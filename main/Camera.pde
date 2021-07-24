@@ -81,7 +81,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
     lastmillis = millis();
     //clock = millis();
-    clock = 0;    
+    clock = 0;
   }
 
   void update () {
@@ -100,11 +100,12 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
     if (dying) {
       float progress = (millis() - dyingStartTime) / dyingDuration;
+      float targetTimeScale = hyperspace ? HYPERSPACE_DEFAULT_TIME: 1;
       if (progress < 1) {
-        float targetTimeScale = hyperspace ? HYPERSPACE_DEFAULT_TIME: 1;
         timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
       } else {
         dying = false;
+        timeScale = targetTimeScale;
       }
     }
   }

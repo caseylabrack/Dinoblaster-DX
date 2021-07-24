@@ -34,8 +34,8 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
-  fullScreen(P2D);
+  size(1024, 768, P2D);
+  //fullScreen(P2D);
   orientation(LANDSCAPE);
 
   //pixelDensity(displayDensity());
@@ -85,9 +85,7 @@ void setup () {
     settings.setBoolean("CretaceousUnlocked", true);
     output.println("\t\"CretaceousUnlocked\": true,");
     settings.setInt("blurriness", assets.DEFAULT_BLURINESS);
-    output.println("\t\"blurriness\": " + assets.DEFAULT_BLURINESS + ",");
-    settings.setBoolean("hideHelpButton", true);
-    output.println("\t\"hideHelpButton\": true");
+    output.println("\t\"blurriness\": " + assets.DEFAULT_BLURINESS);
     output.println("}");
     output.flush();
     output.close();
@@ -110,15 +108,16 @@ void setup () {
     inputs.setInt("sfxVolume", 100);
     inputs.setInt("musicVolume", 100);
     inputs.setInt("startAtLevel", 4);
+    inputs.setBoolean("hideHelpButton", false); 
     writeOutControls();
   }
-  
+
   try {
     picadeSettings = loadJSONObject("picade.txt");
     noCursor();
     //frameRate(30);
-  } catch(Exception e) {
-    
+  } 
+  catch(Exception e) {
   }
 
   assets.load(this, picadeSettings);
@@ -136,7 +135,7 @@ void setup () {
   } else {
     assets.volumeMusic(float(vmusic) / 100);
   }
-    
+
   jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
   leftkey = inputs.getString("player1LeftKey", "a").charAt(0);
@@ -161,8 +160,8 @@ void keyPressed() {
   } else {
     if (key=='1' || key==triassicSelect || key=='2' || key==jurassicSelect || key=='3' || key==cretaceousSelect) currentScene.cleanup();
     if (key=='1' || key==triassicSelect) currentScene = new SinglePlayer(UIStory.TRIASSIC);
-    if (key=='2' || key==jurassicSelect) currentScene = new SinglePlayer(UIStory.JURASSIC);
-    if (key=='3' || key==cretaceousSelect) currentScene = new SinglePlayer(UIStory.CRETACEOUS);
+    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) currentScene = new SinglePlayer(UIStory.JURASSIC);
+    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) currentScene = new SinglePlayer(UIStory.CRETACEOUS);
     if (key==leftkey) keys.setKey(Keys.LEFT, true);
     if (key==rightkey) keys.setKey(Keys.RIGHT, true);
     if (key=='r') {
@@ -203,11 +202,11 @@ void mouseReleased () {
 
 void draw () {
 
-  if(frameCount==1) {
-     currentScene = new SinglePlayer(chooseNextLevel()); 
-     return;
+  if (frameCount==1) {
+    currentScene = new SinglePlayer(chooseNextLevel()); 
+    return;
   }
-  
+
   //if(touches.length==0) {
   //  keys.setKey(Keys.LEFT, false);
   //  keys.setKey(Keys.RIGHT, false);
@@ -279,7 +278,7 @@ int chooseNextLevel () {
 
   case 3: 
     if (settings.getBoolean("CretaceousUnlocked", false) || unlocked >= UIStory.CRETACEOUS) chosen = UIStory.CRETACEOUS;
-    break;
+    break;  
   }
 
   return chosen;
@@ -299,7 +298,8 @@ void writeOutControls () {
   output.println("\t\"cretaceousSelect\": " + inputs.getString("cretaceousSelect", "3") + ",");
   output.println("\t\"sfxVolume\": " + inputs.getInt("sfxVolume", 100) + ",");    
   output.println("\t\"musicVolume\": " + inputs.getInt("musicVolume", 100) + ",");
-  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 1));
+  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 4) + ",");
+  output.println("\t\"hideHelpButton\": " + inputs.getBoolean("hideHelpButton", false));
   output.println("}");
   output.flush();
   output.close();

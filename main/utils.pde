@@ -1,7 +1,7 @@
 static class utils {
 
-  static final PVector ZERO_VECTOR = new PVector(0,0);
-  
+  static final PVector ZERO_VECTOR = new PVector(0, 0);
+
   static float angleOf(PVector from, PVector to) {
 
     return degrees(atan2(to.y - from.y, to.x - from.x));
@@ -133,3 +133,22 @@ static class utils {
       : pow(2, -10 * x) * sin((x * 10 - 0.75) * c4) + 1;
   }
 } 
+
+class Rectangle {
+  float x, y, w, h;
+
+  Rectangle (float _x, float _y, float _w, float _h) {
+    x = _x;
+    y = _y;
+    w = _w;
+    h = _h;
+  }
+
+  boolean inside (PVector point) {
+    return inside(point.x, point.y);
+  }
+
+  boolean inside (float px, float py) {
+    return px > x && px < x + w && py > y && py < y + h;
+  }
+}
