@@ -71,6 +71,7 @@ class AssetManager {
       roidStuff.hits[i] = raspi ? new SoundM("_audio/roids/impact" + (i + 1) + ".wav", ngainSFX) : new SoundP("_audio/roids/impact" + (i + 1) + ".wav", context);
       sounds.add(roidStuff.hits[i]);
     }
+    roidStuff.bigone = loadImage("bigone.png");
 
     playerStuff.dethSVG = loadShape("bronto-death.svg");
     playerStuff.dethSVG.disableStyle();
@@ -212,6 +213,7 @@ class AssetManager {
     PImage[] roidFrames;
     PImage trail;
     SoundPlayable[] hits = new SoundPlayable[5];
+    PImage bigone;
   }
 
   class PlayerStuff {

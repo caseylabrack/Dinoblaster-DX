@@ -1,19 +1,18 @@
 class Camera extends Entity implements updateable {
 
   public float magn = 0;
+  private Entity following = null;
 
-  Camera (float _x, float _y) {
+  Camera () {
 
-    x = _x + width/2;
-    y = _y + height/2;
   }
 
   void update () {
 
     dx = 0;
     dy = 0;
-    x = width/2;
-    y = height/2;
+    //x = width/2;
+    //y = height/2;
 
     //if (mousePressed) magn += 3;
 
@@ -81,7 +80,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
     lastmillis = millis();
     //clock = millis();
-    clock = 0;    
+    clock = 0;
   }
 
   void update () {

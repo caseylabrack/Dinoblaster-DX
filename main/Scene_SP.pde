@@ -54,7 +54,7 @@ class SinglePlayer extends Scene {
     eventManager = new EventManager();
     time = new Time(eventManager);
     earth = new Earth(time, eventManager, lvl);
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     volcanoManager = new VolcanoManager(eventManager, time, currentColor, earth, lvl);
@@ -105,10 +105,15 @@ class SinglePlayer extends Scene {
     } else {
       starManager.update();
     }
-    
-    if(ui.gameDone) {
+
+    if (ui.gameDone) {
       status = DONE;
     }
+
+    //if (ufoManager.ufo != null) {
+    //  camera.setPosition(0, 0);
+    //  camera.parent = ufoManager.ufo;
+    //}
   }
 
   void render () {
@@ -116,7 +121,8 @@ class SinglePlayer extends Scene {
     PVector m = screentoScaled2(mouseX, mouseY);
 
     pushMatrix(); // world-space
-    translate(camera.x, camera.y);
+    translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
+    //translate(camera.x, camera.y);
     scale(SCALE);
     if (!options) {
       for (renderable r : renderers) r.render();
@@ -294,7 +300,7 @@ class Oviraptor extends Scene {
     eventManager = new EventManager();
     time = new Time(eventManager);
     earth = new Earth(time, eventManager, lvl);
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     starManager = new StarManager(currentColor, time, eventManager, lvl);
@@ -399,7 +405,7 @@ class testScene extends Scene {
     earth = new Earth(time, eventManager, lvl);
     //earth.dr = 0;
 
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     starManager = new StarManager(currentColor, time, eventManager, lvl);

@@ -121,7 +121,6 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
 
     extralives = settings.getInt("extraLives", 0);
 
-
     motdStart = millis();
 
     highscore = loadHighScore(SCORE_DATA_FILENAME);
@@ -189,8 +188,8 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     }
 
     if (time.getClock() - lastScoreTick > 1000 && scoring) {
-      score++;
-      //score+=10;
+      //score++;
+      score+=20;
       lastScoreTick = time.getClock();
     }
 
@@ -202,6 +201,10 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     if (score==200 && stage==JURASSIC) {
       stage = CRETACEOUS;
       eventManager.dispatchLevelChanged(stage);
+    }
+    
+    if(score >= 300) {
+      eventManager.dispatchGameFinale();
     }
   }
 
@@ -239,3 +242,13 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     image(extralives>=3 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
   }
 } 
+
+class GameFinale implements gameFinaleEvent {
+  GameFinale (EventManager e) {
+    e.gameFinaleSubscribers.add(this);
+  }
+  
+  void finaleHandle() {
+    
+  }
+}

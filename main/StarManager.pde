@@ -1,4 +1,4 @@
-class StarManager implements updateable, renderable, renderableScreen, nebulaEvents {
+class StarManager implements updateable, renderable, renderableScreen, nebulaEvents, gameFinaleEvent {
 
   PVector[] stars = new PVector[800];
   float r = 2000;
@@ -16,6 +16,8 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   boolean hyperspace = false;
   IntList hyperspaceSpawns = new IntList();
   boolean hypercubesEnabled;
+  
+  boolean isFinale = false;
 
   ColorDecider currentColor;
   Time time;
@@ -36,6 +38,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
     }
 
     evs.nebulaStartSubscribers.add(this);
+    evs.gameFinaleSubscribers.add(this);
 
     hypercubesEnabled = settings.getBoolean("hypercubesEnabled", true);
 
@@ -57,7 +60,14 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   void nebulaStopHandle() {
   }
 
+  void finaleHandle() {
+    isFinale = true;
+  }
+
   void update () {
+    
+    if(isFinale) return;
+    
     a += starSpeed * time.getTimeScale();
 
     if (!hypercubesEnabled) return;

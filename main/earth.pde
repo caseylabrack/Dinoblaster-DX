@@ -1,4 +1,4 @@
-class Earth extends Entity implements levelChangeEvent, updateable, renderable {
+class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updateable, renderable {
 
   PGraphics tarpitDynamicMask;
   final float TARPIT_AMPLITUDE = 20;
@@ -17,6 +17,8 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
   float shakingDur;
   float shakingMag;
   float shakingStart;
+
+  boolean isFinale = false;
 
   final static float DEFAULT_EARTH_ROTATION = 2.3;
   final static float EARTH_RADIUS = 167;
@@ -55,7 +57,6 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
     tarpitDynamicMask.endDraw();
     assets.earthStuff.mask.set("mask", tarpitDynamicMask);
 
-
     PVector mypoint = new PVector(cos(radians(tarpitArcStart + TARPIT_ARC/2)), sin(radians(tarpitArcStart + TARPIT_ARC/2)));
     tarpitAngle = utils.angleOf(new PVector(0, 0), mypoint);
 
@@ -64,6 +65,7 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
     }
 
     events.levelChangeSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
   }
 
   void shake (float _mag) {
@@ -79,6 +81,12 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
   }
 
   void update() {
+
+    if (isFinale) {
+      x = 0;
+      y = 0;
+      return;
+    }
 
     dx = 0 - x;
     dy = 0 - y;
@@ -108,6 +116,10 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
     r += dr * time.getTimeScale();
   }
 
+  void finaleHandle() {
+    isFinale = true;
+  }
+
   void levelChangeHandle(int stage) {
 
     if (stage==UIStory.CRETACEOUS) {
@@ -123,9 +135,9 @@ class Earth extends Entity implements levelChangeEvent, updateable, renderable {
     float diff = utils.unsignedAngleDiff(tarpitAngle, tangle);
     return diff < TARPIT_ARC / 2 - TARPIT_MARGIN;
   }
-  
+
   float getTarpitAngleDegrees () {
-    
+
     return tarpitAngle;
   }
 
