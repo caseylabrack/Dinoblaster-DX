@@ -43,7 +43,8 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
       int i = int(random(5, 80));
       while (i < 80) {
         hyperspaceSpawns.append(i);
-        i += int(random(30, 80));
+        //i += int(random(30, 80));
+        i += int(random(80, 80));
       }
     }
   }

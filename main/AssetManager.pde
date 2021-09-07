@@ -1,6 +1,6 @@
 class AssetManager {
 
-  final float STROKE_WIDTH = 2;
+  final float STROKE_WIDTH = 1.5;
   final int DEFAULT_BLURINESS = 0;
 
   PShader blur;

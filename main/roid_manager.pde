@@ -55,8 +55,8 @@ class RoidManager implements updateable, renderable {
     maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", DEFAULT_SPAWN_DEVIATION)/2;
 
     // convert to frames
-    minSpawnInterval = minSpawnInterval / 16.666;
-    maxSpawnInterval = maxSpawnInterval / 16.666;
+    //minSpawnInterval = minSpawnInterval / 16.666;
+    //maxSpawnInterval = maxSpawnInterval / 16.666;
 
     //roids[roidindex % roids.length].fire();
     //roidindex++;
@@ -66,10 +66,10 @@ class RoidManager implements updateable, renderable {
 
     if (!enabled) return;
 
-      if(frameCount - lastFire > spawnInterval) { // frame instead of timer based
-    //if (time.getClock() - lastFire > spawnInterval) {
-      //lastFire = time.getClock();
-      lastFire = frameCount;
+    //if (frameCount - lastFire > spawnInterval) { // frame instead of timer based
+    if (time.getClock() - lastFire > spawnInterval) {
+      lastFire = time.getClock();
+      //lastFire = frameCount;
       spawnInterval = random(minSpawnInterval, maxSpawnInterval);
 
       Roid r = roids[roidindex++ % roids.length]; // increment roid index and wrap to length of pool
@@ -99,9 +99,8 @@ class RoidManager implements updateable, renderable {
         PVector adjustedPosition = new PVector(earth.x + cos(angle) * (Earth.EARTH_RADIUS + offset), earth.y + sin(angle) * (Earth.EARTH_RADIUS + offset));
         splode.setPosition(earth.globalToLocalPos(adjustedPosition));
         splode.r = utils.angleOf(earth.localPos(), splode.localPos()) + 90;
-        
-        //if(
-        assets.roidStuff.hits[floor(random(0,5))].play();
+
+        assets.roidStuff.hits[floor(random(0, 5))].play();
       }
     }
 

@@ -85,6 +85,8 @@ class PlayerManager implements updateable, renderable, abductionEvent, roidImpac
   }
 
   void abductionHandle(PVector p) {
+    assets.playerStuff.step.stop_();
+    assets.playerStuff.tarStep.stop_();
     player = null;
     extralives++;
     respawning = true;
