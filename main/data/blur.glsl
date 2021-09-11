@@ -19,7 +19,7 @@ varying vec4 vertTexCoord;
 uniform int blurSize;       
 uniform int horizontalPass; // 0 or 1 to indicate vertical or horizontal pass
 uniform float sigma;        // The sigma value for the gaussian function: higher value means more blur
-                            // A good value for 9x9 is around 3 to 5
+uniform int scale;                            // A good value for 9x9 is around 3 to 5
                             // A good value for 7x7 is around 2.5 to 4
                             // A good value for 5x5 is around 2 to 3.5
                             // ... play around with this based on what you need :)
@@ -55,5 +55,6 @@ void main() {
     incrementalGaussian.xy *= incrementalGaussian.yz;
   }
 
-  gl_FragColor = avgValue / (coefficientSum * .75);
+  //gl_FragColor = avgValue / (coefficientSum * .75);
+    gl_FragColor = texture2D(texture, vertTexCoord.st);
 }

@@ -42,6 +42,8 @@ class SinglePlayer extends Scene {
   Rectangle soundButton;
   Rectangle restartButton;
   Rectangle musicButton;
+  Rectangle launchFinderButton;
+  float directoryTextYPos = 32 + 10 + 32 + 10 + 32 + 10 + 10;
   float yoffset = -5; // optically vertically center align text within rectangle buttons
   IntList validLvls = new IntList();
 
@@ -102,6 +104,8 @@ class SinglePlayer extends Scene {
     musicButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
     y+= optionsDY;
     restartButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
+    y+= optionsDY;
+    launchFinderButton = new Rectangle(-HEIGHT_REF_HALF + 10, directoryTextYPos, HEIGHT_REFERENCE - 20, HEIGHT_REF_HALF - directoryTextYPos - 20);
   }
 
   void update () {
@@ -159,6 +163,12 @@ class SinglePlayer extends Scene {
       stroke(0, 0, 100, 1);
       noFill();
       rect(restartButton.x, restartButton.y, restartButton.w, restartButton.h);
+      fill(0, 0, 100, 1);
+
+      fill(launchFinderButton.inside(m) ? 80 : 300, 70, 70, 1);
+      stroke(0, 0, 100, 1);
+      //noFill();
+      rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
       fill(0, 0, 100, 1);
 
       switch(inputs.getInt("startAtLevel", 4)) {

@@ -1,3 +1,7 @@
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.effects.*;
