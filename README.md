@@ -39,4 +39,4 @@ roidImpactRateInMilliseconds | positive number (300) | how do you want to space 
 roidImpactRateVariation | positive number (100) | by how many milliseconds should impacts vary randomly? at 100, the roid impact rate will vary by a tenth of a second from the rate above
 JurassicUnlocked| true or false (false) | Cheat and play in the Jurassic era without beating the Triassic
 CretaceousUnlocked | true or false (false) | Cheat and play in the Cretaceous era without beating the Jurassic
-blurriness | positive number (6) | Blurriness of game monitor. Part of the 1979 vector aesthetic. Requires GPU power to render. Zero to disable effect.
+glowiness | positive number (30) | Glowiness of game monitor. Part of the 1979 vector aesthetic. Requires GPU power to render. Zero to disable effect.

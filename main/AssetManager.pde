@@ -1,10 +1,10 @@
 class AssetManager {
 
   final float STROKE_WIDTH = 1.5;
-  final int DEFAULT_BLURINESS = 0;
+  final int DEFAULT_GLOWINESS = 30;
 
-  PShader blur;
-  boolean blurring = true;
+  PShader glow;
+  boolean glowing = true;
 
   StringList motds;
   int motdsIndex;
@@ -32,7 +32,7 @@ class AssetManager {
       raspi = true;
     }
 
-    blur = loadShader("blur.glsl");
+    glow = loadShader("glowiness.glsl");
 
     motds = new StringList();
     motds.append("Real Winners Say No to Drugs");
@@ -126,22 +126,22 @@ class AssetManager {
     musics.add(musicStuff.lvl3);
   }
 
-  void setBlur (int blurriness) {
-    if (blurriness != 0) {
-      assets.blur.set("blurSize", blurriness);
-      assets.blur.set("sigma", (float)blurriness/2);
-      blurring = true;
+  void setGlowiness (int glowiness) {
+    if (glowiness != 0) {
+      assets.glow.set("blurSize", glowiness);
+      assets.glow.set("sigma", (float)glowiness/2);
+      glowing = true;
     } else {
-      blurring = false;
+      glowing = false;
     }
   }
 
-  void applyBlur () {
-    if (!blurring) return;
-    blur.set("horizontalPass", 0);
-    filter(blur);
-    blur.set("horizontalPass", 1);
-    filter(blur);
+  void applyGlowiness () {
+    if (!glowing) return;
+    glow.set("horizontalPass", 0);
+    filter(glow);
+    glow.set("horizontalPass", 1);
+    filter(glow);
   }
 
   void volumeSFX (float v) {

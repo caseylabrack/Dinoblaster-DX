@@ -43,7 +43,7 @@ class SinglePlayer extends Scene {
   Rectangle restartButton;
   Rectangle musicButton;
   Rectangle launchFinderButton;
-  float directoryTextYPos = 32 + 10 + 32 + 10 + 32 + 10 + 10;
+  float directoryTextYPos = 0;//32 + 10 + 32 + 10 + 32 + 10 + 10;
   float yoffset = -5; // optically vertically center align text within rectangle buttons
   IntList validLvls = new IntList();
 
@@ -165,10 +165,10 @@ class SinglePlayer extends Scene {
       rect(restartButton.x, restartButton.y, restartButton.w, restartButton.h);
       fill(0, 0, 100, 1);
 
-      fill(launchFinderButton.inside(m) ? 80 : 300, 70, 70, 1);
+      //fill(launchFinderButton.inside(m) ? 80 : 300, 70, 70, 1);
       stroke(0, 0, 100, 1);
       //noFill();
-      rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
+      //rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
       fill(0, 0, 100, 1);
 
       switch(inputs.getInt("startAtLevel", 4)) {
@@ -193,6 +193,7 @@ class SinglePlayer extends Scene {
       textLeading(32);
 
       float y = 0;
+      //text("More settings in\n`controls-settings.txt` and\n`game-settings.txt`", 0, y);
       text("More settings in", 0, y);
       y += 32 + 10;
       fill(currentColor.getColor());
@@ -212,7 +213,7 @@ class SinglePlayer extends Scene {
     translate(width/2, height/2);
     scale(SCALE);
     if (!options) gameText.render();
-    assets.applyBlur();
+    assets.applyGlowiness();
     ui.render();
     imageMode(CORNER);
     if (!inputs.getBoolean("hideHelpButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
@@ -231,7 +232,7 @@ class SinglePlayer extends Scene {
   }
 
   void mouseUp() {
-    
+
     PVector m = screentoScaled2(mouseX, mouseY);
 
     if (optionsButton.inside(m) && inputs.getBoolean("hideHelpButton", false)==false) {
@@ -275,6 +276,18 @@ class SinglePlayer extends Scene {
         int nextOption = (indexOfCurrent+1) % validLvls.size(); // choose the next valid setting in the list by incrementing and wrapping current index
         inputs.setInt("startAtLevel", validLvls.get(nextOption));
         writeOutControls();
+      }
+
+      if (launchFinderButton.inside(m)) {
+        Desktop desktop = Desktop.getDesktop();
+        File dirToOpen = null;
+        try {
+          dirToOpen = new File(sketchPath());
+          desktop.open(dirToOpen);
+        } 
+        catch (Exception iae) {
+          System.out.println("File Not Found");
+        }
       }
     }
   }
@@ -372,7 +385,7 @@ class Oviraptor extends Scene {
     translate(width/2, height/2);
     scale(SCALE);
     gameText.render();
-    assets.applyBlur();
+    assets.applyGlowiness();
     ui.render();
     popMatrix();
 

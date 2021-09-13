@@ -38,11 +38,11 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
-  fullScreen(P2D);
+  size(1024, 768, P2D);
+  //fullScreen(P2D);
   orientation(LANDSCAPE);
 
-  pixelDensity(displayDensity());
+  //pixelDensity(displayDensity());
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
@@ -88,8 +88,8 @@ void setup () {
     output.println("\t\"JurassicUnlocked\": true,");
     settings.setBoolean("CretaceousUnlocked", true);
     output.println("\t\"CretaceousUnlocked\": true,");
-    settings.setInt("blurriness", assets.DEFAULT_BLURINESS);
-    output.println("\t\"blurriness\": " + assets.DEFAULT_BLURINESS);
+    settings.setInt("glowiness", assets.DEFAULT_GLOWINESS);
+    output.println("\t\"glowiness\": " + assets.DEFAULT_GLOWINESS);
     output.println("}");
     output.flush();
     output.close();
@@ -126,7 +126,7 @@ void setup () {
 
   assets.load(this, picadeSettings);
 
-  assets.setBlur(settings.getInt("blurriness", assets.DEFAULT_BLURINESS));
+  assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
   int vsfx = inputs.getInt("sfxVolume", 100);
   if (vsfx == 0) {
     assets.muteSFX(true);
@@ -223,6 +223,7 @@ void draw () {
     //fill(0,0,0,.2);
     //rect(0,0,width,height);
     if (currentScene.status==Scene.DONE) {
+      currentScene.cleanup();
       currentScene = new SinglePlayer(chooseNextLevel());
     }
     currentScene.update();
