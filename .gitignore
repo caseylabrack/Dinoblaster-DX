@@ -1,10 +1,6 @@
 main/spoofs-and-goofs/frames
 .DS_Store
-main/application.linux-arm64
-main/application.linux-armv6hf
-main/application.linux32
-main/application.linux64
-main/application.macosx/
+main/application.*
 main/build
 main/data/_music
 main/data/_music/*
