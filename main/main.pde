@@ -46,7 +46,7 @@ void setup () {
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
-  //surface.setTitle("DinoBlaster DX");
+  surface.setTitle("DinoBlaster DX");
 
   colorMode(HSB, 360, 100, 100, 1);
   imageMode(CENTER);
@@ -89,7 +89,11 @@ void setup () {
     settings.setBoolean("CretaceousUnlocked", true);
     output.println("\t\"CretaceousUnlocked\": true,");
     settings.setInt("glowiness", assets.DEFAULT_GLOWINESS);
-    output.println("\t\"glowiness\": " + assets.DEFAULT_GLOWINESS);
+    output.println("\t\"glowiness\": " + assets.DEFAULT_GLOWINESS + ",");
+    settings.setBoolean("earthIsPangea", false);
+    output.println("\t\"earthIsPangea\": false,");
+    settings.setBoolean("earthIsWest", true);
+    output.println("\t\"earthIsWest\": true");
     output.println("}");
     output.flush();
     output.close();

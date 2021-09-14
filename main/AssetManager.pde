@@ -2,6 +2,8 @@ class AssetManager {
 
   final float STROKE_WIDTH = 1.5;
   final int DEFAULT_GLOWINESS = 30;
+  final static int DEFAULT_EARTH = 1;
+  final static int DEFAULT_EARTH_SIDE = 1;
 
   PShader glow;
   boolean glowing = true;
@@ -107,6 +109,9 @@ class AssetManager {
     sounds.add(trexStuff.sinking);
 
     earthStuff.earth = loadImage("earth.png");
+    earthStuff.earth2 = loadImage("earth-east.png");
+    earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
+    earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
     earthStuff.mask = loadShader("pixelmask.glsl");
     //earthStuff.mask.set("mask", earthStuff.tarpitMask);
     earthStuff.doodadBone = loadImage("doodad-bone.png");
@@ -243,6 +248,9 @@ class AssetManager {
 
   class EarthStuff {
     PImage earth;
+    PImage earth2;
+    PImage earthPangea1;
+    PImage earthPangea2;
     PImage tarpitMask;
     PShader mask;
     PImage doodadBone;
