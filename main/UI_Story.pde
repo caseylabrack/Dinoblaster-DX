@@ -203,7 +203,8 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
       eventManager.dispatchLevelChanged(stage);
     }
     
-    if(score >= 300) {
+    if(score >= 300 && stage == CRETACEOUS) {
+      stage = FINAL;
       eventManager.dispatchGameFinale();
     }
   }

@@ -36,7 +36,6 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     dy = 0;
     dr = settings.getFloat("earthRotationSpeed", DEFAULT_EARTH_ROTATION);
 
-
     tarpitArcStart = random(360-TARPIT_ARC);
 
     int side = assets.earthStuff.earth.width; // square asset

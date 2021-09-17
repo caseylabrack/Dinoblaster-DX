@@ -1,4 +1,24 @@
+class ZoomStar {
+
+  float x;
+  float y;
+  float z;
+  float pz;
+
+  ZoomStar(float x, float y, float z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.pz = z;
+  }
+}
+
 class StarManager implements updateable, renderable, renderableScreen, nebulaEvents, gameFinaleEvent {
+
+  ArrayList<ZoomStar> zoomStars = new ArrayList<ZoomStar>();
+  final float zoomSpeedFinal = 17;
+  final float zoomSpeedupDuration = 5e3;
+  float zoomSpeedupStart;
 
   PVector[] stars = new PVector[800];
   float r = 2000;
@@ -16,7 +36,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   boolean hyperspace = false;
   IntList hyperspaceSpawns = new IntList();
   boolean hypercubesEnabled;
-  
+
   boolean isFinale = false;
 
   ColorDecider currentColor;
@@ -49,6 +69,10 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
         i += int(random(30, 80));
       }
     }
+
+    for (int i = 0; i < 100; i++) {
+      zoomStars.add(new ZoomStar(random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF), random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF), random(HEIGHT_REF_HALF)));
+    }
   }
 
   void nebulaStartHandle() {
@@ -62,12 +86,43 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
   void finaleHandle() {
     isFinale = true;
+    zoomSpeedupStart = millis();
   }
 
   void update () {
-    
-    if(isFinale) return;
-    
+
+    if (isFinale) {
+
+      float progress = (millis() - zoomSpeedupStart) / zoomSpeedupDuration;
+      //float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
+
+      //float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
+      float zoomSpeed = progress < 1 ? utils.easeOutExpo(progress,0,zoomSpeedFinal,1) : zoomSpeedFinal;
+
+      for (ZoomStar zoomer : zoomStars) {
+        zoomer.pz = zoomer.z;
+        zoomer.z -= zoomSpeed; //map(millis(), zoomSpeedupStart, zoomSpeedupStart + zoomSpeedupDuration, 0, 18);
+        if (zoomer.z < zoomSpeed) {
+          zoomer.x = random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF);
+          zoomer.y = random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF);
+          zoomer.z = HEIGHT_REF_HALF;
+          zoomer.pz = zoomer.z;
+        }
+      }
+
+      //float x = cos(a) * r;
+      //float y = sin(a) * r;
+
+      //for (int i = 0; i < stars.length; i++) {
+      //  if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+      //    zoomStars.add(new ZoomStar());
+      //  }
+      //}
+
+
+      return;
+    }
+
     a += starSpeed * time.getTimeScale();
 
     if (!hypercubesEnabled) return;
@@ -97,44 +152,60 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
   void render () {
 
-    float x = cos(a) * r;
-    float y = sin(a) * r;
-    float x2 = cos(a-(starSpeed * 6)) * r;
-    float y2 = sin(a-(starSpeed * 6)) * r;
-
-    pushStyle();
-    for (int i = 0; i < stars.length; i++) {
+    if (isFinale) {
       pushMatrix();
-      if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
-        if (hyperspace) {
-          strokeWeight(4);
-          fill(currentColor.getColor());
-          if (i % 6 == 0) {
-            stroke(currentColor.getColor());
-            line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
+      pushStyle();
+      stroke(currentColor.getColor());
+      strokeWeight(assets.STROKE_WIDTH);
+      for (ZoomStar z : zoomStars) {
+        float x1 = map(z.x/z.z,  0, 1, 0, HEIGHT_REF_HALF);
+        float y1 = map(z.y/z.z,  0, 1, 0, HEIGHT_REF_HALF);
+        float x2 = map(z.x/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
+        float y2 = map(z.y/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
+        line(x1, y1, x2, y2);
+      }
+      popStyle();
+      popMatrix();
+    } else {
+      float x = cos(a) * r;
+      float y = sin(a) * r;
+      float x2 = cos(a-(starSpeed * 6)) * r;
+      float y2 = sin(a-(starSpeed * 6)) * r;
+
+      pushStyle();
+      for (int i = 0; i < stars.length; i++) {
+        pushMatrix();
+        if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+          if (hyperspace) {
+            strokeWeight(4);
+            fill(currentColor.getColor());
+            if (i % 6 == 0) {
+              stroke(currentColor.getColor());
+              line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
+            } else {
+              noStroke();
+              translate(stars[i].x - x, stars[i].y - y);
+              rotate(PI/4);
+              square(0, 0, 4);
+            }
           } else {
             noStroke();
+            fill(0, 0, 100);
             translate(stars[i].x - x, stars[i].y - y);
             rotate(PI/4);
-            square(0, 0, 4);
+            square(0, 0, 3);
           }
-        } else {
-          noStroke();
-          fill(0, 0, 100);
-          translate(stars[i].x - x, stars[i].y - y);
-          rotate(PI/4);
-          square(0, 0, 3);
         }
+        popMatrix();
       }
-      popMatrix();
-    }
-    popStyle();
+      popStyle();
 
-    if (hypercubeActive) {
-      pushMatrix();
-      translate(hypercubePos.x - x, hypercubePos.y - y);
-      hypercube.update();
-      popMatrix();
+      if (hypercubeActive) {
+        pushMatrix();
+        translate(hypercubePos.x - x, hypercubePos.y - y);
+        hypercube.update();
+        popMatrix();
+      }
     }
   }
 }
