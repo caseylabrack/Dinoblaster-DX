@@ -92,18 +92,19 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
     //clock += (millis() - lastmillis) * timeScale;
     lastmillis = millis();
 
-    delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 3);
+    delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
     //println("delta: " + delta);
     lastNanos = frameRateLastNanos;
     eventManager.playerDiedSubscribers.add(this);
 
     if (dying) {
       float progress = (millis() - dyingStartTime) / dyingDuration;
+      float targetTimeScale = hyperspace ? HYPERSPACE_DEFAULT_TIME: 1;
       if (progress < 1) {
-        float targetTimeScale = hyperspace ? HYPERSPACE_DEFAULT_TIME: 1;
         timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
       } else {
         dying = false;
+        timeScale = targetTimeScale;
       }
     }
   }

@@ -1,23 +1,8 @@
-class ZoomStar {
-
-  float x;
-  float y;
-  float z;
-  float pz;
-
-  ZoomStar(float x, float y, float z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.pz = z;
-  }
-}
-
 class StarManager implements updateable, renderable, renderableScreen, nebulaEvents, gameFinaleEvent {
 
   ArrayList<ZoomStar> zoomStars = new ArrayList<ZoomStar>();
   final float zoomSpeedFinal = 17;
-  final float zoomSpeedupDuration = 5e3;
+  final float zoomSpeedupDuration = 6e3;
   float zoomSpeedupStart;
 
   PVector[] stars = new PVector[800];
@@ -66,12 +51,9 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
       int i = int(random(5, 80));
       while (i < 80) {
         hyperspaceSpawns.append(i);
-        i += int(random(30, 80));
+        //i += int(random(30, 80));
+        i += int(random(80, 80));
       }
-    }
-
-    for (int i = 0; i < 100; i++) {
-      zoomStars.add(new ZoomStar(random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF), random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF), random(HEIGHT_REF_HALF)));
     }
   }
 
@@ -87,6 +69,20 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   void finaleHandle() {
     isFinale = true;
     zoomSpeedupStart = millis();
+
+    float x = cos(a) * r;
+    float y = sin(a) * r;
+
+    for (int i = 0; i < stars.length; i++) {
+      if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+        float starX = stars[i].x - x;
+        float starY = stars[i].y - y;
+        float zoomZ = random(HEIGHT_REF_HALF);
+        float zX = (starX / HEIGHT_REF_HALF) * zoomZ;
+        float zY = (starY / HEIGHT_REF_HALF) * zoomZ;
+        zoomStars.add(new ZoomStar(zX, zY, zoomZ));
+      }
+    }
   }
 
   void update () {
@@ -97,7 +93,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
       //float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
 
       //float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
-      float zoomSpeed = progress < 1 ? utils.easeOutExpo(progress,0,zoomSpeedFinal,1) : zoomSpeedFinal;
+      float zoomSpeed = progress < 1 ? utils.easeInQuad(progress, 0, zoomSpeedFinal, 1) : zoomSpeedFinal;
 
       for (ZoomStar zoomer : zoomStars) {
         zoomer.pz = zoomer.z;
@@ -109,16 +105,6 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
           zoomer.pz = zoomer.z;
         }
       }
-
-      //float x = cos(a) * r;
-      //float y = sin(a) * r;
-
-      //for (int i = 0; i < stars.length; i++) {
-      //  if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
-      //    zoomStars.add(new ZoomStar());
-      //  }
-      //}
-
 
       return;
     }
@@ -155,11 +141,13 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
     if (isFinale) {
       pushMatrix();
       pushStyle();
-      stroke(currentColor.getColor());
-      strokeWeight(assets.STROKE_WIDTH);
+      stroke(0,0,100,1);
+      //stroke(currentColor.getColor());
+      strokeWeight(assets.STROKE_WIDTH + 1.5);
       for (ZoomStar z : zoomStars) {
-        float x1 = map(z.x/z.z,  0, 1, 0, HEIGHT_REF_HALF);
-        float y1 = map(z.y/z.z,  0, 1, 0, HEIGHT_REF_HALF);
+        float x1 = (z.x / z.z) * HEIGHT_REF_HALF;
+        //float x1 = map(z.x/z.z, 0, 1, 0, HEIGHT_REF_HALF);
+        float y1 = map(z.y/z.z, 0, 1, 0, HEIGHT_REF_HALF);
         float x2 = map(z.x/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
         float y2 = map(z.y/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
         line(x1, y1, x2, y2);
@@ -207,5 +195,20 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
         popMatrix();
       }
     }
+  }
+}
+
+class ZoomStar {
+
+  float x;
+  float y;
+  float z;
+  float pz;
+
+  ZoomStar(float x, float y, float z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.pz = z;
   }
 }

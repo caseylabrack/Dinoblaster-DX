@@ -61,6 +61,10 @@ class RoidManager implements updateable, renderable, gameFinaleEvent {
     minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", DEFAULT_SPAWN_DEVIATION)/2;
     maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", DEFAULT_SPAWN_DEVIATION)/2;
 
+    // convert to frames
+    //minSpawnInterval = minSpawnInterval / 16.666;
+    //maxSpawnInterval = maxSpawnInterval / 16.666;
+
     //roids[roidindex % roids.length].fire();
     //roidindex++;
   }
@@ -103,7 +107,6 @@ class RoidManager implements updateable, renderable, gameFinaleEvent {
         splode.setPosition(earth.globalToLocalPos(adjustedPosition));
         splode.r = utils.angleOf(earth.localPos(), splode.localPos()) + 90;
 
-        //if(
         assets.roidStuff.hits[floor(random(0, 5))].play();
       }
     }

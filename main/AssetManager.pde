@@ -1,10 +1,12 @@
 class AssetManager {
 
-  final float STROKE_WIDTH = 2;
-  final int DEFAULT_BLURINESS = 0;
+  final float STROKE_WIDTH = 1.5;
+  final int DEFAULT_GLOWINESS = 30;
+  final static int DEFAULT_EARTH = 1;
+  final static int DEFAULT_EARTH_SIDE = 1;
 
-  PShader blur;
-  boolean blurring = true;
+  PShader glow;
+  boolean glowing = true;
 
   StringList motds;
   int motdsIndex;
@@ -32,7 +34,7 @@ class AssetManager {
       raspi = true;
     }
 
-    blur = loadShader("blur.glsl");
+    glow = loadShader("glowiness.glsl");
 
     motds = new StringList();
     motds.append("Real Winners Say No to Drugs");
@@ -59,6 +61,7 @@ class AssetManager {
     uiStuff.tick = loadImage("progress-tick.png");
     uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
+    uiStuff.optionsBtn = loadImage("button-final.png");
 
     volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
     volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
@@ -72,6 +75,7 @@ class AssetManager {
       sounds.add(roidStuff.hits[i]);
     }
     roidStuff.bigone = loadImage("bigone.png");
+    roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
 
     playerStuff.dethSVG = loadShape("bronto-death.svg");
     playerStuff.dethSVG.disableStyle();
@@ -107,6 +111,9 @@ class AssetManager {
     sounds.add(trexStuff.sinking);
 
     earthStuff.earth = loadImage("earth.png");
+    earthStuff.earth2 = loadImage("earth-east.png");
+    earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
+    earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
     earthStuff.mask = loadShader("pixelmask.glsl");
     //earthStuff.mask.set("mask", earthStuff.tarpitMask);
     earthStuff.doodadBone = loadImage("doodad-bone.png");
@@ -126,22 +133,22 @@ class AssetManager {
     musics.add(musicStuff.lvl3);
   }
 
-  void setBlur (int blurriness) {
-    if (blurriness != 0) {
-      assets.blur.set("blurSize", blurriness);
-      assets.blur.set("sigma", (float)blurriness/2);
-      blurring = true;
+  void setGlowiness (int glowiness) {
+    if (glowiness != 0) {
+      assets.glow.set("blurSize", glowiness);
+      assets.glow.set("sigma", (float)glowiness/2);
+      glowing = true;
     } else {
-      blurring = false;
+      glowing = false;
     }
   }
 
-  void applyBlur () {
-    if (!blurring) return;
-    blur.set("horizontalPass", 0);
-    filter(blur);
-    blur.set("horizontalPass", 1);
-    filter(blur);
+  void applyGlowiness () {
+    if (!glowing) return;
+    glow.set("horizontalPass", 0);
+    filter(glow);
+    glow.set("horizontalPass", 1);
+    filter(glow);
   }
 
   void volumeSFX (float v) {
@@ -200,6 +207,7 @@ class AssetManager {
     PImage tick;
     PImage extraDinoActive;
     PImage extraDinoInactive;
+    PImage optionsBtn;
     PFont extinctType;
   }
 
@@ -214,6 +222,7 @@ class AssetManager {
     PImage trail;
     SoundPlayable[] hits = new SoundPlayable[5];
     PImage bigone;
+    SoundPlayable bigoneBlip;
   }
 
   class PlayerStuff {
@@ -243,6 +252,9 @@ class AssetManager {
 
   class EarthStuff {
     PImage earth;
+    PImage earth2;
+    PImage earthPangea1;
+    PImage earthPangea2;
     PImage tarpitMask;
     PShader mask;
     PImage doodadBone;
@@ -250,7 +262,7 @@ class AssetManager {
     PImage doodadHead;
     PImage doodadRibs;
   }
-
+  
   class MusicStuff {
     SoundPlayable lvl1a;
     SoundPlayable lvl1b;

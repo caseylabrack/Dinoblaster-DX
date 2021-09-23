@@ -1,3 +1,7 @@
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.effects.*;
@@ -15,6 +19,7 @@ Scene currentScene;
 // recording
 int fcount = 0;
 boolean rec = false;
+final int RECORD_FRAMERATE = 2;
 
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
@@ -31,7 +36,6 @@ float WIDTH_REF_HALF = WIDTH_REFERENCE/2;
 float HEIGHT_REFERENCE = 768;
 float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
-
 void setup () {
   //size(500, 500, P2D);
   size(1024, 768, P2D);
@@ -42,7 +46,7 @@ void setup () {
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
-  //surface.setTitle("DinoBlaster DX");
+  surface.setTitle("DinoBlaster DX");
 
   colorMode(HSB, 360, 100, 100, 1);
   imageMode(CENTER);
@@ -84,10 +88,12 @@ void setup () {
     output.println("\t\"JurassicUnlocked\": true,");
     settings.setBoolean("CretaceousUnlocked", true);
     output.println("\t\"CretaceousUnlocked\": true,");
-    settings.setInt("blurriness", assets.DEFAULT_BLURINESS);
-    output.println("\t\"blurriness\": " + assets.DEFAULT_BLURINESS + ",");
-    settings.setBoolean("hideHelpButton", true);
-    output.println("\t\"hideHelpButton\": true");
+    settings.setInt("glowiness", assets.DEFAULT_GLOWINESS);
+    output.println("\t\"glowiness\": " + assets.DEFAULT_GLOWINESS + ",");
+    settings.setBoolean("earthIsPangea", false);
+    output.println("\t\"earthIsPangea\": false,");
+    settings.setBoolean("earthIsWest", true);
+    output.println("\t\"earthIsWest\": true");
     output.println("}");
     output.flush();
     output.close();
@@ -110,20 +116,21 @@ void setup () {
     inputs.setInt("sfxVolume", 100);
     inputs.setInt("musicVolume", 100);
     inputs.setInt("startAtLevel", 4);
+    inputs.setBoolean("hideHelpButton", false); 
     writeOutControls();
   }
-  
+
   try {
     picadeSettings = loadJSONObject("picade.txt");
     noCursor();
     //frameRate(30);
-  } catch(Exception e) {
-    
+  } 
+  catch(Exception e) {
   }
 
   assets.load(this, picadeSettings);
 
-  assets.setBlur(settings.getInt("blurriness", assets.DEFAULT_BLURINESS));
+  assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
   int vsfx = inputs.getInt("sfxVolume", 100);
   if (vsfx == 0) {
     assets.muteSFX(true);
@@ -136,7 +143,7 @@ void setup () {
   } else {
     assets.volumeMusic(float(vmusic) / 100);
   }
-    
+
   jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
   leftkey = inputs.getString("player1LeftKey", "a").charAt(0);
@@ -161,8 +168,8 @@ void keyPressed() {
   } else {
     if (key=='1' || key==triassicSelect || key=='2' || key==jurassicSelect || key=='3' || key==cretaceousSelect) currentScene.cleanup();
     if (key=='1' || key==triassicSelect) currentScene = new SinglePlayer(UIStory.TRIASSIC);
-    if (key=='2' || key==jurassicSelect) currentScene = new SinglePlayer(UIStory.JURASSIC);
-    if (key=='3' || key==cretaceousSelect) currentScene = new SinglePlayer(UIStory.CRETACEOUS);
+    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) currentScene = new SinglePlayer(UIStory.JURASSIC);
+    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) currentScene = new SinglePlayer(UIStory.CRETACEOUS);
     if (key==leftkey) keys.setKey(Keys.LEFT, true);
     if (key==rightkey) keys.setKey(Keys.RIGHT, true);
     if (key=='r') {
@@ -203,11 +210,11 @@ void mouseReleased () {
 
 void draw () {
 
-  if(frameCount==1) {
-     currentScene = new SinglePlayer(chooseNextLevel()); 
-     return;
+  if (frameCount==1) {
+    currentScene = new SinglePlayer(chooseNextLevel()); 
+    return;
   }
-  
+
   //if(touches.length==0) {
   //  keys.setKey(Keys.LEFT, false);
   //  keys.setKey(Keys.RIGHT, false);
@@ -220,6 +227,7 @@ void draw () {
     //fill(0,0,0,.2);
     //rect(0,0,width,height);
     if (currentScene.status==Scene.DONE) {
+      currentScene.cleanup();
       currentScene = new SinglePlayer(chooseNextLevel());
     }
     currentScene.update();
@@ -227,7 +235,7 @@ void draw () {
   }
 
   if (rec) {
-    if (frameCount % 1 == 0) {
+    if (frameCount % RECORD_FRAMERATE == 0) {
       saveFrame("spoofs-and-goofs/frames/dino-" + nf(fcount, 4) + ".png");
       fcount++;
     }
@@ -299,7 +307,8 @@ void writeOutControls () {
   output.println("\t\"cretaceousSelect\": " + inputs.getString("cretaceousSelect", "3") + ",");
   output.println("\t\"sfxVolume\": " + inputs.getInt("sfxVolume", 100) + ",");    
   output.println("\t\"musicVolume\": " + inputs.getInt("musicVolume", 100) + ",");
-  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 1));
+  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 4) + ",");
+  output.println("\t\"hideHelpButton\": " + inputs.getBoolean("hideHelpButton", false));
   output.println("}");
   output.flush();
   output.close();
@@ -360,4 +369,8 @@ class Keys {
 
     anykey = left || right;
   }
+}
+
+PVector screenspaceToWorldspace (float x, float y) {
+  return new PVector((x - width/2) / SCALE, (y - height/2) / SCALE);
 }

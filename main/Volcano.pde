@@ -188,7 +188,7 @@ class Volcano extends Entity {
 
   public void goExtinct () {
     endingStart = time.getClock();
-    state = ENDING;
+    if(state != EXTINCT) state = ENDING;
   }
 
   float getCurrentMargin () {
@@ -206,7 +206,6 @@ class Volcano extends Entity {
     PVector trans = globalPos();
     translate(trans.x, trans.y);
     rotate(radians(globalRote()));
-
 
     if (state==ERUPTING || state==ACTIVE || state==ENDING) {
       image(assets.volcanoStuff.volcanoFrames[1], 0, 0);

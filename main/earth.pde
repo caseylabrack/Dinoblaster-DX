@@ -1,5 +1,7 @@
 class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updateable, renderable {
 
+  PImage model;
+
   PGraphics tarpitDynamicMask;
   final float TARPIT_AMPLITUDE = 20;
   final float TARPIT_ARC = 45;
@@ -36,6 +38,20 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     dy = 0;
     dr = settings.getFloat("earthRotationSpeed", DEFAULT_EARTH_ROTATION);
 
+    if (settings.getBoolean("earthIsPangea", false)) {
+      if (settings.getBoolean("earthIsWest", true)) {
+        model = assets.earthStuff.earthPangea1;
+      } else {
+        model = assets.earthStuff.earthPangea2;
+      }
+    } else {
+      if (settings.getBoolean("earthIsWest", true)) {
+        model = assets.earthStuff.earth;
+      } else {
+        model = assets.earthStuff.earth2;
+      }
+    }
+
     tarpitArcStart = random(360-TARPIT_ARC);
 
     int side = assets.earthStuff.earth.width; // square asset
@@ -64,7 +80,6 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     }
 
     events.levelChangeSubscribers.add(this);
-    events.gameFinaleSubscribers.add(this);
   }
 
   void shake (float _mag) {
@@ -80,7 +95,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   }
 
   void update() {
-
+    
     if (isFinale) {
       x = 0;
       y = 0;
@@ -110,13 +125,9 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
       }
     }
 
-    x += dx * time.getTimeScale();
-    y += dy * time.getTimeScale();
+    x += dx;// * time.getTimeScale();
+    y += dy;// * time.getTimeScale();
     r += dr * time.getTimeScale();
-  }
-
-  void finaleHandle() {
-    isFinale = true;
   }
 
   void levelChangeHandle(int stage) {
@@ -124,6 +135,10 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     if (stage==UIStory.CRETACEOUS) {
       tarpitEnabled = true;
     }
+  }
+
+  void finaleHandle() {
+    isFinale = true;
   }
 
   boolean isInTarpit (PVector pos) {
@@ -136,14 +151,13 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   }
 
   float getTarpitAngleDegrees () {
-
     return tarpitAngle;
   }
 
   void render () {
 
     if (tarpitEnabled) shader(assets.earthStuff.mask);
-    simpleRenderImage(assets.earthStuff.earth);
+    simpleRenderImage(model);
     if (tarpitEnabled) resetShader();
 
     if (!tarpitEnabled) return;

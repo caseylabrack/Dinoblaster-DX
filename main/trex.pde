@@ -1,4 +1,4 @@
-class TrexManager implements updateable, renderable, levelChangeEvent {
+class TrexManager implements updateable, renderable, levelChangeEvent, gameFinaleEvent {
 
   EventManager events;
   Time time;  
@@ -20,14 +20,20 @@ class TrexManager implements updateable, renderable, levelChangeEvent {
 
     if (!settings.getBoolean("trexEnabled", true)) return;
 
-    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
+    //if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
     events.levelChangeSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
   }
 
   void levelChangeHandle(int stage) {
 
     if (stage==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
   }
+
+  void finaleHandle() {
+    // deactivate any t-rexs
+  }
+
 
   public void spawnTrex(PVector pos) {
     trex = new Trex(earth, playerManager, time, pos);

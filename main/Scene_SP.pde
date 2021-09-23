@@ -36,13 +36,17 @@ class SinglePlayer extends Scene {
   TrexManager trexManager;
   GameScreenMessages gameText;
   MusicManager musicManager;
+  FinaleStuff finaleManager;
 
   boolean options = false;
   Rectangle optionsButton;
   Rectangle soundButton;
   Rectangle restartButton;
   Rectangle musicButton;
-  float optionsDY = 100;
+  Rectangle launchFinderButton;
+  float directoryTextYPos = 0;//32 + 10 + 32 + 10 + 32 + 10 + 10;
+  float yoffset = -5; // optically vertically center align text within rectangle buttons
+  IntList validLvls = new IntList();
 
   ArrayList<updateable> updaters = new ArrayList<updateable>();
   ArrayList<renderableScreen> screenRenderers = new ArrayList<renderableScreen>();
@@ -65,6 +69,7 @@ class SinglePlayer extends Scene {
     ui = new UIStory(eventManager, time, currentColor, lvl);
     ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager, time);
     musicManager = new MusicManager(eventManager, lvl);
+    finaleManager = new FinaleStuff(eventManager, earth);
 
     updaters.add(time);
     updaters.add(ui);
@@ -78,6 +83,7 @@ class SinglePlayer extends Scene {
     updaters.add(volcanoManager);
     updaters.add(trexManager);
     updaters.add(musicManager);
+    updaters.add(finaleManager);
 
     renderers.add(ufoManager);
     renderers.add(volcanoManager);
@@ -86,16 +92,24 @@ class SinglePlayer extends Scene {
     renderers.add(earth);
     renderers.add(roids);
     renderers.add(starManager);
+    renderers.add(finaleManager);
 
     screenRenderers.add(gameText);
     screenRenderers.add(ui);
 
     status = RUNNING;
 
-    optionsButton = new Rectangle(WIDTH_REF_HALF - 75, HEIGHT_REF_HALF - 75, 25, 25);
-    soundButton = new Rectangle(-WIDTH_REF_HALF/2, -HEIGHT_REF_HALF + optionsDY - 25, WIDTH_REF_HALF, 50);
-    musicButton = new Rectangle(-WIDTH_REF_HALF/2, -HEIGHT_REF_HALF + optionsDY * 2 - 25, WIDTH_REF_HALF, 50);
-    restartButton = new Rectangle(-WIDTH_REF_HALF/2, -HEIGHT_REF_HALF + optionsDY * 3 - 25, WIDTH_REF_HALF, 50);
+    optionsButton = new Rectangle(WIDTH_REF_HALF - 100, HEIGHT_REF_HALF - 125, 100, 100);
+    float y = -HEIGHT_REF_HALF + 125; // 125 pixels from top of screen
+    float optionsDY = 75;
+    float buttonWidth = HEIGHT_REFERENCE - 150;
+    soundButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
+    y += optionsDY;
+    musicButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
+    y+= optionsDY;
+    restartButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
+    y+= optionsDY;
+    launchFinderButton = new Rectangle(-HEIGHT_REF_HALF + 10, directoryTextYPos, HEIGHT_REFERENCE - 20, HEIGHT_REF_HALF - directoryTextYPos - 20);
   }
 
   void update () {
@@ -104,6 +118,7 @@ class SinglePlayer extends Scene {
       for (updateable u : updaters) u.update();
     } else {
       starManager.update();
+      currentColor.update();
     }
 
     if (ui.gameDone) {
@@ -118,7 +133,7 @@ class SinglePlayer extends Scene {
 
   void render () {
 
-    PVector m = screentoScaled2(mouseX, mouseY);
+    PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
     pushMatrix(); // world-space
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
@@ -140,30 +155,79 @@ class SinglePlayer extends Scene {
       textFont(assets.uiStuff.MOTD);
       textAlign(CENTER, CENTER);
 
-      fill(soundButton.inside(m) ? 80 : 300, 70, 70, 1);
+      //fill(soundButton.inside(m) ? 80 : 300, 70, 70, 1);
+      stroke(0, 0, 100, 1);
+      noFill();
       rect(soundButton.x, soundButton.y, soundButton.w, soundButton.h);
       fill(0, 0, 100, 1);
-      text(inputs.getInt("sfxVolume", 100) > 0 ? "Sound: < ON >" : " Sound: < OFF >", 0, -HEIGHT_REF_HALF + optionsDY);
+      text(inputs.getInt("sfxVolume", 100) > 0 ? "Sound: < ON >" : " Sound: < OFF >", soundButton.x + soundButton.w/2, soundButton.y + soundButton.h/2 + yoffset);      
 
-      fill(musicButton.inside(m) ? 80 : 300, 70, 70, 1);
+      //fill(musicButton.inside(m) ? 80 : 300, 70, 70, 1);
+      stroke(0, 0, 100, 1);
+      noFill();
       rect(musicButton.x, musicButton.y, musicButton.w, musicButton.h);
       fill(0, 0, 100, 1);
-      text(inputs.getInt("musicVolume", 100) > 0 ? "Music: < ON >" : "Music: < OFF >", 0, -HEIGHT_REF_HALF + optionsDY * 2);
+      text(inputs.getInt("musicVolume", 100) > 0 ? "Music: < ON >" : " Music: < OFF >", musicButton.x + musicButton.w/2, musicButton.y + musicButton.h/2 + yoffset);
 
-      fill(restartButton.inside(m) ? 80 : 300, 70, 70, 1);
+      //fill(restartButton.inside(m) ? 80 : 300, 70, 70, 1);
+      stroke(0, 0, 100, 1);
+      noFill();
       rect(restartButton.x, restartButton.y, restartButton.w, restartButton.h);
       fill(0, 0, 100, 1);
-      text(" Restart at: < Triassic >", 0, -HEIGHT_REF_HALF + optionsDY * 3);
+
+      //fill(launchFinderButton.inside(m) ? 80 : 300, 70, 70, 1);
+      stroke(0, 0, 100, 1);
+      //noFill();
+      //rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
+      fill(0, 0, 100, 1);
+
+      switch(inputs.getInt("startAtLevel", 4)) {
+      case 0:
+      case 1:
+        text(" Restart at: < Triassic >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
+        break;
+
+      case 2:
+        text(" Restart at: < Jurassic >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
+        break;
+
+      case 3:
+        text("   Restart at: < Cretaceous >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
+        break;
+      case 4:
+        text(" Restart at: < Furthest >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
+        break;
+      }
+
+      textAlign(CENTER, TOP);
+      textLeading(32);
+
+      float y = 0;
+      //text("More settings in\n`controls-settings.txt` and\n`game-settings.txt`", 0, y);
+      text("More settings in", 0, y);
+      y += 32 + 10;
+      fill(currentColor.getColor());
+      text("`controls-settings.txt`", 0, y);
+      fill(0, 0, 100, 1);
+      y += 32 + 10;
+      text("in your install folder:", 0, y);
+      y += 32 + 10 + 10;
+      text(sketchPath(), -HEIGHT_REF_HALF + 10, y, HEIGHT_REFERENCE - 10, 400);
+
       popMatrix();
       popStyle();
     }
 
     pushMatrix(); // screen-space (UI)
+    pushStyle();
     translate(width/2, height/2);
     scale(SCALE);
     if (!options) gameText.render();
-    assets.applyBlur();
+    assets.applyGlowiness();
     ui.render();
+    imageMode(CORNER);
+    if (!inputs.getBoolean("hideHelpButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
+    popStyle();
     popMatrix();
 
     pushMatrix(); // pillarboxing (for high aspect ratios)
@@ -175,51 +239,19 @@ class SinglePlayer extends Scene {
     rect((width-w)/2 + w, 0, (width-w)/2, height);
     popStyle();
     popMatrix();
-
-    pushMatrix();
-    pushStyle();
-    translate(width/2, height/2);
-    scale(SCALE);
-    PVector b = new PVector(WIDTH_REF_HALF - 75, HEIGHT_REF_HALF - 75);
-
-    fill(optionsButton.inside(m) ? 200 : 0, 70, 70, 1);
-    rect(b.x, b.y, 25, 25);
-    popStyle();
-    popMatrix();
-
-
-    //pushStyle();
-    //fill(270, 70, 70, 1);
-    //float x = (mouseX + WIDTH_REF_HALF) / SCALE;
-    //float y = (mouseY + HEIGHT_REF_HALF) / SCALE;
-    //circle(x, y, 25 * SCALE);
-    //PVector p = screenToScaled(mouseX, mouseY);
-    //fill(320, 70, 70, 1);
-    //ellipseMode(CENTER);
-    //circle(p.x, p.y, 10 * SCALE);
-    //popStyle();
-
-    //pushStyle();
-    //fill(180, 70, 70, 1);
-    ////circle(x, 0, 25);
-    //circle((WIDTH_REF_HALF - 50) * SCALE + (width/2), HEIGHT_REF_HALF - 50, 25);
-    //popStyle();
-
-    //println(screentoScaled2(mouseX, mouseY), b);
-    //println(mouseX);
   }
 
   void mouseUp() {
 
-    PVector m = screentoScaled2(mouseX, mouseY);
+    PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
-    if (optionsButton.inside(m)) {
+    if (optionsButton.inside(m) && inputs.getBoolean("hideHelpButton", false)==false) {
       options = !options;
     }
 
     if (options) {
       if (soundButton.inside(m)) {
-        float sfx = inputs.getInt("sfxVolume", 100);
+        int sfx = inputs.getInt("sfxVolume", 100);
         inputs.setInt("sfxVolume", sfx > 0 ? 0 : 100);
         assets.muteSFX(sfx > 0 ? true : false);
         writeOutControls();
@@ -233,7 +265,39 @@ class SinglePlayer extends Scene {
       }
 
       if (restartButton.inside(m)) {
-        println("restart from somewhere else");
+        int startAt = inputs.getInt("startAtLevel", 4);
+
+        validLvls.clear();
+        validLvls.push(1);
+        validLvls.push(4);
+        if (highestUnlockedLevel() >= UIStory.JURASSIC   || settings.getBoolean("JurassicUnlocked", true)) validLvls.push(2); 
+        if (highestUnlockedLevel() == UIStory.CRETACEOUS || settings.getBoolean("CretaceousUnlocked", true)) validLvls.push(3);
+        validLvls.sort();
+
+        // get index of current startAt setting
+        int indexOfCurrent = 0;
+        for (int i = 0; i < validLvls.size(); i++) {
+          if (validLvls.get(i) == startAt) {
+            indexOfCurrent = i;
+            break;
+          }
+        }
+
+        int nextOption = (indexOfCurrent+1) % validLvls.size(); // choose the next valid setting in the list by incrementing and wrapping current index
+        inputs.setInt("startAtLevel", validLvls.get(nextOption));
+        writeOutControls();
+      }
+
+      if (launchFinderButton.inside(m)) {
+        Desktop desktop = Desktop.getDesktop();
+        File dirToOpen = null;
+        try {
+          dirToOpen = new File(sketchPath());
+          desktop.open(dirToOpen);
+        } 
+        catch (Exception iae) {
+          System.out.println("File Not Found");
+        }
       }
     }
   }
@@ -243,36 +307,13 @@ class SinglePlayer extends Scene {
     assets.stopAllSfx();
   }
 
-  PVector screenToScaled (float x, float y) {
-    return new PVector((x + WIDTH_REF_HALF) / SCALE, (y + HEIGHT_REF_HALF) / SCALE);
-  }
-
-  PVector screentoScaled2 (float x, float y) {
-    return new PVector((x - width/2) / SCALE, (y - height/2) / SCALE);
-  }
+  //PVector screenToScaled (float x, float y) {
+  //  return new PVector((x + WIDTH_REF_HALF) / SCALE, (y + HEIGHT_REF_HALF) / SCALE);
+  //}
 
   //int nextScene () {
   //  return SINGLEPLAYER;
   //}
-}
-
-class Rectangle {
-  float x, y, w, h;
-
-  Rectangle (float _x, float _y, float _w, float _h) {
-    x = _x;
-    y = _y;
-    w = _w;
-    h = _h;
-  }
-
-  boolean inside (PVector point) {
-    return inside(point.x, point.y);
-  }
-
-  boolean inside (float px, float py) {
-    return px > x && px < x + w && py > y && py < y + h;
-  }
 }
 
 class Oviraptor extends Scene {
@@ -350,7 +391,7 @@ class Oviraptor extends Scene {
     translate(width/2, height/2);
     scale(SCALE);
     gameText.render();
-    assets.applyBlur();
+    assets.applyGlowiness();
     ui.render();
     popMatrix();
 
