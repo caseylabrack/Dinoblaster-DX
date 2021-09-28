@@ -67,23 +67,27 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   }
 
   void finaleHandle() {
-    isFinale = true;
-    zoomSpeedupStart = millis();
+    //isFinale = true;
+    //zoomSpeedupStart = millis();
 
-    float x = cos(a) * r;
-    float y = sin(a) * r;
+    //float x = cos(a) * r;
+    //float y = sin(a) * r;
 
-    for (int i = 0; i < stars.length; i++) {
-      if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
-        float starX = stars[i].x - x;
-        float starY = stars[i].y - y;
-        float zoomZ = random(HEIGHT_REF_HALF);
-        float zX = (starX / HEIGHT_REF_HALF) * zoomZ;
-        float zY = (starY / HEIGHT_REF_HALF) * zoomZ;
-        zoomStars.add(new ZoomStar(zX, zY, zoomZ));
-      }
-    }
+    //for (int i = 0; i < stars.length; i++) {
+    //  if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+    //    float starX = stars[i].x - x;
+    //    float starY = stars[i].y - y;
+    //    float zoomZ = random(HEIGHT_REF_HALF);
+    //    float zX = (starX / HEIGHT_REF_HALF) * zoomZ;
+    //    float zY = (starY / HEIGHT_REF_HALF) * zoomZ;
+    //    zoomStars.add(new ZoomStar(zX, zY, zoomZ));
+    //  }
+    //}
   }
+  
+  void finaleTrexHandled(PVector _) {}
+  
+  void finaleImpact() {}
 
   void update () {
 

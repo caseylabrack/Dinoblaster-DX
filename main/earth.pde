@@ -21,6 +21,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   float shakingStart;
 
   boolean isFinale = false;
+  float finaleStartR, finaleTargetR, finaleStartTimer;
 
   final static float DEFAULT_EARTH_ROTATION = 2.3;
   final static float EARTH_RADIUS = 167;
@@ -80,6 +81,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     }
 
     events.levelChangeSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
   }
 
   void shake (float _mag) {
@@ -95,39 +97,44 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   }
 
   void update() {
-    
+
     if (isFinale) {
-      x = 0;
-      y = 0;
-      return;
-    }
 
-    dx = 0 - x;
-    dy = 0 - y;
-
-    if (shake) {
-      shakeAngle = random(0, TWO_PI);
-      dx += cos(shakeAngle) * shakeMag;
-      dy += sin(shakeAngle) * shakeMag;
-      shakeMag *= .9;
-      if (shakeMag < .1) {
-        shakeMag = 0;
-        shake = false;
+      float progress = (millis() - finaleStartTimer) / FinaleStuff.BIG_ONE_INCOMING_DURATION;
+      if (progress < 1) {
+        this.r = finaleStartR + (finaleTargetR - finaleStartR) * progress;
+      } else {
+        // don't rotate
       }
-    } 
+    } else {
 
-    if (shaking) {
-      shakeAngle = random(0, TWO_PI);
-      dx += cos(shakeAngle) * shakingMag;
-      dy += sin(shakeAngle) * shakingMag;
-      if (time.getClock() - shakingStart > shakingDur) {
-        shaking = false;
+      dx = 0 - x;
+      dy = 0 - y;
+
+      if (shake) {
+        shakeAngle = random(0, TWO_PI);
+        dx += cos(shakeAngle) * shakeMag;
+        dy += sin(shakeAngle) * shakeMag;
+        shakeMag *= .9;
+        if (shakeMag < .1) {
+          shakeMag = 0;
+          shake = false;
+        }
+      } 
+
+      if (shaking) {
+        shakeAngle = random(0, TWO_PI);
+        dx += cos(shakeAngle) * shakingMag;
+        dy += sin(shakeAngle) * shakingMag;
+        if (time.getClock() - shakingStart > shakingDur) {
+          shaking = false;
+        }
       }
-    }
 
-    x += dx;// * time.getTimeScale();
-    y += dy;// * time.getTimeScale();
-    r += dr * time.getTimeScale();
+      x += dx;// * time.getTimeScale();
+      y += dy;// * time.getTimeScale();
+      r += dr * time.getTimeScale();
+    }
   }
 
   void levelChangeHandle(int stage) {
@@ -138,7 +145,23 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   }
 
   void finaleHandle() {
+  }
+
+  void finaleTrexHandled(PVector p) {
     isFinale = true;
+    float diff = random(30, 60);
+    if (p != utils.ZERO_VECTOR) {
+      float finaleSlowdownStartAngle = utils.angleOf(utils.ZERO_VECTOR, p);
+      float targetAngle = utils.angleOf(utils.ZERO_VECTOR, new PVector(-HEIGHT_REFERENCE, -HEIGHT_REFERENCE));
+      diff = utils.signedAngleDiff(finaleSlowdownStartAngle, targetAngle);
+    }
+    finaleStartR = this.r;
+    finaleTargetR = this.r + diff;
+    finaleStartTimer = millis();
+  }
+
+  void finaleImpact() {
+    dr = 0;
   }
 
   boolean isInTarpit (PVector pos) {

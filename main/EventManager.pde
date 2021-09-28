@@ -44,9 +44,17 @@ class EventManager {
   void dispatchNebulaEnded () {
     for (nebulaEvents n : nebulaStartSubscribers) n.nebulaStopHandle();
   }
-  
+
   void dispatchGameFinale () {
-    for(gameFinaleEvent g : gameFinaleSubscribers) g.finaleHandle();
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleHandle();
+  }
+
+  void dispatchFinaleTrexPositioned (PVector p) {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleTrexHandled(p);
+  }
+
+  void dispatchFinaleImpact () {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleImpact();
   }
 } 
 
@@ -80,6 +88,8 @@ interface levelChangeEvent {
 
 interface gameFinaleEvent {
   void finaleHandle();
+  void finaleTrexHandled(PVector p);
+  void finaleImpact();
 }
 
 interface nebulaEvents {

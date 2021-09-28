@@ -40,6 +40,10 @@ class RoidManager implements updateable, renderable, gameFinaleEvent {
   void finaleHandle() {
     isFinale = true;
   }
+  
+  void finaleTrexHandled(PVector _) {}
+  
+  void finaleImpact() {}
 
   RoidManager (Earth earf, EventManager _events, Time t) {
     earth = earf;

@@ -7,7 +7,7 @@ class FinaleStuff implements gameFinaleEvent, updateable, renderable {
 
   boolean isFinale = false;
 
-  final float BIG_ONE_INCOMING_DURATION = 6e3;
+  final static float BIG_ONE_INCOMING_DURATION = 6e3;
   float bigoneStart;
   int lastBeep = -1;
   float steplength, fromEarthToRoid, progress;
@@ -53,6 +53,7 @@ class FinaleStuff implements gameFinaleEvent, updateable, renderable {
         bigone.setPosition(-HEIGHT_REF_HALF + cos(fromEarthToRoid + PI) * travelDist, -HEIGHT_REF_HALF + sin(fromEarthToRoid + PI) * travelDist);
       } else {        
         state = IMPACTING;
+        eventManager.dispatchFinaleImpact();
       }
       break;
 
@@ -78,7 +79,14 @@ class FinaleStuff implements gameFinaleEvent, updateable, renderable {
   }
 
   void finaleHandle() {
+    //isFinale = true;
+    //bigoneStart = millis();
+  }
+  void finaleTrexHandled(PVector _) {
     isFinale = true;
     bigoneStart = millis();
+  }
+
+  void finaleImpact() {
   }
 }

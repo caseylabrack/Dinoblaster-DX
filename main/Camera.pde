@@ -4,7 +4,6 @@ class Camera extends Entity implements updateable {
   private Entity following = null;
 
   Camera () {
-
   }
 
   void update () {
@@ -52,7 +51,7 @@ class ColorDecider implements updateable {
   }
 }
 
-class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
+class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
 
   private float clock;
   private float lastmillis;
@@ -69,6 +68,12 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
   private boolean hyperspace = false;
   final static float HYPERSPACE_DEFAULT_TIME = 1.75;
 
+  boolean isFinale = false;
+  private float finaleStart;
+  final static float FINALE_SLOWDOWN_TRANSITION = 3e3;
+  final float FINALE_SLOWDOWN_START_VALUE = .25;
+  final float FINALE_SLOWDOWN_END_VALUE = .05;
+
   EventManager eventManager;
 
   Time (EventManager ev) {
@@ -77,6 +82,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
     eventManager.playerDiedSubscribers.add(this);
     eventManager.gameOverSubscribers.add(this);
     eventManager.nebulaStartSubscribers.add(this);
+    eventManager.gameFinaleSubscribers.add(this);
 
     lastmillis = millis();
     //clock = millis();
@@ -107,7 +113,24 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
         timeScale = targetTimeScale;
       }
     }
+
+    if (isFinale) {
+      float progress = (millis() - finaleStart) / FINALE_SLOWDOWN_TRANSITION;
+      if (progress < 1) {
+        timeScale = utils.easeOutQuad(progress, FINALE_SLOWDOWN_START_VALUE, FINALE_SLOWDOWN_END_VALUE - FINALE_SLOWDOWN_START_VALUE, 1);
+      }
+    }
   }
+
+  void finaleHandle () {
+    isFinale = true;
+  }
+
+  void finaleTrexHandled (PVector _) {
+    finaleStart = millis();
+  }
+  
+  void finaleImpact() {}
 
   void nebulaStartHandle() {
 
