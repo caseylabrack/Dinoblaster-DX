@@ -69,7 +69,7 @@ class SinglePlayer extends Scene {
     ui = new UIStory(eventManager, time, currentColor, lvl);
     ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager, time);
     musicManager = new MusicManager(eventManager, lvl);
-    finaleManager = new FinaleStuff(eventManager, earth);
+    finaleManager = new FinaleStuff(eventManager, earth, playerManager);
 
     updaters.add(time);
     updaters.add(ui);

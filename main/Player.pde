@@ -75,12 +75,29 @@ class PlayerManager implements updateable, renderable, abductionEvent, roidImpac
         if (extralives<0) {
           assets.playerStuff.extinct.play();
           eventManager.dispatchGameOver();
+          player = null;
         } else {
           eventManager.dispatchPlayerDied(player.globalPos());
           assets.playerStuff.littleDeath.play();
+          player = null;
         }
-        player = null;
       }
+    }
+  }
+
+  void bigOneKill () {
+
+    if (player!=null) {
+      assets.playerStuff.step.stop_();
+      assets.playerStuff.tarStep.stop_();
+      float incomingAngle = utils.angleOf(earth.globalPos(), player.globalPos());
+      float offset = -20;
+      PVector adjustedPosition = new PVector(earth.globalPos().x + cos(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset), earth.globalPos().y + sin(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset));
+
+      deathAnim = new PlayerDeath(time, player.globalPos(), player.globalRote(), player.direction, player.globalToLocalPos(adjustedPosition));
+      assets.playerStuff.extinct.play();
+      eventManager.dispatchGameOver();
+      player = null;
     }
   }
 

@@ -19,6 +19,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   float shakingDur;
   float shakingMag;
   float shakingStart;
+  final float FINALE_SHAKING_MAG = 10;
 
   boolean isFinale = false;
   float finaleStartR, finaleTargetR, finaleStartTimer;
@@ -99,12 +100,13 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   void update() {
 
     if (isFinale) {
-
       float progress = (millis() - finaleStartTimer) / FinaleStuff.BIG_ONE_INCOMING_DURATION;
       if (progress < 1) {
         this.r = finaleStartR + (finaleTargetR - finaleStartR) * progress;
       } else {
-        // don't rotate
+        shakeAngle = random(0, TWO_PI);
+        x = cos(shakeAngle) * FINALE_SHAKING_MAG;
+        y = sin(shakeAngle) * FINALE_SHAKING_MAG;
       }
     } else {
 

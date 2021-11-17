@@ -76,6 +76,7 @@ class AssetManager {
     }
     roidStuff.bigone = loadImage("bigone.png");
     roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
+    sounds.add(roidStuff.bigoneBlip);
 
     playerStuff.dethSVG = loadShape("bronto-death.svg");
     playerStuff.dethSVG.disableStyle();
