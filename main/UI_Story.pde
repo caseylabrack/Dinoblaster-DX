@@ -66,7 +66,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
   boolean isGameOver = false;
   float gameOverGracePeriodStart;
   final float gameOverGracePeriodDuration = 4e3;
-  float score = 0;
+  int score = 0;
 
   final static int TRIASSIC = 0;
   final static int JURASSIC = 1;
@@ -125,13 +125,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     motdStart = millis();
 
     highscore = loadHighScore(SCORE_DATA_FILENAME);
-    //highscore = 0;
-    //byte[] scoreData = loadBytes(SCORE_DATA_FILENAME);
-    //if (scoreData!=null) {
-    //  for (byte n : scoreData) {
-    //    highscore += float(n + 128);
-    //  }
-    //}
+    
     println("highscore: " + highscore);
   }
 
@@ -139,11 +133,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     isGameOver = true;
     gameOverGracePeriodStart = millis();
     if (score > highscore) {
-      saveHighScore(score,SCORE_DATA_FILENAME);
-      //byte[] nums = new byte[score > 255 ? 2 : 1];
-      //nums[0] = byte(highscore > 255 ? 127 : floor(score) - 128);
-      //if (highscore > 256) nums[1] = byte(floor(score) - 256 - 127);
-      //saveBytes(SCORE_DATA_FILENAME, nums);
+      saveHighScore(score, SCORE_DATA_FILENAME);
     }
   }
 

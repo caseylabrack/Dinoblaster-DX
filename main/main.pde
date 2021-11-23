@@ -251,7 +251,8 @@ void draw () {
 
 int highestUnlockedLevel () {
   int nextlvl = UIStory.TRIASSIC;
-  switch(int(loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100)) {
+  int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
+  switch(highscorefloor) {
   case 0:  
     nextlvl = UIStory.TRIASSIC;
     break;
@@ -287,7 +288,7 @@ int chooseNextLevel () {
 
   case 3: 
     if (settings.getBoolean("CretaceousUnlocked", false) || unlocked >= UIStory.CRETACEOUS) chosen = UIStory.CRETACEOUS;
-    break;  
+    break;
   }
 
   return chosen;
@@ -314,22 +315,27 @@ void writeOutControls () {
   output.close();
 }
 
-float loadHighScore (String filename) {
-  float h = 0;
+int loadHighScore (String filename) {
+  // load four bytes into one 32-bit integer by ORing bytes together
+  int highscore = 0;
   byte[] scoreData = loadBytes(filename);
-  if (scoreData!=null) {
-    for (byte n : scoreData) {
-      h += float(n + 128);
-    }
+  if (scoreData != null ) {
+    highscore = (((scoreData[3]       ) << 24) |
+                ((scoreData[2] & 0xff) << 16) |
+                ((scoreData[1] & 0xff) <<  8) |
+                ((scoreData[0] & 0xff)      ));
   }
-
-  return h;
+  return highscore;
 }
 
-void saveHighScore (float score, String filename) {
-  byte[] nums = new byte[score > 255 ? 2 : 1];
-  nums[0] = byte(score > 255 ? 127 : floor(score) - 128);
-  if (score > 256) nums[1] = byte(floor(score) - 256 - 127);
+void saveHighScore (int score, String filename) {
+  // split score (32-bit integer in java) into four bytes, bitwise. save as byte array
+  byte[] nums = new byte[4];
+  nums[0] = (byte) (score & 0xff);
+  nums[1] = (byte) ((score >>> 8) & 0xff);
+  nums[2] = (byte) ((score >>> 16) & 0xff);
+  nums[3] = (byte) ((score >>> 24) & 0xff);
+
   saveBytes(filename, nums);
 }
 
