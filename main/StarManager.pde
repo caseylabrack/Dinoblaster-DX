@@ -41,6 +41,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
     if (lvl==UIStory.TRIASSIC) {
       int i = int(random(5, 80));
+      //int i = 1; // DEBUG: hypercube on start
       while (i < 80) {
         hyperspaceSpawns.append(i);
         //i += int(random(30, 80));

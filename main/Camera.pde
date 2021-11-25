@@ -69,6 +69,9 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
   private boolean hyperspace = false;
   final static float HYPERSPACE_DEFAULT_TIME = 1.75;
+  final static float DEFAULT_DEFAULT_TIME_SCALE = 1;
+  float defaultTimeScale;
+  float hyperspaceTimeScale;
 
   EventManager eventManager;
 
@@ -82,6 +85,12 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
     lastmillis = millis();
     //clock = millis();
     clock = 0;
+    
+    hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", HYPERSPACE_DEFAULT_TIME);
+    hyperspaceTimeScale = constrain(hyperspaceTimeScale, .1, 10.0);
+    defaultTimeScale = settings.getFloat("defaultTimeScale", DEFAULT_DEFAULT_TIME_SCALE);
+    defaultTimeScale = constrain(defaultTimeScale, .1, 5.0);
+    timeScale = defaultTimeScale;
   }
 
   void update () {
@@ -100,7 +109,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
     if (dying) {
       float progress = (millis() - dyingStartTime) / dyingDuration;
-      float targetTimeScale = hyperspace ? HYPERSPACE_DEFAULT_TIME: 1;
+      float targetTimeScale = hyperspace ? hyperspaceTimeScale: defaultTimeScale;
       if (progress < 1) {
         timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
       } else {
@@ -122,7 +131,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
 
     hyperspace = false;
     if (!dying) { 
-      timeScale = 1;
+      timeScale = defaultTimeScale;
     }
   }
 

@@ -58,7 +58,7 @@ class VolcanoManager implements levelChangeEvent, updateable, renderable {
     float angle;
     boolean valid;
 
-    for (int i = 0; i < 2000; i++) {
+    for (int i = 0; i < 2000; i++) { // use brute force to try to find a place where the volcano can spawn
       angle = random(360);
       valid = true;
       for (Volcano v : volcanos) {
