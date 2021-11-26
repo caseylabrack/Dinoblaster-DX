@@ -18,12 +18,14 @@ class VolcanoManager implements levelChangeEvent, updateable, renderable {
     earth = e;
     currentColor = _c;
 
-    if (lvl==UIStory.JURASSIC) {
-      spawn();
-      enabled = true;
-    }
+    if (settings.getBoolean("volcanosEnabled", true)) {
+      if (lvl==UIStory.JURASSIC) {
+        spawn();
+        enabled = true;
+      }
 
-    events.levelChangeSubscribers.add(this);
+      events.levelChangeSubscribers.add(this);
+    }
   }
 
   void update () {
@@ -188,7 +190,7 @@ class Volcano extends Entity {
 
   public void goExtinct () {
     endingStart = time.getClock();
-    if(state != EXTINCT) state = ENDING;
+    if (state != EXTINCT) state = ENDING;
   }
 
   float getCurrentMargin () {

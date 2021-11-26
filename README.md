@@ -28,10 +28,13 @@ hideHelpButton | true or false (false) | toggles the options button. allows user
 Setting|Possible values (and Default)|Description
 :--- |:---|:---
 roidsEnabled | true or false (true)| toggles asteroids. note that this is a game about dodging asteroids. maybe you feel like doing [game tourism](http://vectorpoem.com/tourism/)?
+trexEnabled | true or false (true) | toggle the T-Rex in Cretaceous era
+volcanosEnabled | true or flase (true) | toggle volcanos in Jurassic era
 hypercubesEnabled | true or false (true) | toggles the hypercube, a mysterious 4th-dimensional shape that speeds up time when touched
 ufosEnabled | true or false (true)| toggles UFOs, the way players earn extra lives
-defaultTimeScale | positive number (1.0) | Adjust the global rate of events. At `2.0`, everything is happening twice as fast. At values like `0.5`, you're in bullet time.
-hyperspaceTimeScale | positive number (1.75) | Adjust the global rate of events during hyperspace, the period right after touching the hypercube
+defaultTimeScale | positive number (1.0) | adjust the global rate of events. At `2.0`, everything is happening twice as fast. At values like `0.5`, you're in bullet time.
+hyperspaceTimeScale | positive number (1.75) | adjust the global rate of events during hyperspace, the period right after  touching the hypercube
+hyperspaceDuration | positive number (15) | how long should hyperspace last (in seconds)
 extraLives | positive integer (0) | how many extra lives should the player start with?
 earthRotationSpeed | number (2.3) | how fast should the earth spin? very strong effect on difficulty and fun.
 playerSpeed | number (5.0) | how fast should the player move? low values are surprisingly fun.

@@ -10,7 +10,8 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
   boolean hypercubeActive = false;
   final float hypercubeLead = 17;
   final float hypercubeOffset = -150;
-  final float HYPERSPACE_DURATION = 15e3;
+  final static float DEFAULT_HYPERSPACE_DURATION = 15e3;
+  float hyperspaceDuration;
   float hyperspaceStart;
   Hypercube hypercube;
   boolean hyperspace = false;
@@ -37,6 +38,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
     evs.nebulaStartSubscribers.add(this);
 
+    hyperspaceDuration = settings.getFloat("hyperspaceDuration", DEFAULT_HYPERSPACE_DURATION) * 1e3;
     hypercubesEnabled = settings.getBoolean("hypercubesEnabled", true);
 
     if (lvl==UIStory.TRIASSIC) {
@@ -74,7 +76,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
     }
 
     if (hyperspace) {
-      if (millis() - hyperspaceStart > HYPERSPACE_DURATION) {
+      if (millis() - hyperspaceStart > hyperspaceDuration) {
         hyperspace = false;
         hypercubeActive = false;
         starSpeed = defaultStarSpeed;
