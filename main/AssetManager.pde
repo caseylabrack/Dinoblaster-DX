@@ -62,6 +62,7 @@ class AssetManager {
     uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
     uiStuff.optionsBtn = loadImage("button-final.png");
+    uiStuff.DIPswitchesBtn = loadImage("dipswitches-btn.png");
 
     volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
     volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
@@ -207,6 +208,7 @@ class AssetManager {
     PImage extraDinoInactive;
     PImage optionsBtn;
     PFont extinctType;
+    PImage DIPswitchesBtn;
   }
 
   class VolcanoStuff {

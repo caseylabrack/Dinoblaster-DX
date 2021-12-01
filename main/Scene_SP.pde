@@ -38,6 +38,7 @@ class SinglePlayer extends Scene {
   MusicManager musicManager;
 
   boolean options = false;
+  Rectangle dipswitchesButton;
   Rectangle optionsButton;
   Rectangle soundButton;
   Rectangle restartButton;
@@ -95,6 +96,9 @@ class SinglePlayer extends Scene {
 
     status = RUNNING;
 
+    float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
+    float dipheight = assets.uiStuff.DIPswitchesBtn.height;
+    dipswitchesButton = new Rectangle(HEIGHT_REF_HALF + (WIDTH_REF_HALF - HEIGHT_REF_HALF) / 2 - dipwidth/2, HEIGHT_REF_HALF - dipheight, dipwidth, dipheight);
     optionsButton = new Rectangle(WIDTH_REF_HALF - 100, HEIGHT_REF_HALF - 125, 100, 100);
     float y = -HEIGHT_REF_HALF + 125; // 125 pixels from top of screen
     float optionsDY = 75;
@@ -216,7 +220,11 @@ class SinglePlayer extends Scene {
     assets.applyGlowiness();
     ui.render();
     imageMode(CORNER);
+    rectMode(CORNER);
     if (!inputs.getBoolean("hideHelpButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
+    //image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, assets.uiStuff.DIPswitchesBtn.width/2, assets.uiStuff.DIPswitchesBtn.height/2);
+    image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
+    
     popStyle();
     popMatrix();
 
@@ -234,6 +242,19 @@ class SinglePlayer extends Scene {
   void mouseUp() {
 
     PVector m = screentoScaled2(mouseX, mouseY);
+
+    if (dipswitchesButton.inside(m)) {
+      println("you clicked dipswitch"); 
+      Desktop desktop = Desktop.getDesktop();
+      File dirToOpen = null;
+      try {
+        dirToOpen = new File(sketchPath());
+        desktop.open(dirToOpen);
+      } 
+      catch (Exception iae) {
+        System.out.println("File Not Found");
+      }
+    }
 
     if (optionsButton.inside(m) && inputs.getBoolean("hideHelpButton", false)==false) {
       options = !options;
