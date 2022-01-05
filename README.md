@@ -23,9 +23,11 @@ sfxVolume | number (100) | sound effects volume level, 0–100. at zero, sound e
 musicVolume | number (100) | music volume level, 0–100. at zero, music is muted. volume control is not guaranteed to work on all devices, but muting should always work
 startAtLevel | number (4) | what level plays when the game starts (and restarts). values of 0 and 1 make the game start at triassic; 2 at jurassic; 3 at cretaceous; and 4, the default, chooses the highest level unlocked
 hideHelpButton | true or false (false) | toggles the options button. options button allows users to change some controls from within game using a click or tap. on devices without a click or tap (like arcade cabinet setups), choose true
-glowiness | positive number (30) | Glowiness of game monitor. Setting of 0 is crisp; 15 is glowy; 30 is sparkly; 60 looks old and dusty. Non-zero setting requires OpenGL.
+glowiness | positive number (30) | Glowiness of game monitor. Setting of 0 is crisp; 15 is glowy; 30 is sparkly; 60 looks old and dusty. Non-zero setting requires OpenGL (it might not work on the Raspberry Pi, depending on your version).
 
 ### Gameplay
+Setting|Possible values (and Default)|Description
+:--- |:---|:---
 roidsEnabled | true or false (true)| toggles asteroids. note that this is a game about dodging asteroids. maybe you feel like doing [game tourism](http://vectorpoem.com/tourism/)?
 trexEnabled | true or false (true) | toggle the T-Rex in Cretaceous era
 volcanosEnabled | true or flase (true) | toggle volcanos in Jurassic era
