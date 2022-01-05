@@ -154,14 +154,14 @@ class SinglePlayer extends Scene {
       noFill();
       rect(soundButton.x, soundButton.y, soundButton.w, soundButton.h);
       fill(0, 0, 100, 1);
-      text(inputs.getInt("sfxVolume", 100) > 0 ? "Sound: < ON >" : " Sound: < OFF >", soundButton.x + soundButton.w/2, soundButton.y + soundButton.h/2 + yoffset);      
+      text(settings.getInt("sfxVolume", 100) > 0 ? "Sound: < ON >" : " Sound: < OFF >", soundButton.x + soundButton.w/2, soundButton.y + soundButton.h/2 + yoffset);      
 
       //fill(musicButton.inside(m) ? 80 : 300, 70, 70, 1);
       stroke(0, 0, 100, 1);
       noFill();
       rect(musicButton.x, musicButton.y, musicButton.w, musicButton.h);
       fill(0, 0, 100, 1);
-      text(inputs.getInt("musicVolume", 100) > 0 ? "Music: < ON >" : " Music: < OFF >", musicButton.x + musicButton.w/2, musicButton.y + musicButton.h/2 + yoffset);
+      text(settings.getInt("musicVolume", 100) > 0 ? "Music: < ON >" : " Music: < OFF >", musicButton.x + musicButton.w/2, musicButton.y + musicButton.h/2 + yoffset);
 
       //fill(restartButton.inside(m) ? 80 : 300, 70, 70, 1);
       stroke(0, 0, 100, 1);
@@ -175,7 +175,7 @@ class SinglePlayer extends Scene {
       //rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
       fill(0, 0, 100, 1);
 
-      switch(inputs.getInt("startAtLevel", 4)) {
+      switch(settings.getInt("startAtLevel", 4)) {
       case 0:
       case 1:
         text(" Restart at: < Triassic >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
@@ -221,10 +221,10 @@ class SinglePlayer extends Scene {
     ui.render();
     imageMode(CORNER);
     rectMode(CORNER);
-    if (!inputs.getBoolean("hideHelpButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
+    //if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
     //image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, assets.uiStuff.DIPswitchesBtn.width/2, assets.uiStuff.DIPswitchesBtn.height/2);
-    image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
-    
+    if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
+
     popStyle();
     popMatrix();
 
@@ -244,7 +244,7 @@ class SinglePlayer extends Scene {
     PVector m = screentoScaled2(mouseX, mouseY);
 
     if (dipswitchesButton.inside(m)) {
-      println("you clicked dipswitch"); 
+      //println("you clicked dipswitch"); 
       Desktop desktop = Desktop.getDesktop();
       File dirToOpen = null;
       try {
@@ -256,27 +256,27 @@ class SinglePlayer extends Scene {
       }
     }
 
-    if (optionsButton.inside(m) && inputs.getBoolean("hideHelpButton", false)==false) {
+    if (optionsButton.inside(m) && settings.getBoolean("hideDIPSwitchesButton", false)==false) {
       options = !options;
     }
 
     if (options) {
       if (soundButton.inside(m)) {
-        int sfx = inputs.getInt("sfxVolume", 100);
-        inputs.setInt("sfxVolume", sfx > 0 ? 0 : 100);
+        int sfx = settings.getInt("sfxVolume", 100);
+        //settings.setInt("sfxVolume", sfx > 0 ? 0 : 100);
         assets.muteSFX(sfx > 0 ? true : false);
-        writeOutControls();
+        //writeOutControls();
       }
 
       if (musicButton.inside(m)) {
-        float msx = inputs.getInt("musicVolume", 100);
-        inputs.setInt("musicVolume", msx > 0 ? 0 : 100);
+        float msx = settings.getInt("musicVolume", 100);
+        //settings.setInt("musicVolume", msx > 0 ? 0 : 100);
         assets.muteMusic(msx > 0 ? true : false);
-        writeOutControls();
+        //writeOutControls();
       }
 
       if (restartButton.inside(m)) {
-        int startAt = inputs.getInt("startAtLevel", 4);
+        int startAt = settings.getInt("startAtLevel", 4);
 
         validLvls.clear();
         validLvls.push(1);
@@ -295,8 +295,8 @@ class SinglePlayer extends Scene {
         }
 
         int nextOption = (indexOfCurrent+1) % validLvls.size(); // choose the next valid setting in the list by incrementing and wrapping current index
-        inputs.setInt("startAtLevel", validLvls.get(nextOption));
-        writeOutControls();
+        //settings.setInt("startAtLevel", validLvls.get(nextOption));
+        //writeOutControls();
       }
 
       if (launchFinderButton.inside(m)) {

@@ -1,0 +1,44 @@
+--Edit this text file to change your controls, set preferences, and even cheat.
+--(Restart DinoBlaster for changes to take effect.)
+--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX
+
+
+----CONTROLS----
+player1LeftKey: a
+player1RightKey: d
+
+triassicSelect: 1
+jurassicSelect: 2
+cretaceousSelect: 3
+
+sfxVolume: 100
+musicVolume: 100
+
+startAtLevel: 4
+hideDIPSwitchesButton: false
+glowiness: 30
+
+
+----GAMEPLAY----
+roidsEnabled: true
+trexEnabled: true
+volcanosEnabled: true
+ufosEnabled: true
+
+hypercubesEnabled: true
+hyperspaceDuration: 15          -- in seconds
+hyperspaceTimeScale: 1.75
+defaultTimeScale: 1.0
+
+playerSpeed: 5.0
+extraLives: 0
+
+earthRotationSpeed: 2.3
+earthIsPangea: false
+earthIsWest: true
+
+roidImpactRateInMilliseconds: 300.0
+roidImpactRateVariation: 100.0
+
+JurassicUnlocked: false
+CretaceousUnlocked: false
