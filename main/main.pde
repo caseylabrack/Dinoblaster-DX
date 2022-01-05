@@ -22,9 +22,8 @@ boolean rec = false;
 
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
-JSONObject settings;
-JSONObject inputs;
-JSONObject picadeSettings = null;
+SimpleTXTParser settings;
+JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked;
 char leftkey, rightkey, leftkey2p, rightkey2p, triassicSelect, jurassicSelect, cretaceousSelect;
@@ -54,75 +53,85 @@ void setup () {
   minim = new Minim(this);
 
   try {
-    settings = loadJSONObject("game-settings.txt");
+    settings = new SimpleTXTParser("DIP-switches.txt", true);
   }
   catch(Exception e) {
     println("problem load game settings");
-    settings = new JSONObject();
     PrintWriter output;
-    output = createWriter("game-settings.txt"); 
-    output.println("{");
-    settings.setBoolean("roidsEnabled", true);
-    output.println("\t\"roidsEnabled\": true,");
-    settings.setBoolean("trexEnabled", true);
-    output.println("\t\"trexEnabled\": true,");
-    settings.setBoolean("volcanosEnabled", true);
-    output.println("\t\"volcanosEnabled\": true,");
-    settings.setBoolean("hypercubesEnabled", true);
-    output.println("\t\"hypercubesEnabled\": true,");
-    settings.setBoolean("ufosEnabled", true);
-    output.println("\t\"ufosEnabled\": true,");
-    settings.setFloat("defaultTimeScale", 1);
-    output.println("\t\"defaultTimeScale\": 1,");
-    settings.setFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
-    output.println("\t\"hyperspaceTimeScale\": " + Time.HYPERSPACE_DEFAULT_TIME + ",");
-    settings.setFloat("hyperspaceDuration", StarManager.DEFAULT_HYPERSPACE_DURATION/1e3);
-    output.println("\t\"hyperspaceDuration\": " + StarManager.DEFAULT_HYPERSPACE_DURATION/1e3 + ",");
-    settings.setInt("extraLives", 0);
-    output.println("\t\"extraLives\": 0,");
-    settings.setFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    output.println("\t\"earthRotationSpeed\": " + Earth.DEFAULT_EARTH_ROTATION + ",");
-    settings.setFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
-    output.println("\t\"playerSpeed\": " + Player.DEFAULT_RUNSPEED + ",");
-    settings.setFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE);
-    output.println("\t\"roidImpactRateInMilliseconds\": " + (int)(RoidManager.DEFAULT_SPAWN_RATE) + ",");
-    settings.setFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION);
-    output.println("\t\"roidImpactRateVariation\": " + (int)(RoidManager.DEFAULT_SPAWN_DEVIATION) + ",");
-    settings.setBoolean("JurassicUnlocked", true);
-    output.println("\t\"JurassicUnlocked\": true,");
-    settings.setBoolean("CretaceousUnlocked", true);
-    output.println("\t\"CretaceousUnlocked\": true,");
-    settings.setInt("glowiness", assets.DEFAULT_GLOWINESS);
-    output.println("\t\"glowiness\": " + assets.DEFAULT_GLOWINESS + ",");
-    settings.setBoolean("earthIsPangea", false);
-    output.println("\t\"earthIsPangea\": false,");
-    settings.setBoolean("earthIsWest", true);
-    output.println("\t\"earthIsWest\": true");
-    output.println("}");
+    output = createWriter("DIP-switches.txt");
+    String spacer = "          ";
+    String settingsString = String.join("\n", 
+      "--Edit this text file to change your controls, set preferences, and even cheat.", 
+      "--(Restart DinoBlaster for changes to take effect.)", 
+      "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
+      "", 
+      "",
+      "----CONTROLS----",
+      "player1LeftKey: a",
+      "player1RightKey: d",
+      "",
+      "triassicSelect: 1",
+      "jurassicSelect: 2",
+      "cretaceousSelect: 3",
+      "",
+      "sfxVolume: 100", 
+      "musicVolume: 100",
+      "",
+      "startAtLevel: 4", 
+      "hideHelpButton: false", 
+      "glowiness: " + assets.DEFAULT_GLOWINESS,
+      "",
+      "",
+      "----GAMEPLAY----",
+      "roidsEnabled: " + true, 
+      "trexEnabled: " + true, 
+      "volcanosEnabled: " + true, 
+      "ufosEnabled: " + true, 
+      "", 
+      "hypercubesEnabled: " + true, 
+      "hyperspaceDuration: " + int(StarManager.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
+      "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
+      "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
+      "", 
+      "playerSpeed: " + Player.DEFAULT_RUNSPEED, 
+      "extraLives: " + 0, 
+      "", 
+      "earthRotationSpeed: " + Earth.DEFAULT_EARTH_ROTATION, 
+      "earthIsPangea: " + false, 
+      "earthIsWest: " + true, 
+      "", 
+      "roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
+      "roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
+      "", 
+      "JurassicUnlocked: " + false, 
+      "CretaceousUnlocked: " + false
+      );
+    output.println(settingsString);
     output.flush();
     output.close();
+    settings = new SimpleTXTParser(settingsString, true);
   }
 
-  try {
-    inputs = loadJSONObject("controls-settings.txt");
-  }
-  catch(Exception e) {
-    println("problem load inputs");
-    inputs = new JSONObject();
-    inputs.setString("player1LeftKey", "a");
-    inputs.setString("player1RightKey", "d");
-    inputs.setString("player2LeftKey", "k");
-    inputs.setString("player2RightKey", "l");
-    inputs.setBoolean("player2UsesArrowKeys", false);
-    inputs.setString("triassicSelect", "1");
-    inputs.setString("jurassicSelect", "2");
-    inputs.setString("cretaceousSelect", "3");
-    inputs.setInt("sfxVolume", 100);
-    inputs.setInt("musicVolume", 100);
-    inputs.setInt("startAtLevel", 4);
-    inputs.setBoolean("hideHelpButton", false); 
-    writeOutControls();
-  }
+  //try {
+  //  inputs = loadJSONObject("controls-settings.txt");
+  //}
+  //catch(Exception e) {
+  //  println("problem load inputs");
+  //  inputs = new JSONObject();
+  //  inputs.setString("player1LeftKey", "a");
+  //  inputs.setString("player1RightKey", "d");
+  //  inputs.setString("player2LeftKey", "k");
+  //  inputs.setString("player2RightKey", "l");
+  //  inputs.setBoolean("player2UsesArrowKeys", false);
+  //  inputs.setString("triassicSelect", "1");
+  //  inputs.setString("jurassicSelect", "2");
+  //  inputs.setString("cretaceousSelect", "3");
+  //  inputs.setInt("sfxVolume", 100);
+  //  inputs.setInt("musicVolume", 100);
+  //  inputs.setInt("startAtLevel", 4);
+  //  inputs.setBoolean("hideHelpButton", false); 
+  //  writeOutControls();
+  //}
 
   try {
     picadeSettings = loadJSONObject("picade.txt");
@@ -135,13 +144,13 @@ void setup () {
   assets.load(this, picadeSettings);
 
   assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
-  int vsfx = inputs.getInt("sfxVolume", 100);
+  int vsfx = settings.getInt("sfxVolume", 100);
   if (vsfx == 0) {
     assets.muteSFX(true);
   } else {
     assets.volumeSFX(float(vsfx) / 100);
   }
-  int vmusic = inputs.getInt("musicVolume", 100);
+  int vmusic = settings.getInt("musicVolume", 100);
   if (vmusic == 0) {
     assets.muteMusic(true);
   } else {
@@ -150,11 +159,11 @@ void setup () {
 
   jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
-  leftkey = inputs.getString("player1LeftKey", "a").charAt(0);
-  rightkey = inputs.getString("player1RightKey", "d").charAt(0);
-  triassicSelect = inputs.getString("triassicSelect", "1").charAt(0);
-  jurassicSelect = inputs.getString("jurassicSelect", "2").charAt(0);
-  cretaceousSelect = inputs.getString("cretaceousSelect", "3").charAt(0);  
+  leftkey = settings.getString("player1LeftKey", "a").charAt(0);
+  rightkey = settings.getString("player1RightKey", "d").charAt(0);
+  triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
+  jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
+  cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
 
   //currentScene = new SinglePlayer(UIStory.TRIASSIC);
   //currentScene = new Oviraptor(Scene.OVIRAPTOR);
@@ -276,7 +285,7 @@ int highestUnlockedLevel () {
 
 int chooseNextLevel () {
 
-  int startAt = inputs.getInt("startAtLevel", 4);
+  int startAt = settings.getInt("startAtLevel", 4);
   int unlocked = highestUnlockedLevel();
   int chosen = unlocked; // default to highest level unlocked. user can choose this with any number 4+
 
@@ -298,26 +307,26 @@ int chooseNextLevel () {
   return chosen;
 }
 
-void writeOutControls () {
-  PrintWriter output;
-  output = createWriter("controls-settings.txt"); 
-  output.println("{");
-  output.println("\t\"player1LeftKey\": " + inputs.getString("player1LeftKey", "a") + ",");
-  output.println("\t\"player1RightKey\": " + inputs.getString("player1RightKey", "d") + ",");
-  output.println("\t\"player2LeftKey\": " + inputs.getString("player2LeftKey", "k") + ",");
-  output.println("\t\"player2RightKey\": " + inputs.getString("player2RightKey", "l") + ",");
-  output.println("\t\"player2UsesArrowKeys\": " + inputs.getBoolean("player2UsesArrowKeys", false) + ",");
-  output.println("\t\"triassicSelect\": " + inputs.getString("triassicSelect", "1") + ",");
-  output.println("\t\"jurassicSelect\": " + inputs.getString("jurassicSelect", "2") + ",");
-  output.println("\t\"cretaceousSelect\": " + inputs.getString("cretaceousSelect", "3") + ",");
-  output.println("\t\"sfxVolume\": " + inputs.getInt("sfxVolume", 100) + ",");    
-  output.println("\t\"musicVolume\": " + inputs.getInt("musicVolume", 100) + ",");
-  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 4) + ",");
-  output.println("\t\"hideHelpButton\": " + inputs.getBoolean("hideHelpButton", false));
-  output.println("}");
-  output.flush();
-  output.close();
-}
+//void writeOutControls () {
+//  PrintWriter output;
+//  output = createWriter("controls-settings.txt"); 
+//  output.println("{");
+//  output.println("\t\"player1LeftKey\": " + inputs.getString("player1LeftKey", "a") + ",");
+//  output.println("\t\"player1RightKey\": " + inputs.getString("player1RightKey", "d") + ",");
+//  output.println("\t\"player2LeftKey\": " + inputs.getString("player2LeftKey", "k") + ",");
+//  output.println("\t\"player2RightKey\": " + inputs.getString("player2RightKey", "l") + ",");
+//  output.println("\t\"player2UsesArrowKeys\": " + inputs.getBoolean("player2UsesArrowKeys", false) + ",");
+//  output.println("\t\"triassicSelect\": " + inputs.getString("triassicSelect", "1") + ",");
+//  output.println("\t\"jurassicSelect\": " + inputs.getString("jurassicSelect", "2") + ",");
+//  output.println("\t\"cretaceousSelect\": " + inputs.getString("cretaceousSelect", "3") + ",");
+//  output.println("\t\"sfxVolume\": " + inputs.getInt("sfxVolume", 100) + ",");    
+//  output.println("\t\"musicVolume\": " + inputs.getInt("musicVolume", 100) + ",");
+//  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 4) + ",");
+//  output.println("\t\"hideHelpButton\": " + inputs.getBoolean("hideHelpButton", false));
+//  output.println("}");
+//  output.flush();
+//  output.close();
+//}
 
 int loadHighScore (String filename) {
   // load four bytes into one 32-bit integer by ORing bytes together
@@ -325,9 +334,9 @@ int loadHighScore (String filename) {
   byte[] scoreData = loadBytes(filename);
   if (scoreData != null ) {
     highscore = (((scoreData[3]       ) << 24) |
-                ((scoreData[2] & 0xff) << 16) |
-                ((scoreData[1] & 0xff) <<  8) |
-                ((scoreData[0] & 0xff)      ));
+      ((scoreData[2] & 0xff) << 16) |
+      ((scoreData[1] & 0xff) <<  8) |
+      ((scoreData[0] & 0xff)      ));
   }
   return highscore;
 }

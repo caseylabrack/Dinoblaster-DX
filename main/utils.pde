@@ -152,3 +152,87 @@ class Rectangle {
     return px > x && px < x + w && py > y && py < y + h;
   }
 }
+
+class SimpleTXTParser {
+
+  String txt;
+  boolean errors;
+
+  SimpleTXTParser(String path) {
+    init(path, false);
+  }
+
+  SimpleTXTParser(String path, boolean errors) {
+    init(path, errors);
+  }
+
+  void init (String path, boolean errors) {
+    if (path.endsWith(".txt")) {
+      String[] arr = loadStrings(path);
+      if (arr != null) {
+        txt = String.join("\n", arr);
+      } else {
+        throw new java.lang.RuntimeException("configs parser: couldn't `loadStrings` this file");
+      }
+    } else { // string isn't a path, it's already a delimited config string
+      txt = path;
+    }
+  }
+
+  boolean getBoolean (String _key, boolean _default) {
+    boolean result = _default;
+    String[] m = match(txt, _key + ":\\s*(\\w+)");
+    if (m != null) {
+      if (m[1].equalsIgnoreCase("true")) result = true;
+      if (m[1].equalsIgnoreCase("false")) result = false;
+    } else {
+      if (errors) println("getBool no match: ", _key);
+    }
+    return result;
+  }
+
+  float getFloat (String _key, float _default) {
+    float result = _default;
+    String[] m = match(txt, _key + ":\\s*([+-]?\\d*\\.?\\d*)");
+    if (m != null) {
+      try {
+        result = Float.parseFloat(m[1]);
+      } 
+      catch(Exception e) {
+      }
+    } else {
+      if (errors) println("getBool no match: ", _key);
+    }
+    return result;
+  }
+
+  int getInt (String _key, int _default) {
+    int result = _default;
+    String[] m = match(txt, _key + ":\\s*(\\d+)");
+    if (m != null) {
+      try {
+        result = Integer.parseInt(m[1]);
+      } 
+      catch(Exception e) {
+      }
+    } else {
+      if (errors) println("getBool no match: ", _key);
+    }
+    return result;
+  }
+  
+  String getString (String _key, String _default) {
+    String result = _default;
+    String[] m = match(txt, _key + ":\\s*(\\w+)");
+    if (m != null) {
+      try {
+        result = m[1];
+      } 
+      catch(Exception e) {
+      }
+    } else {
+      if (errors) println("getString no match: ", _key);
+    }
+    return result;
+  }
+}
