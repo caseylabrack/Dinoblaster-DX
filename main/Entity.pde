@@ -1,13 +1,28 @@
 class Entity {
   float x, y, r, dx, dy, dr;
   int facing = 1;
+  float scale = 1;
   Entity parent = null;
+  PImage model;
 
   void addChild (Entity child) {
     child.setPosition(globalToLocalPos(child.globalPos()));
     child.r = child.globalRote() - r;
     child.parent = this;
   } 
+
+  //public Entity clone () {
+  //  Entity e = new Entity();
+  //  e.x = this.x;
+  //  e.y = this.y;
+  //  e.r = this.r;
+  //  e.dx = this.dx;
+  //  e.dy = this.dy;
+  //  e.dr = this.dr;
+  //  e.facing = this.facing;
+  //  e.parent = this.parent;
+  //  return e;
+  //}
 
   public PVector globalToLocalPos (PVector globalPoint) {
     PVector mypos = globalPos();
@@ -51,18 +66,30 @@ class Entity {
   float localRote() {
     return r;
   }
-  
+
   void pushTransforms () {
     pushMatrix();
     PVector pos = globalPos();
     scale(facing, 1);
     translate(pos.x * facing, pos.y);
     rotate(radians(globalRote() * facing));
+    scale(scale);
   }
-  
+
   void simpleRenderImage (PImage im) {
     pushTransforms();
     image(im, 0, 0);
+    popMatrix();
+  }
+
+  void simpleRenderImage () {
+    simpleRenderImage(model);
+  }
+
+  void simpleRenderImage (PShape im) {
+    pushTransforms();
+    shapeMode(CENTER);
+    shape(im, 0, 0);
     popMatrix();
   }
 }

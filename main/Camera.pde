@@ -130,6 +130,8 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents, 
     finaleStart = millis();
   }
   
+  void finaleClose () {}
+  
   void finaleImpact() {}
 
   void nebulaStartHandle() {
@@ -178,7 +180,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents, 
   }
 }
 
-class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebulaEvents {
+class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
 
   final float START_DELAY = 2e3;
   float start;
@@ -194,6 +196,7 @@ class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebul
     events.gameOverSubscribers.add(this);
     events.levelChangeSubscribers.add(this);
     events.nebulaStartSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
 
     start = millis();
   }
@@ -230,6 +233,15 @@ class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebul
     }
     currentMusic.play(true);
   }
+  
+  void finaleHandle() {
+    currentMusic.stop_();
+  }
+  void finaleTrexHandled(PVector p) {}
+  void finaleImpact() {
+    currentMusic.play();
+  }
+  void finaleClose() {}
 
   void nebulaStartHandle () {
     currentMusic.rate(settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME));

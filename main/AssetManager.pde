@@ -49,6 +49,13 @@ class AssetManager {
     ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
     ufostuff.ufoSVG = loadShape("UFO.svg");
     ufostuff.ufoSVG.disableStyle();
+    ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
+    ufostuff.ufoFinalSingle.disableStyle();
+    ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
+    ufostuff.ufoFinalDuo.disableStyle();
+    ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
+    ufostuff.ufoFinalDuoZoom.disableStyle();
+    
     ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
     sounds.add(ufostuff.ufoSound);
 
@@ -112,6 +119,7 @@ class AssetManager {
     sounds.add(trexStuff.sinking);
 
     earthStuff.earth = loadImage("earth.png");
+    earthStuff.earthV = loadShape("earth-v.svg");
     earthStuff.earth2 = loadImage("earth-east.png");
     earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
     earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
@@ -197,6 +205,9 @@ class AssetManager {
     PImage[] brontoAbductionFrames;
     PShape ufoSVG;
     SoundPlayable ufoSound;
+    PShape ufoFinalSingle;
+    PShape ufoFinalDuo;
+    PShape ufoFinalDuoZoom;
   }
 
   class UIStuff {
@@ -253,6 +264,7 @@ class AssetManager {
 
   class EarthStuff {
     PImage earth;
+    PShape earthV;
     PImage earth2;
     PImage earthPangea1;
     PImage earthPangea2;

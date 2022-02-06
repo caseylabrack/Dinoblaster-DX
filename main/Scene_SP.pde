@@ -69,7 +69,7 @@ class SinglePlayer extends Scene {
     ui = new UIStory(eventManager, time, currentColor, lvl);
     ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager, time);
     musicManager = new MusicManager(eventManager, lvl);
-    finaleManager = new FinaleStuff(eventManager, earth, playerManager);
+    finaleManager = new FinaleStuff(eventManager, earth, playerManager, starManager, camera, time);
 
     updaters.add(time);
     updaters.add(ui);
@@ -89,10 +89,10 @@ class SinglePlayer extends Scene {
     renderers.add(volcanoManager);
     renderers.add(playerManager);
     renderers.add(trexManager);
+    renderers.add(finaleManager);
     renderers.add(earth);
     renderers.add(roids);
     renderers.add(starManager);
-    renderers.add(finaleManager);
 
     screenRenderers.add(gameText);
     screenRenderers.add(ui);
@@ -139,6 +139,8 @@ class SinglePlayer extends Scene {
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
     //translate(camera.x, camera.y);
     scale(SCALE);
+    rotate(camera.globalRote());
+    //scale(2);
     if (!options) {
       for (renderable r : renderers) r.render();
     } else {

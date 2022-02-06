@@ -71,7 +71,7 @@ class PlayerManager implements updateable, renderable, abductionEvent, roidImpac
         float offset = -20;
         PVector adjustedPosition = new PVector(earth.globalPos().x + cos(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset), earth.globalPos().y + sin(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset));
 
-        deathAnim = new PlayerDeath(time, player.globalPos(), player.globalRote(), player.direction, player.globalToLocalPos(adjustedPosition));
+        deathAnim = new PlayerDeath(time, player.globalPos(), player.globalRote(), player.facing, player.globalToLocalPos(adjustedPosition));
         if (extralives<0) {
           assets.playerStuff.extinct.play();
           eventManager.dispatchGameOver();
@@ -94,7 +94,7 @@ class PlayerManager implements updateable, renderable, abductionEvent, roidImpac
       float offset = -20;
       PVector adjustedPosition = new PVector(earth.globalPos().x + cos(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset), earth.globalPos().y + sin(radians(incomingAngle)) * (Earth.EARTH_RADIUS + offset));
 
-      deathAnim = new PlayerDeath(time, player.globalPos(), player.globalRote(), player.direction, player.globalToLocalPos(adjustedPosition));
+      deathAnim = new PlayerDeath(time, player.globalPos(), player.globalRote(), player.facing, player.globalToLocalPos(adjustedPosition));
       assets.playerStuff.extinct.play();
       eventManager.dispatchGameOver();
       player = null;
@@ -112,6 +112,13 @@ class PlayerManager implements updateable, renderable, abductionEvent, roidImpac
     respawningStart = millis();
     display = true;
     progress = 0;
+  }
+  
+  void removePlayerNotKill () {
+    assets.playerStuff.step.stop_();
+    assets.playerStuff.tarStep.stop_();
+    player = null;
+    respawning = false;
   }
 
   void nebulaStartHandle() {
@@ -196,7 +203,6 @@ class Player extends Entity implements updateable, renderable {
   PImage[] runFrames = new PImage[2];
   PImage idle;
   float runSpeed;
-  int direction = 1;
   int playerNum = 1;
   int framesTotal = 8;
   final static float DIST_FROM_EARTH = 194;//197;
@@ -213,12 +219,13 @@ class Player extends Entity implements updateable, renderable {
 
   boolean wasInTarpitLastFrame = false;
 
-
   EventManager eventManager;
   Time time;
   VolcanoManager volcanoManager;
   Earth earth;
   PlayerManager manager;
+  
+  boolean isFinale = false;
 
   Player (EventManager _eventManager, Time t, Earth e, int whichPlayer, VolcanoManager volcs, PVector pos, PlayerManager p) {
     eventManager = _eventManager;
@@ -273,7 +280,7 @@ class Player extends Entity implements updateable, renderable {
       }
 
       model = runFrames[utils.cycleRangeWithDelay(runFrames.length, 4, frameCount)];
-      direction = keys.left ? -1 : 1;
+      facing = keys.left ? -1 : 1;
 
       float tarpitFactor = 1;
       if (inTarpit) {
@@ -281,10 +288,10 @@ class Player extends Entity implements updateable, renderable {
         if (tarpitSink < 0) {
           tarpitSink = 0;
         }
-        tarpitFactor = tarpitSink == 0 ? TARPIT_SLOW_FACTOR : 0;
+        tarpitFactor = tarpitSink == 0 ? (isFinale ? 1 : TARPIT_SLOW_FACTOR) : 0;
       }
 
-      targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * time.getTimeScale() * direction * tarpitFactor);
+      targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * time.getTimeScale() * facing * tarpitFactor);
     } else {
       model = idle;
       state = STATE_IDLE;
@@ -316,16 +323,14 @@ class Player extends Entity implements updateable, renderable {
   }
 
   void render () {
-    pushMatrix();
-    pushStyle();
-    imageMode(CENTER);
-    PVector trans = globalPos();
-    scale(direction, 1);
-    translate(trans.x * direction, trans.y);
-    rotate(radians(globalRote() * direction));
-    image(model, 0, 0);
-    popStyle();
-    popMatrix();
+    simpleRenderImage(model);
+    //    pushMatrix();
+    //PVector pos = globalPos();
+    //scale(facing, 1);
+    //translate(pos.x * facing, pos.y);
+    //rotate(radians(globalRote() * facing));
+    //image(model, 0, 0);
+    //popMatrix();
   }
 }
 

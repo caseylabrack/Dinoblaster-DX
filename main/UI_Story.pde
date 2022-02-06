@@ -100,7 +100,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
   float extinctFlickerRate = 100;
   final float EXTINCT_FLICKERING_DURATION = 3e3;
   float extinctFlickeringStart;
-  
+
   boolean gameDone = false;
 
   UIStory (EventManager _eventManager, Time t, ColorDecider _currentColor, int lvl) {
@@ -124,13 +124,6 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     motdStart = millis();
 
     highscore = loadHighScore(SCORE_DATA_FILENAME);
-    //highscore = 0;
-    //byte[] scoreData = loadBytes(SCORE_DATA_FILENAME);
-    //if (scoreData!=null) {
-    //  for (byte n : scoreData) {
-    //    highscore += float(n + 128);
-    //  }
-    //}
     println("highscore: " + highscore);
   }
 
@@ -138,11 +131,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     isGameOver = true;
     gameOverGracePeriodStart = millis();
     if (score > highscore) {
-      saveHighScore(score,SCORE_DATA_FILENAME);
-      //byte[] nums = new byte[score > 255 ? 2 : 1];
-      //nums[0] = byte(highscore > 255 ? 127 : floor(score) - 128);
-      //if (highscore > 256) nums[1] = byte(floor(score) - 256 - 127);
-      //saveBytes(SCORE_DATA_FILENAME, nums);
+      saveHighScore(score, SCORE_DATA_FILENAME);
     }
   }
 
@@ -188,8 +177,8 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     }
 
     if (time.getClock() - lastScoreTick > 1000 && scoring) {
-      //score++;
-      score+=20;
+      score++;
+      //score+=20;
       lastScoreTick = time.getClock();
     }
 
@@ -202,10 +191,15 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
       stage = CRETACEOUS;
       eventManager.dispatchLevelChanged(stage);
     }
-    
-    if(score >= 300 && stage == CRETACEOUS) {
+
+    if (score == 290) {
+      eventManager.dispatchFinaleClose();
+    }
+
+    if (score >= 300 && stage == CRETACEOUS) {
       stage = FINAL;
       eventManager.dispatchGameFinale();
+      println("finale start");
     }
   }
 

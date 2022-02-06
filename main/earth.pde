@@ -27,6 +27,11 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
   final static float DEFAULT_EARTH_ROTATION = 2.3;
   final static float EARTH_RADIUS = 167;
 
+  final  int NORM = 0;
+  final  int FINALE = 1;
+  final int ZOOMING = 2;
+  int state = NORM;
+
   Time time;
   EventManager events;
 
@@ -97,19 +102,15 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     shaking = true;
   }
 
+  void zoomAway () {
+    state = ZOOMING;
+  }
+
   void update() {
 
-    if (isFinale) {
-      float progress = (millis() - finaleStartTimer) / FinaleStuff.BIG_ONE_INCOMING_DURATION;
-      if (progress < 1) {
-        this.r = finaleStartR + (finaleTargetR - finaleStartR) * progress;
-      } else {
-        shakeAngle = random(0, TWO_PI);
-        x = cos(shakeAngle) * FINALE_SHAKING_MAG;
-        y = sin(shakeAngle) * FINALE_SHAKING_MAG;
-      }
-    } else {
+    switch(state) {
 
+    case NORM:
       dx = 0 - x;
       dy = 0 - y;
 
@@ -136,6 +137,24 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
       x += dx;// * time.getTimeScale();
       y += dy;// * time.getTimeScale();
       r += dr * time.getTimeScale();
+      break;
+
+    case FINALE:
+      float progress = (millis() - finaleStartTimer) / FinaleStuff.BIG_ONE_INCOMING_DURATION;
+      if (progress < 1) {
+        this.r = finaleStartR + (finaleTargetR - finaleStartR) * progress;
+      } else {
+        shakeAngle = random(0, TWO_PI);
+        x = cos(shakeAngle) * FINALE_SHAKING_MAG;
+        y = sin(shakeAngle) * FINALE_SHAKING_MAG;
+      }
+      break;
+
+    case ZOOMING:
+      x += dx;// * time.getTimeScale();
+      y += dy;// * time.getTimeScale();
+      r += dr * time.getTimeScale();
+      break;
     }
   }
 
@@ -146,6 +165,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     }
   }
 
+  void finaleClose(){}
   void finaleHandle() {
   }
 
@@ -160,6 +180,7 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
     finaleStartR = this.r;
     finaleTargetR = this.r + diff;
     finaleStartTimer = millis();
+    state = FINALE;
   }
 
   void finaleImpact() {
@@ -183,6 +204,12 @@ class Earth extends Entity implements levelChangeEvent, gameFinaleEvent, updatea
 
     if (tarpitEnabled) shader(assets.earthStuff.mask);
     simpleRenderImage(model);
+    //simpleRenderImage(assets.earthStuff.earthV);
+    //pushTransforms();
+    //strokeWeight(assets.STROKE_WIDTH / scale);
+    //shapeMode(CENTER);
+    //shape(assets.earthStuff.earthV, 0, 0, 324, 324);
+    //popMatrix();
     if (tarpitEnabled) resetShader();
 
     if (!tarpitEnabled) return;

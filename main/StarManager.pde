@@ -2,7 +2,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
   ArrayList<ZoomStar> zoomStars = new ArrayList<ZoomStar>();
   final float zoomSpeedFinal = 17;
-  final float zoomSpeedupDuration = 6e3;
+  final static float zoomSpeedupDuration = 6e3;
   float zoomSpeedupStart;
 
   PVector[] stars = new PVector[800];
@@ -65,6 +65,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
 
   void nebulaStopHandle() {
   }
+  void finaleClose() {}
 
   void finaleHandle() {
     //isFinale = true;
@@ -84,12 +85,52 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
     //  }
     //}
   }
-  
-  void finaleTrexHandled(PVector _) {}
-  
-  void finaleImpact() {}
+
+  void startZooming () {
+    isFinale = true;
+    zoomSpeedupStart = millis();
+
+    float x = cos(a) * r;
+    float y = sin(a) * r;
+
+    for (int i = 0; i < stars.length; i++) {
+      if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+        float starX = stars[i].x - x;
+        float starY = stars[i].y - y;
+        float zoomZ = random(HEIGHT_REF_HALF);
+        float zX = (starX / HEIGHT_REF_HALF) * zoomZ;
+        float zY = (starY / HEIGHT_REF_HALF) * zoomZ;
+        zoomStars.add(new ZoomStar(zX, zY, zoomZ));
+      }
+    }
+  }
+
+  void finaleTrexHandled(PVector _) {
+  }
+
+  void finaleImpact() {
+  }
 
   void update () {
+
+    //if (mousePressed) {
+    //  isFinale = true;
+    //  //zoomSpeedupStart = millis();
+
+    //  float x = cos(a) * r;
+    //  float y = sin(a) * r;
+
+    //  for (int i = 0; i < stars.length; i++) {
+    //    if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+    //      float starX = stars[i].x - x;
+    //      float starY = stars[i].y - y;
+    //      float zoomZ = random(HEIGHT_REF_HALF);
+    //      float zX = (starX / HEIGHT_REF_HALF) * zoomZ;
+    //      float zY = (starY / HEIGHT_REF_HALF) * zoomZ;
+    //      zoomStars.add(new ZoomStar(zX, zY, zoomZ));
+    //    }
+    //  }
+    //}
 
     if (isFinale) {
 
@@ -145,7 +186,7 @@ class StarManager implements updateable, renderable, renderableScreen, nebulaEve
     if (isFinale) {
       pushMatrix();
       pushStyle();
-      stroke(0,0,100,1);
+      stroke(0, 0, 100, 1);
       //stroke(currentColor.getColor());
       strokeWeight(assets.STROKE_WIDTH + 1.5);
       for (ZoomStar z : zoomStars) {

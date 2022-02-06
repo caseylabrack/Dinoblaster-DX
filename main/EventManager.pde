@@ -56,6 +56,10 @@ class EventManager {
   void dispatchFinaleImpact () {
     for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleImpact();
   }
+
+  void dispatchFinaleClose () {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleClose();
+  }
 } 
 
 interface gameOverEvent {
@@ -87,6 +91,7 @@ interface levelChangeEvent {
 }
 
 interface gameFinaleEvent {
+  void finaleClose();
   void finaleHandle();
   void finaleTrexHandled(PVector p);
   void finaleImpact();
@@ -95,4 +100,8 @@ interface gameFinaleEvent {
 interface nebulaEvents {
   void nebulaStartHandle();
   void nebulaStopHandle();
+}
+
+interface gameWinEvent {
+  void gameWinHandle();
 }

@@ -21,11 +21,11 @@ class TrexManager implements updateable, renderable, levelChangeEvent, gameFinal
     currentColor = c;
     playerManager = pm;
 
-    if (!settings.getBoolean("trexEnabled", true)) return;
-
-    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
     events.levelChangeSubscribers.add(this);
     events.gameFinaleSubscribers.add(this);
+
+    if (!settings.getBoolean("trexEnabled", true)) return;
+    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
   }
 
   void levelChangeHandle(int stage) {
@@ -43,10 +43,12 @@ class TrexManager implements updateable, renderable, levelChangeEvent, gameFinal
         events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
       }
     } else {
+      println("no trex to position");
       events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
     }
   }
 
+  void finaleClose() {}
 
   public void spawnTrex(PVector pos) {
     trex = new Trex(earth, playerManager, time, pos);
@@ -59,6 +61,7 @@ class TrexManager implements updateable, renderable, levelChangeEvent, gameFinal
   void finaleTrexHandled(PVector _) {
   }
   void finaleImpact() {
+    // make trex explode maybe
   }
 
   void update () {
