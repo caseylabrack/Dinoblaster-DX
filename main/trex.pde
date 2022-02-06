@@ -1,4 +1,4 @@
-class TrexManager implements updateable, renderable, levelChangeEvent {
+class TrexManager implements updateable, renderable, levelChangeEvent, gameFinaleEvent {
 
   EventManager events;
   Time time;  
@@ -11,6 +11,9 @@ class TrexManager implements updateable, renderable, levelChangeEvent {
   final int SPAWN_DELAY = 25;
   int spawnSchedule = -1;
 
+  boolean finalePositioningTrex = false;
+  final float FINALE_TREX_POSITIONING_LEADING = 60;
+
   TrexManager (EventManager e, Time t, Earth w, PlayerManager pm, ColorDecider c, int lvl) {
     events = e;
     time = t;
@@ -18,16 +21,34 @@ class TrexManager implements updateable, renderable, levelChangeEvent {
     currentColor = c;
     playerManager = pm;
 
-    if (!settings.getBoolean("trexEnabled", true)) return;
-
-    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
     events.levelChangeSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
+
+    if (!settings.getBoolean("trexEnabled", true)) return;
+    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
   }
 
   void levelChangeHandle(int stage) {
 
     if (stage==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
   }
+
+  void finaleHandle() {
+    // deactivate any t-rexs
+    if (trex!=null) {
+      trex.disable();
+      if (trex.state == trex.STUNNED) {
+        finalePositioningTrex = true;
+      } else {
+        events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
+      }
+    } else {
+      println("no trex to position");
+      events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
+    }
+  }
+
+  void finaleClose() {}
 
   public void spawnTrex(PVector pos) {
     trex = new Trex(earth, playerManager, time, pos);
@@ -37,7 +58,23 @@ class TrexManager implements updateable, renderable, levelChangeEvent {
     trex = new Trex(earth, playerManager, time, new PVector(0, -120));
   }
 
+  void finaleTrexHandled(PVector _) {
+  }
+  void finaleImpact() {
+    // make trex explode maybe
+  }
+
   void update () {
+
+    if (finalePositioningTrex) {
+      float currentAngle = utils.angleOf(utils.ZERO_VECTOR, trex.globalPos());
+      float targetAngle = utils.angleOf(utils.ZERO_VECTOR, new PVector(-HEIGHT_REF_HALF, -HEIGHT_REF_HALF));
+      float diff = utils.signedAngleDiff(currentAngle, targetAngle);
+      if (diff > 0 && diff < FINALE_TREX_POSITIONING_LEADING) {
+        events.dispatchFinaleTrexPositioned(trex.globalPos());
+        finalePositioningTrex = false;
+      }
+    }
 
     if (spawnSchedule > -1) {
       spawnSchedule--;
@@ -211,6 +248,7 @@ class Trex extends Entity implements gameOverEvent, updateable, renderable {
   final static int WALKING = 0;
   final static int SINKING = 1;
   final static int DONE = 2;
+  final static int STUNNED = 3;
   int state = WALKING;
 
   Trex (Earth _earth, PlayerManager pm, Time t, PVector pos) {
@@ -231,6 +269,11 @@ class Trex extends Entity implements gameOverEvent, updateable, renderable {
 
   void gameOverHandle () {
     chasing = false;
+  }
+
+  void disable () {
+    if (state == SINKING) return;
+    state = STUNNED;
   }
 
   void update () {
@@ -288,6 +331,10 @@ class Trex extends Entity implements gameOverEvent, updateable, renderable {
       setPosition(tarpitAdjusted);
 
       if (tarpitSink > 1) state = DONE;
+      break;
+
+    case STUNNED:
+      // do nothing but get hit by The Big One
       break;
     }
   }

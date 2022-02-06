@@ -19,6 +19,7 @@ Scene currentScene;
 // recording
 int fcount = 0;
 boolean rec = false;
+final int RECORD_FRAMERATE = 2;
 
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
@@ -33,7 +34,6 @@ float WIDTH_REFERENCE = 1024;
 float WIDTH_REF_HALF = WIDTH_REFERENCE/2;
 float HEIGHT_REFERENCE = 768;
 float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
-
 
 void setup () {
   //size(500, 500, P2D);
@@ -227,7 +227,7 @@ void draw () {
   }
 
   if (rec) {
-    if (frameCount % 1 == 0) {
+    if (frameCount % RECORD_FRAMERATE == 0) {
       saveFrame("spoofs-and-goofs/frames/dino-" + nf(fcount, 4) + ".png");
       fcount++;
     }
@@ -367,4 +367,8 @@ class Keys {
 
     anykey = left || right;
   }
+}
+
+PVector screenspaceToWorldspace (float x, float y) {
+  return new PVector((x - width/2) / SCALE, (y - height/2) / SCALE);
 }

@@ -100,7 +100,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
   float extinctFlickerRate = 100;
   final float EXTINCT_FLICKERING_DURATION = 3e3;
   float extinctFlickeringStart;
-  
+
   boolean gameDone = false;
 
   UIStory (EventManager _eventManager, Time t, ColorDecider _currentColor, int lvl) {
@@ -121,11 +121,9 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
 
     extralives = settings.getInt("extraLives", 0);
 
-
     motdStart = millis();
 
     highscore = loadHighScore(SCORE_DATA_FILENAME);
-    
     println("highscore: " + highscore);
   }
 
@@ -180,7 +178,7 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
 
     if (time.getClock() - lastScoreTick > 1000 && scoring) {
       score++;
-      //score+=10;
+      //score+=20;
       lastScoreTick = time.getClock();
     }
 
@@ -192,6 +190,16 @@ class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerS
     if (score==200 && stage==JURASSIC) {
       stage = CRETACEOUS;
       eventManager.dispatchLevelChanged(stage);
+    }
+
+    if (score == 290) {
+      eventManager.dispatchFinaleClose();
+    }
+
+    if (score >= 300 && stage == CRETACEOUS) {
+      stage = FINAL;
+      eventManager.dispatchGameFinale();
+      println("finale start");
     }
   }
 

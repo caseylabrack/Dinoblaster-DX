@@ -1,19 +1,17 @@
 class Camera extends Entity implements updateable {
 
   public float magn = 0;
+  private Entity following = null;
 
-  Camera (float _x, float _y) {
-
-    x = _x + width/2;
-    y = _y + height/2;
+  Camera () {
   }
 
   void update () {
 
     dx = 0;
     dy = 0;
-    x = width/2;
-    y = height/2;
+    //x = width/2;
+    //y = height/2;
 
     //if (mousePressed) magn += 3;
 
@@ -53,7 +51,7 @@ class ColorDecider implements updateable {
   }
 }
 
-class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
+class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
 
   private float clock;
   private float lastmillis;
@@ -73,6 +71,12 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
   float defaultTimeScale;
   float hyperspaceTimeScale;
 
+  boolean isFinale = false;
+  private float finaleStart;
+  final static float FINALE_SLOWDOWN_TRANSITION = 3e3;
+  final float FINALE_SLOWDOWN_START_VALUE = .25;
+  final float FINALE_SLOWDOWN_END_VALUE = .05;
+
   EventManager eventManager;
 
   Time (EventManager ev) {
@@ -81,6 +85,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
     eventManager.playerDiedSubscribers.add(this);
     eventManager.gameOverSubscribers.add(this);
     eventManager.nebulaStartSubscribers.add(this);
+    eventManager.gameFinaleSubscribers.add(this);
 
     lastmillis = millis();
     //clock = millis();
@@ -117,7 +122,26 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
         timeScale = targetTimeScale;
       }
     }
+
+    if (isFinale) {
+      float progress = (millis() - finaleStart) / FINALE_SLOWDOWN_TRANSITION;
+      if (progress < 1) {
+        timeScale = utils.easeOutQuad(progress, FINALE_SLOWDOWN_START_VALUE, FINALE_SLOWDOWN_END_VALUE - FINALE_SLOWDOWN_START_VALUE, 1);
+      }
+    }
   }
+
+  void finaleHandle () {
+    isFinale = true;
+  }
+
+  void finaleTrexHandled (PVector _) {
+    finaleStart = millis();
+  }
+  
+  void finaleClose () {}
+  
+  void finaleImpact() {}
 
   void nebulaStartHandle() {
 
@@ -165,7 +189,7 @@ class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents {
   }
 }
 
-class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebulaEvents {
+class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
 
   final float START_DELAY = 2e3;
   float start;
@@ -181,6 +205,7 @@ class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebul
     events.gameOverSubscribers.add(this);
     events.levelChangeSubscribers.add(this);
     events.nebulaStartSubscribers.add(this);
+    events.gameFinaleSubscribers.add(this);
 
     start = millis();
   }
@@ -217,6 +242,15 @@ class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebul
     }
     currentMusic.play(true);
   }
+  
+  void finaleHandle() {
+    currentMusic.stop_();
+  }
+  void finaleTrexHandled(PVector p) {}
+  void finaleImpact() {
+    currentMusic.play();
+  }
+  void finaleClose() {}
 
   void nebulaStartHandle () {
     currentMusic.rate(settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME));

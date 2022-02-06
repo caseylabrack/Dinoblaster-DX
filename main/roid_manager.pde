@@ -1,4 +1,4 @@
-class RoidManager implements updateable, renderable {
+class RoidManager implements updateable, renderable, gameFinaleEvent {
 
   EventManager events;
   Time time;  
@@ -18,6 +18,7 @@ class RoidManager implements updateable, renderable {
   int splodeindex = 0;
 
   public boolean enabled;
+  boolean isFinale = false;
 
   class Explosion extends Entity {
     PImage model;
@@ -36,10 +37,26 @@ class RoidManager implements updateable, renderable {
     final static float dr = .1;
   }
 
+  void finaleClose () {
+    isFinale = true;
+  }
+
+  void finaleHandle() {
+    //isFinale = true;
+  }
+
+  void finaleTrexHandled(PVector _) {
+  }
+
+  void finaleImpact() {
+  }
+
   RoidManager (Earth earf, EventManager _events, Time t) {
     earth = earf;
     events = _events;
     time = t;
+
+    events.gameFinaleSubscribers.add(this);
 
     for (int i = 0; i < roids.length; i++) {
       roids[i] = new Roid();
@@ -66,20 +83,20 @@ class RoidManager implements updateable, renderable {
 
     if (!enabled) return;
 
-    //if (frameCount - lastFire > spawnInterval) { // frame instead of timer based
-    if (time.getClock() - lastFire > spawnInterval) {
-      lastFire = time.getClock();
-      //lastFire = frameCount;
-      spawnInterval = random(minSpawnInterval, maxSpawnInterval);
+    if (!isFinale) {
+      if (time.getClock() - lastFire > spawnInterval) {
+        lastFire = time.getClock();
+        spawnInterval = random(minSpawnInterval, maxSpawnInterval);
 
-      Roid r = roids[roidindex++ % roids.length]; // increment roid index and wrap to length of pool
-      r.enabled = true;
-      r.angle = random(0, 359);
-      r.x = earth.x + cos(radians(r.angle)) * spawnDist;
-      r.y = earth.y + sin(radians(r.angle)) * spawnDist;
-      r.dx = cos(radians(r.angle+180)) * Roid.speed;
-      r.dy = sin(radians(r.angle+180)) * Roid.speed;
-    };
+        Roid r = roids[roidindex++ % roids.length]; // increment roid index and wrap to length of pool
+        r.enabled = true;
+        r.angle = random(0, 359);
+        r.x = earth.x + cos(radians(r.angle)) * spawnDist;
+        r.y = earth.y + sin(radians(r.angle)) * spawnDist;
+        r.dx = cos(radians(r.angle+180)) * Roid.speed;
+        r.dy = sin(radians(r.angle+180)) * Roid.speed;
+      };
+    }
 
     for (Roid r : roids) {
       if (!r.enabled) continue;

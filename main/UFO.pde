@@ -1,4 +1,4 @@
-class UFOManager implements updateable, renderable, abductionEvent, playerDiedEvent, playerRespawnedEvent {
+class UFOManager implements updateable, renderable, abductionEvent, playerDiedEvent, playerRespawnedEvent, gameFinaleEvent {
 
   ColorDecider currentColor;
   UFO ufo = null;
@@ -25,6 +25,7 @@ class UFOManager implements updateable, renderable, abductionEvent, playerDiedEv
     eventManager.playerDiedSubscribers.add(this);
     eventManager.playerRespawnedSubscribers.add(this);
     eventManager.abductionSubscribers.add(this);
+    eventManager.gameFinaleSubscribers.add(this);
 
     extralives = settings.getInt("extraLives", 0);
 
@@ -32,6 +33,17 @@ class UFOManager implements updateable, renderable, abductionEvent, playerDiedEv
     //spawnCountDown = 3000;
 
     enabled = settings.getBoolean("ufosEnabled", true);
+  }
+
+  void finaleClose () {
+    if (ufo!=null) ufo.state=UFO.LEAVING;
+    spawnCountDown = 100000e3;
+  }
+  void finaleHandle() {
+  }
+  void finaleTrexHandled(PVector p) {
+  }
+  void finaleImpact() {
   }
 
   void abductionHandle(PVector p) {
@@ -213,7 +225,7 @@ class UFO extends Entity implements updateable, renderable {
             if (utils.unsignedAngleDiff(utils.angleOf(earth.globalPos(), playerManager.player.globalPos()), utils.angleOf(earth.globalPos(), globalPos())) < snatchMargin) {
               snatchStart = time.getClock();
               snatchStartPos = playerManager.player.globalPos();
-              lilBrontoFacingDirection = playerManager.player.direction;
+              lilBrontoFacingDirection = playerManager.player.facing;
               state = SNATCHING;
               lilBrontoAngle = playerManager.player.globalRote();
               eventManager.dispatchAbduction(playerManager.player.globalPos());

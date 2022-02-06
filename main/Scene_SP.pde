@@ -36,6 +36,7 @@ class SinglePlayer extends Scene {
   TrexManager trexManager;
   GameScreenMessages gameText;
   MusicManager musicManager;
+  FinaleStuff finaleManager;
 
   boolean options = false;
   Rectangle dipswitchesButton;
@@ -58,7 +59,7 @@ class SinglePlayer extends Scene {
     eventManager = new EventManager();
     time = new Time(eventManager);
     earth = new Earth(time, eventManager, lvl);
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     volcanoManager = new VolcanoManager(eventManager, time, currentColor, earth, lvl);
@@ -69,6 +70,7 @@ class SinglePlayer extends Scene {
     ui = new UIStory(eventManager, time, currentColor, lvl);
     ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager, time);
     musicManager = new MusicManager(eventManager, lvl);
+    finaleManager = new FinaleStuff(eventManager, earth, playerManager, starManager, camera, time);
 
     updaters.add(time);
     updaters.add(ui);
@@ -82,11 +84,13 @@ class SinglePlayer extends Scene {
     updaters.add(volcanoManager);
     updaters.add(trexManager);
     updaters.add(musicManager);
+    updaters.add(finaleManager);
 
     renderers.add(ufoManager);
     renderers.add(volcanoManager);
     renderers.add(playerManager);
     renderers.add(trexManager);
+    renderers.add(finaleManager);
     renderers.add(earth);
     renderers.add(roids);
     renderers.add(starManager);
@@ -124,15 +128,23 @@ class SinglePlayer extends Scene {
     if (ui.gameDone) {
       status = DONE;
     }
+
+    //if (ufoManager.ufo != null) {
+    //  camera.setPosition(0, 0);
+    //  camera.parent = ufoManager.ufo;
+    //}
   }
 
   void render () {
 
-    PVector m = screentoScaled2(mouseX, mouseY);
+    PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
     pushMatrix(); // world-space
-    translate(camera.x, camera.y);
+    translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
+    //translate(camera.x, camera.y);
     scale(SCALE);
+    rotate(camera.globalRote());
+    //scale(2);
     if (!options) {
       for (renderable r : renderers) r.render();
     } else {
@@ -241,7 +253,7 @@ class SinglePlayer extends Scene {
 
   void mouseUp() {
 
-    PVector m = screentoScaled2(mouseX, mouseY);
+    PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
     if (dipswitchesButton.inside(m)) {
       //println("you clicked dipswitch"); 
@@ -318,13 +330,9 @@ class SinglePlayer extends Scene {
     assets.stopAllSfx();
   }
 
-  PVector screenToScaled (float x, float y) {
-    return new PVector((x + WIDTH_REF_HALF) / SCALE, (y + HEIGHT_REF_HALF) / SCALE);
-  }
-
-  PVector screentoScaled2 (float x, float y) {
-    return new PVector((x - width/2) / SCALE, (y - height/2) / SCALE);
-  }
+  //PVector screenToScaled (float x, float y) {
+  //  return new PVector((x + WIDTH_REF_HALF) / SCALE, (y + HEIGHT_REF_HALF) / SCALE);
+  //}
 
   //int nextScene () {
   //  return SINGLEPLAYER;
@@ -356,7 +364,7 @@ class Oviraptor extends Scene {
     eventManager = new EventManager();
     time = new Time(eventManager);
     earth = new Earth(time, eventManager, lvl);
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     starManager = new StarManager(currentColor, time, eventManager, lvl);
@@ -461,7 +469,7 @@ class testScene extends Scene {
     earth = new Earth(time, eventManager, lvl);
     //earth.dr = 0;
 
-    camera = new Camera(0, 0);
+    camera = new Camera();
     roids = new RoidManager(earth, eventManager, time);
     currentColor = new ColorDecider();
     starManager = new StarManager(currentColor, time, eventManager, lvl);

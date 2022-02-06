@@ -7,6 +7,7 @@ class EventManager {
   ArrayList<playerRespawnedEvent> playerRespawnedSubscribers = new ArrayList<playerRespawnedEvent>();
   ArrayList<levelChangeEvent> levelChangeSubscribers = new ArrayList<levelChangeEvent>();
   ArrayList<nebulaEvents> nebulaStartSubscribers = new ArrayList<nebulaEvents>();  
+  ArrayList<gameFinaleEvent> gameFinaleSubscribers = new ArrayList<gameFinaleEvent>();
 
   void dispatchGameOver () {
     for (gameOverEvent g : gameOverSubscribers) g.gameOverHandle();
@@ -43,6 +44,22 @@ class EventManager {
   void dispatchNebulaEnded () {
     for (nebulaEvents n : nebulaStartSubscribers) n.nebulaStopHandle();
   }
+
+  void dispatchGameFinale () {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleHandle();
+  }
+
+  void dispatchFinaleTrexPositioned (PVector p) {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleTrexHandled(p);
+  }
+
+  void dispatchFinaleImpact () {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleImpact();
+  }
+
+  void dispatchFinaleClose () {
+    for (gameFinaleEvent g : gameFinaleSubscribers) g.finaleClose();
+  }
 } 
 
 interface gameOverEvent {
@@ -73,7 +90,18 @@ interface levelChangeEvent {
   void levelChangeHandle(int stage);
 }
 
+interface gameFinaleEvent {
+  void finaleClose();
+  void finaleHandle();
+  void finaleTrexHandled(PVector p);
+  void finaleImpact();
+}
+
 interface nebulaEvents {
   void nebulaStartHandle();
   void nebulaStopHandle();
+}
+
+interface gameWinEvent {
+  void gameWinHandle();
 }
