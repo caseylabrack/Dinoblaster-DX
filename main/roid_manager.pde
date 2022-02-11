@@ -2,7 +2,7 @@ class RoidManager {
   final static float DEFAULT_SPAWN_RATE = 300;
   final static float DEFAULT_SPAWN_DEVIATION = 100;
   final int ROID_POOL_SIZE = 100;
-  final int SPLODES_POOL_SIZE = 100;
+  final int SPLODES_POOL_SIZE = 25;
   final float SPAWN_DIST = 720;
   float minSpawnInterval; 
   float maxSpawnInterval; 
@@ -12,7 +12,7 @@ class RoidManager {
   Roid[] roids = new Roid[ROID_POOL_SIZE];
   int roidindex = 0;
 
-  Explosion[] splodes = new Explosion[25];
+  Explosion[] splodes = new Explosion[SPLODES_POOL_SIZE];
   int splodeindex = 0;
 
   private ArrayList<Roid> hits = new ArrayList<Roid>();
@@ -78,13 +78,12 @@ class RoidManager {
     for (Explosion s : splodes) {
       if (!s.enabled) continue;
 
-      float elapsed = clock - s.start;
+      float progress = (clock - s.start) / Explosion.DURATION;
 
-      if (elapsed < Explosion.duration) {
-        s.model = s.frames[round((elapsed / Explosion.duration) * (assets.roidStuff.explosionFrames.length - 1))];
-      } else {
-        s.enabled = false;
-      }
+      if (progress > 1 && s.isDeadly) s.isDeadly = false;
+      if (progress > .33 && progress < .66) s.model = s.frames[1];
+      if (progress > .66 && progress <= 1) s.model = s.frames[2];
+      if (progress > 1) s.enabled = false;
     }
   }
 
@@ -104,15 +103,10 @@ class RoidManager {
   Explosion newExplosion (float clock) {
     Explosion splode = splodes[splodeindex++ % splodes.length]; // increment splode index and wrap to length of pool
     splode.enabled = true;
+    splode.isDeadly = true;
     splode.parent = null;
     splode.start = clock;
-
-    return splode;
-  }
-
-  Explosion newExplosionFromRoid (float clock, Roid roid) {
-    Explosion splode = newExplosion(clock);
-
+    splode.model = splode.frames[0];
 
     return splode;
   }
@@ -143,6 +137,16 @@ class RoidManager {
       s.simpleRenderImage(s.model);
     }
   }
+
+  void restart () {
+    for (Roid r : roids) {
+      r.enabled = false;
+    }
+
+    for (Explosion e : splodes) {
+      e.enabled = false;
+    }
+  }
 }
 
 class Roid extends Entity {
@@ -157,12 +161,14 @@ class Roid extends Entity {
 }
 
 class Explosion extends Entity {
-  //PImage model;
   PImage[] frames;
   float start;
-  final static float duration = 500;
+  final static float DURATION = 500;
+  final static float DEADLY_DURATION = 100;
   final static float OFFSET_FROM_EARTH = 20;
+  final static float BOUNDING_ARC = 10;
   boolean enabled = false;
+  boolean isDeadly = false;
 }
 
 //class RoidManager implements updateable, renderable, gameFinaleEvent {

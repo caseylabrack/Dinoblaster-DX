@@ -92,4 +92,16 @@ class Entity {
     shape(im, 0, 0);
     popMatrix();
   }
+  
+  void identity () {
+    x = 0;
+    y = 0;
+    r = 0;
+    dx = 0;
+    dy = 0;
+    dr = 0;
+    facing = 1;
+    scale = 1;
+    parent = null;
+  }
 }

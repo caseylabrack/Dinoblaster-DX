@@ -1,5 +1,4 @@
 class Camera extends Entity {
-  
 }
 
 //class Camera extends Entity implements updateable {
@@ -58,13 +57,25 @@ class ColorDecider implements updateable {
 class Time {
   float clock;
   float lastmillis;
-  float timeScale = 1;
   long lastNanos;
   float delta;
   int tick;
   float elapsed;
   final static float HYPERSPACE_DEFAULT_TIME = 1.75;
   final static float DEFAULT_DEFAULT_TIME_SCALE = 1;
+  final static float DEATH_SCALING_DURATION = 2e3;
+
+  float defaultTimeScale = DEFAULT_DEFAULT_TIME_SCALE;
+  float hyperspaceTimeScale = HYPERSPACE_DEFAULT_TIME;
+  float timeScale = DEFAULT_DEFAULT_TIME_SCALE;
+
+  boolean isHyperSpace = false;
+  boolean isDying = false;
+
+  final static int NORM = 0;
+  final static int DEATH = 1;
+  int state = NORM;
+  float stateStart;
 
   public void update () {
     elapsed = millis() - lastmillis;
@@ -73,6 +84,24 @@ class Time {
 
     delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
     lastNanos = frameRateLastNanos;
+
+    if (state == DEATH) {
+      float progress = (millis() - stateStart) / DEATH_SCALING_DURATION;
+      float targetTimeScale = isHyperSpace ? hyperspaceTimeScale: defaultTimeScale;
+      if (progress >= 1) {
+        state = NORM;
+        isDying = false;
+        timeScale = targetTimeScale;
+      } else {
+        timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
+      }
+    }
+  }
+
+  public void deathStart () {
+    state = DEATH;
+    stateStart = millis();
+    isDying = false;
   }
 
   public float getTimeScale () {
@@ -81,6 +110,12 @@ class Time {
 
   public float getClock() {
     return clock;
+  }
+  
+  public void restart () {
+    isDying = false;
+    state = NORM;
+    timeScale = defaultTimeScale;
   }
 }
 

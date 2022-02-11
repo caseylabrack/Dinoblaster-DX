@@ -4,10 +4,12 @@ class Player extends Entity {
   final static float TARPIT_SLOW_FACTOR = .25;
   final static float TARPIT_BOTTOM_DIST = 110;
   final float TARPIT_RISE_FACTOR = 2;
+  final static float BOUNDING_CIRCLE = 35;
+  final static float BOUNDING_ARC = 15;
 
   boolean enabled = false;
   PImage runFrames[];
-  float runSpeed;
+  float runSpeed = DEFAULT_RUNSPEED;
   float tarpitFactor = 1;
 
   public void move(int direction, float delta) {
@@ -22,17 +24,28 @@ class Player extends Entity {
     if (!enabled) return;
     simpleRenderImage();
   }
+  
+  public void restart () {
+    identity();
+    enabled = false;
+    tarpitFactor = 1;
+  }
 }
 
 class PlayerIntro extends Entity {
   float spawningStart;
-  final float spawningDuration = 1e3;
+  final float spawningDuration = 3e3;
   final static int FLASHING = 0;
   final static int SPAWNING = 1;
   final static int DONE = 2;
   int state = FLASHING;
 
   final float FLICKER_RATE = 16;
+
+  public void startIntro () {
+    spawningStart = millis();
+    state = FLASHING;
+  }
 
   public void update () {
     if (state==DONE) return;
@@ -50,6 +63,114 @@ class PlayerIntro extends Entity {
     }
   }
 }
+
+class GibbsSystem {
+
+  Gib[] gibs;
+  
+  GibbsSystem (PShape model, Entity guy) {
+    gibs = new Gib[model.getChildCount()];
+  }
+  
+  class Gib {
+    float dx, dy;
+    PVector points;
+    PVector p1, p2;
+    PVector midpoint;
+    PVector center;
+    boolean enabled = true;
+    final static float minDisable = 1e3;
+    final static float maxDisable = 4e3;
+    float disableStart;
+    float disableDuration;
+    final PVector sourceImageCenter = new PVector(51, 67).div(2);
+  }
+}
+
+//  class DinoGib {
+//    float dx, dy;
+//    PVector points;
+//    PVector p1, p2;
+//    PVector midpoint;
+//    PVector center;
+//    boolean enabled = true;
+//    final static float minDisable = 1e3;
+//    final static float maxDisable = 4e3;
+//    float disableStart;
+//    float disableDuration;
+//    final PVector sourceImageCenter = new PVector(51, 67).div(2);
+//  }
+//  DinoGib[] gibs;
+
+//  PlayerDeath (Time t, PVector _coords, float _r, float facing, PVector forcePoint) {
+//    time = t;
+//    setPosition(_coords);
+//    r = _r;
+
+//    gibs = new DinoGib[assets.playerStuff.dethSVG.getChildCount()];
+//    DinoGib g;
+//    PShape model;
+
+//    for (int i = 0; i < gibs.length; i++) {
+
+//      g = gibs[i] = new DinoGib();
+//      model = assets.playerStuff.dethSVG.getChild(i); // one line
+
+//      g.p1 = new PVector(model.getParams()[0], model.getParams()[1]); // first anchor point of line
+//      g.p2 = new PVector(model.getParams()[2], model.getParams()[3]); // second anchor point
+//      g.p1.sub(g.sourceImageCenter); // translate anchor points so that center of image is (0,0)
+//      g.p2.sub(g.sourceImageCenter); 
+//      g.p1.x *= facing==1 ? 1 : -1; // flip x-coords if facing opposite way
+//      g.p2.x *= facing==1 ? 1 : -1;
+//      g.midpoint = PVector.add(g.p1, g.p2).div(2); // part of line to apply force to
+//      g.disableDuration = random(DinoGib.minDisable, DinoGib.maxDisable);
+//      g.disableStart = time.getClock();
+//      //g.disableStart = millis();
+
+//      float angle = utils.angleOfRadians(forcePoint, g.midpoint);
+//      float d = forcePoint.dist(g.midpoint);
+//      //float force = (1/(d * d)) * 5000;
+//      //float force = (1/d) * 500;
+//      float force = (1/d) * 250;
+//      //float force = 5;
+//      //float force = (1/ (d * d)) * 1e3;
+//      g.dx = cos(angle) * force;
+//      g.dy = sin(angle) * force;
+//    }
+//  }
+
+//  void update () {
+//    for (DinoGib g : gibs) {
+//      if (time.getClock() - g.disableStart > g.disableDuration) g.enabled = false;
+//      //if (millis() - g.disableStart > g.disableDuration) g.enabled = false;
+
+//      g.p1.x += g.dx * time.getTimeScale();
+//      g.p1.y += g.dy * time.getTimeScale();
+
+//      g.p2.x += g.dx * time.getTimeScale();
+//      g.p2.y += g.dy * time.getTimeScale();
+
+//      g.dx *= .99;
+//      g.dy *= .99;
+//    }
+//  }
+
+//  void render () {
+
+//    pushTransforms();
+//    pushStyle();
+//    stroke(0, 0, 100);
+//    strokeWeight(assets.STROKE_WIDTH);
+
+//    for (DinoGib g : gibs) {
+//      if (!g.enabled) continue;
+//      line(g.p1.x, g.p1.y, g.p2.x, g.p2.y);
+//    }
+//    popStyle();
+//    popMatrix();
+//  }
+//} 
+
 
 //class PlayerManager implements updateable, renderable, abductionEvent, roidImpactEvent, playerRespawnedEvent, nebulaEvents {
 

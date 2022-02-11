@@ -40,6 +40,7 @@ class SinglePlayer extends Scene {
   //FinaleStuff finaleManager;
   Player player = new Player();
   PlayerIntro playerIntro = new PlayerIntro();
+  GameOver gameOver = new GameOver();
 
   //boolean options = false;
   //Rectangle dipswitchesButton;
@@ -60,17 +61,18 @@ class SinglePlayer extends Scene {
 
     earth.model = assets.earthStuff.earth;
     earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    playerIntro.spawningStart = millis();
     playerIntro.model = assets.playerStuff.brontoFrames[0];
     playerIntro.y = -Player.DIST_FROM_EARTH;
 
     player.model = assets.playerStuff.brontoFrames[0];
-    player.runSpeed = Player.DEFAULT_RUNSPEED;
 
     roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.initRoidPool(assets.roidStuff.roidFrames);
     roidManager.initSplodePool(assets.roidStuff.explosionFrames);
+
+    playerIntro.spawningStart = millis();
+
 
     //sceneID = TRIASSIC + lvl - 1;
 
@@ -149,7 +151,7 @@ class SinglePlayer extends Scene {
     if (keys.left != keys.right) player.move(keys.left ? -1 : 1, time.getTimeScale());
     roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
-    
+
     // handle roids hitting earth
     ArrayList<Roid> earthHits = roidManager.anyRoidsHittingThisCircle(earth.x, earth.y, Earth.EARTH_RADIUS);
     if (!earthHits.isEmpty()) {
@@ -161,13 +163,39 @@ class SinglePlayer extends Scene {
         splode.y = earth.y + sin(incomingAngle) * (Earth.EARTH_RADIUS + Explosion.OFFSET_FROM_EARTH);
         splode.r = utils.angleOf(earth.globalPos(), splode.globalPos()) + 90;
         earth.addChild(splode);
+
+        // did the player get hit
+        if (player.enabled) {
+          if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
+            player.restart();
+            gameOver.callGameover();
+            time.deathStart();
+          }
+        }
       }
     }
-    
-    roidManager.updateExplosions(time.getClock());
-    
-    // handle explosions killing player
 
+    roidManager.updateExplosions(time.getClock());
+
+    // handle explosions killing player
+    //if (player.enabled) {
+    //  for (Explosion e : roidManager.splodes) {
+    //    if (!e.enabled || !e.isDeadly) continue;
+    //    if (utils.unsignedAngleDiff(e.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
+    //      println("dead: " + frameCount);
+    //      player.restart();
+    //      gameOver.callGameover();
+    //      time.deathStart();
+    //    }
+    //  }
+    //}
+
+    gameOver.update();
+    if (gameOver.readyToRestart && keys.anykey) {
+      playerIntro.startIntro();
+      gameOver.restart();
+      roidManager.restart();
+    }
 
     //if (!options) {
     //  for (updateable u : updaters) u.update();
@@ -197,6 +225,17 @@ class SinglePlayer extends Scene {
     earth.simpleRenderImage();
     playerIntro.render();
     player.render();
+    //pushStyle();
+    //noFill();
+    //stroke(30, 70, 70, 1);
+    //strokeWeight(2);
+    //float angDegrees = utils.angleOf(earth.globalPos(), player.globalPos());
+    //PVector arc1 = new PVector(earth.globalPos().x + cos(radians(angDegrees - Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS, earth.globalPos().y + sin(radians(angDegrees - Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS);
+    //PVector arc2 = new PVector(earth.globalPos().x + cos(radians(angDegrees + Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS, earth.globalPos().y + sin(radians(angDegrees + Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS);
+    //circle(arc1.x, arc1.y, 10);
+    //circle(arc2.x, arc2.y, 10);
+    ////circle(player.globalPos().x, player.globalPos().y, Player.BOUNDING_CIRCLE);
+    //popStyle();
     roidManager.renderRoids();
     roidManager.renderSplodes();
     popMatrix(); 

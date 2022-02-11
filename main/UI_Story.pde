@@ -1,3 +1,35 @@
+class GameOver {
+  float start;
+  final static float DURATION = 5e3;
+  boolean enabled = false;
+  PFont extinctFont;
+  boolean readyToRestart = false;
+
+  //void GameOver(PFont f) {
+  //   extinctFont = f; 
+  //}
+  
+  void restart () {
+    enabled = false;
+    readyToRestart = false;
+  }
+
+  void callGameover () {
+    enabled = true;
+    start = millis();
+  }
+
+  void update() {
+    if(!enabled) return;
+    if(millis() - start > DURATION) readyToRestart = true;
+  }
+
+  void render() {
+    if(!enabled) return;
+    
+  }
+}
+
 class UIStory {
   final static int TRIASSIC = 0;
   final static int JURASSIC = 1;
