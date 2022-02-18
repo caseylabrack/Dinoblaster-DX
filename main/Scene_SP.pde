@@ -25,11 +25,13 @@ class SinglePlayer extends Scene {
   Earth earth = new Earth();
   Time time = new Time();
   //EventManager eventManager;
-  //StarManager starManager;
+  StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
   //VolcanoManager volcanoManager;
-  //ColorDecider currentColor;
+  ColorDecider currentColor = new ColorDecider();
   //UIStory ui;
+  UFO ufo;
+  UFORespawn ufoRespawn;
   //UFOManager ufoManager;
   //PlayerManager playerManager;
   //Time time;
@@ -38,7 +40,8 @@ class SinglePlayer extends Scene {
   //GameScreenMessages gameText;
   //MusicManager musicManager;
   //FinaleStuff finaleManager;
-  Player player = new Player();
+  Player player;
+  PlayerRespawn playerRespawn;
   PlayerIntro playerIntro = new PlayerIntro();
   GameOver gameOver = new GameOver();
 
@@ -64,7 +67,12 @@ class SinglePlayer extends Scene {
     playerIntro.model = assets.playerStuff.brontoFrames[0];
     playerIntro.y = -Player.DIST_FROM_EARTH;
 
+    player = new Player(assets.playerStuff.brontoSVG);
+    player.frames = assets.playerStuff.brontoFrames;
     player.model = assets.playerStuff.brontoFrames[0];
+    player.extraLives = 4;
+
+    playerRespawn = new PlayerRespawn(assets.playerStuff.brontoFrames[0]);
 
     roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
@@ -73,6 +81,12 @@ class SinglePlayer extends Scene {
 
     playerIntro.spawningStart = millis();
 
+    starsSystem.spawnSomeStars();
+    currentColor.update();
+
+    ufo = new UFO(assets.ufostuff.ufoSVG);
+    ufo.startCountDown();
+    ufoRespawn = new UFORespawn(assets.ufostuff.ufoSVG);
 
     //sceneID = TRIASSIC + lvl - 1;
 
@@ -140,17 +154,42 @@ class SinglePlayer extends Scene {
   void update () {
 
     time.update();
+    starsSystem.spin(time.getTimeScale());
+    currentColor.update();
     playerIntro.update();
-    earth.r += earth.dr * time.getTimeScale();
     if (playerIntro.state == PlayerIntro.SPAWNING) {
       playerIntro.state = PlayerIntro.DONE;
       player.enabled = true;
       player.y = playerIntro.y;
       earth.addChild(player);
     }
-    if (keys.left != keys.right) player.move(keys.left ? -1 : 1, time.getTimeScale());
+
+    boolean canSpawn = playerRespawn.update(time.getClock());
+    if (keys.anykey && canSpawn) {
+      playerRespawn.enabled = false;
+      player.enabled = true;
+      player.y = playerIntro.y;
+      earth.addChild(player);
+      ufo.resumeCountDown();
+    }
+    earth.r += earth.dr * time.getTimeScale();
+    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock());
     roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
+
+    boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
+    if (abducted) {
+      player.extraLives++;
+      player.restart();
+      playerRespawn.respawn();
+    }
+
+    Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
+    if (ufoRespawned != null) {
+      player.enabled = true;
+      player.setPosition(ufoRespawned.globalPos());
+      earth.addChild(player);
+    }
 
     // handle roids hitting earth
     ArrayList<Roid> earthHits = roidManager.anyRoidsHittingThisCircle(earth.x, earth.y, Earth.EARTH_RADIUS);
@@ -167,28 +206,24 @@ class SinglePlayer extends Scene {
         // did the player get hit
         if (player.enabled) {
           if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
-            player.restart();
-            gameOver.callGameover();
-            time.deathStart();
+            if (player.extraLives <= 0) {
+              player.restart();
+              gameOver.callGameover();
+              time.deathStart();
+              roidManager.killer = splode;
+            } else {
+              player.extraLives--;
+              println("extra lives: " + player.extraLives);
+              player.restart();
+              ufo.pauseCountDown();
+              ufoRespawn.dispatch(player, earth.globalPos());
+            }
           }
         }
       }
     }
 
     roidManager.updateExplosions(time.getClock());
-
-    // handle explosions killing player
-    //if (player.enabled) {
-    //  for (Explosion e : roidManager.splodes) {
-    //    if (!e.enabled || !e.isDeadly) continue;
-    //    if (utils.unsignedAngleDiff(e.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
-    //      println("dead: " + frameCount);
-    //      player.restart();
-    //      gameOver.callGameover();
-    //      time.deathStart();
-    //    }
-    //  }
-    //}
 
     gameOver.update();
     if (gameOver.readyToRestart && keys.anykey) {
@@ -222,6 +257,9 @@ class SinglePlayer extends Scene {
     scale(SCALE);
     rotate(camera.globalRote());
 
+    playerRespawn.render();
+    ufo.render(currentColor.getColor());
+    ufoRespawn.render(currentColor.getColor());
     earth.simpleRenderImage();
     playerIntro.render();
     player.render();
@@ -238,6 +276,7 @@ class SinglePlayer extends Scene {
     //popStyle();
     roidManager.renderRoids();
     roidManager.renderSplodes();
+    starsSystem.render(currentColor.getColor());
     popMatrix(); 
 
     //PVector m = screenspaceToWorldspace(mouseX, mouseY);

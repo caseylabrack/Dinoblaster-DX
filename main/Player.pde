@@ -1,4 +1,4 @@
-class Player extends Entity {
+class Player extends Entity implements abductable {
   final static float DIST_FROM_EARTH = 194;//197;
   final static float DEFAULT_RUNSPEED = 5;
   final static float TARPIT_SLOW_FACTOR = .25;
@@ -11,30 +11,61 @@ class Player extends Entity {
   PImage runFrames[];
   float runSpeed = DEFAULT_RUNSPEED;
   float tarpitFactor = 1;
+  float runFrameRate = 100;
+  PImage[] frames;
+  PShape abductModel;
 
-  public void move(int direction, float delta) {
+  int extraLives = 0;
+
+  Player(PShape abductModel) {
+    this.abductModel = abductModel;
+  }
+
+  public void move(boolean left, boolean right, float delta, float clock) {
     if (!enabled) return;
-    facing = direction;
-    PVector targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * delta * direction * tarpitFactor);
-    setPosition(targetPos);
-    r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+    if (left != right) {
+      facing = left ? -1 : 1;
+      PVector targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * delta * facing * tarpitFactor);
+      setPosition(targetPos);
+      r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+      int frame = (clock % runFrameRate) > runFrameRate / 2 ? 1 : 2;
+      model = frames[frame];
+    } else {
+      model = frames[0];
+    }
   }
 
   public void render() {
     if (!enabled) return;
     simpleRenderImage();
   }
-  
+
   public void restart () {
     identity();
     enabled = false;
     tarpitFactor = 1;
   }
+
+  PShape getModel () {
+    return abductModel;
+  }
+
+  PVector getPosition () {
+    return globalPos();
+  }
+
+  float getRote() {
+    return globalRote();
+  }
+
+  int getFacing() {
+    return facing;
+  }
 }
 
 class PlayerIntro extends Entity {
   float spawningStart;
-  final float spawningDuration = 3e3;
+  final float spawningDuration = 1e3;
   final static int FLASHING = 0;
   final static int SPAWNING = 1;
   final static int DONE = 2;
@@ -64,14 +95,68 @@ class PlayerIntro extends Entity {
   }
 }
 
+class PlayerRespawn extends Entity {
+  float spawningStart;
+  final float spawningDuration = 1e3;
+  boolean display = true;
+  float startY = -100;
+  float endY = -Player.DIST_FROM_EARTH;
+  final float RISING_DURATION = 5e3;
+  final float FLICKER_RATE_START = 400;
+  final static float FLICKER_RATE_FINAL = 60;
+  float flickerRate;
+  float flickerStart;
+  boolean enabled = false;
+  boolean canSpawn = false;
+
+  PlayerRespawn (PImage model) {
+    this.model = model;
+  }
+
+  void respawn () {
+    enabled = true;
+    flickerRate = FLICKER_RATE_START;
+    spawningStart = millis();
+    flickerStart = millis();
+    display = true;
+  }
+
+  boolean update (float clock) {
+    if (!enabled) return false;
+    boolean canSpawn = false;
+
+    float progress = (millis() - spawningStart) / RISING_DURATION;
+    if (progress < 1) {
+      float t = utils.easeOutCubicT(progress);
+      flickerRate = map(t, 0, 1, FLICKER_RATE_START, FLICKER_RATE_FINAL);
+      y = map(t, 0, 1, startY, endY);
+    } else {
+      flickerRate = FLICKER_RATE_FINAL;
+      y = endY;
+      canSpawn = true;
+    }
+    if (millis() - flickerStart > flickerRate) {
+      display = !display;
+      flickerStart = millis();
+    }
+
+    return canSpawn;
+  }
+
+  void render() {
+    if (!enabled) return;
+    if (display) simpleRenderImage();
+  }
+}
+
 class GibbsSystem {
 
   Gib[] gibs;
-  
+
   GibbsSystem (PShape model, Entity guy) {
     gibs = new Gib[model.getChildCount()];
   }
-  
+
   class Gib {
     float dx, dy;
     PVector points;

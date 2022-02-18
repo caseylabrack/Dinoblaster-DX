@@ -132,6 +132,10 @@ static class utils {
       ? 1
       : pow(2, -10 * x) * sin((x * 10 - 0.75) * c4) + 1;
   }
+
+  static float easeOutCubicT(float x) {
+    return 1 - pow(1 - x, 3);
+  }
 } 
 
 class Rectangle {
@@ -220,7 +224,7 @@ class SimpleTXTParser {
     }
     return result;
   }
-  
+
   String getString (String _key, String _default) {
     String result = _default;
     String[] m = match(txt, _key + ":\\s*(\\w+)");

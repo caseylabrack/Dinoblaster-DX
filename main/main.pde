@@ -89,7 +89,7 @@ void setup () {
       "ufosEnabled: " + true, 
       "", 
       "hypercubesEnabled: " + true, 
-      "hyperspaceDuration: " + int(StarManager.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
+      "hyperspaceDuration: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
       "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
       "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
       "", 

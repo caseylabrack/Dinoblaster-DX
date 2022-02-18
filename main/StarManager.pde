@@ -1,5 +1,64 @@
-class StarManager {
+class StarsSystem {
   final static float DEFAULT_HYPERSPACE_DURATION = 15e3;
+  PVector[] stars = new PVector[800];
+  float r = 2000;
+  float a = 0;//PI/2;
+  final float defaultStarSpeed = TWO_PI / (360 * 40);
+  float starSpeed = defaultStarSpeed;
+  
+  final int SPINNING = 0;
+  final int HYPERSPACE = 1;
+  final int ZOOMING = 2;
+  int state = SPINNING;
+
+  void spawnSomeStars() {
+    int k = 0;
+    for (int j = 0; j < 360; j+= 9) {
+      for (int i = 0; i < 20; i++) {
+        stars[k] = new PVector(cos(a+j) * r + random(-width/2, width/2), sin(a+j)*r + random(-height/2, height/2));
+        k++;
+      }
+    }
+  }
+
+  void spin (float dt) {
+    a += starSpeed * dt;
+  }
+
+  void render(color currentColor) {
+    float x = cos(a) * r;
+    float y = sin(a) * r;
+    float x2 = cos(a-(starSpeed * 6)) * r;
+    float y2 = sin(a-(starSpeed * 6)) * r;
+
+    pushStyle();
+    for (int i = 0; i < stars.length; i++) {
+      pushMatrix();
+      if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
+        if (state == HYPERSPACE) {
+          strokeWeight(4);
+          fill(currentColor);
+          if (i % 6 == 0) {
+            stroke(currentColor);
+            line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
+          } else {
+            noStroke();
+            translate(stars[i].x - x, stars[i].y - y);
+            rotate(PI/4);
+            square(0, 0, 4);
+          }
+        } else {
+          noStroke();
+          fill(0, 0, 100);
+          translate(stars[i].x - x, stars[i].y - y);
+          rotate(PI/4);
+          square(0, 0, 3);
+        }
+      }
+      popMatrix();
+    }
+    popStyle();
+  }
 }
 
 //class StarManager implements updateable, renderable, renderableScreen, nebulaEvents, gameFinaleEvent {

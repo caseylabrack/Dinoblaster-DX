@@ -14,6 +14,8 @@ class RoidManager {
 
   Explosion[] splodes = new Explosion[SPLODES_POOL_SIZE];
   int splodeindex = 0;
+  
+  Explosion killer = null;
 
   private ArrayList<Roid> hits = new ArrayList<Roid>();
 
