@@ -1,40 +1,32 @@
 abstract class Scene {
-  public int sceneID;
-  final static int SPLASH = 0;
-  final static int MENU = 1;
-  final static int PTUTORIAL = 2;
-  final static int TRIASSIC = 3;
-  final static int JURASSIC = 4;
-  final static int CRETACEOUS = 5;
-  final static int MULTIPLAYER = 6;
-  final static int OVIRAPTOR = 7;
+  //public int sceneID;
 
-  public int status;
-  final static int RUNNING = 1;
-  final static int DONE = 2;
+  //public int status;
+  //final static int RUNNING = 1;
+  //final static int DONE = 2;
 
   abstract void update();
   abstract void render();
   abstract void mouseUp();
-  abstract void cleanup();
+  //abstract void cleanup();
   //abstract int nextScene();
 }
 
 class SinglePlayer extends Scene {
 
+  final static int TRIASSIC = 0;
+  final static int JURASSIC = 1;
+  final static int CRETACEOUS = 3;
+  
   Earth earth = new Earth();
   Time time = new Time();
-  //EventManager eventManager;
   StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
-  //VolcanoManager volcanoManager;
+  VolcanoSystem volcanoSystem;
   ColorDecider currentColor = new ColorDecider();
   //UIStory ui;
   UFO ufo;
   UFORespawn ufoRespawn;
-  //UFOManager ufoManager;
-  //PlayerManager playerManager;
-  //Time time;
   Camera camera = new Camera();
   //TrexManager trexManager;
   //GameScreenMessages gameText;
@@ -60,9 +52,21 @@ class SinglePlayer extends Scene {
   //ArrayList<renderableScreen> screenRenderers = new ArrayList<renderableScreen>();
   //ArrayList<renderable> renderers =  new ArrayList<renderable>();
 
-  SinglePlayer(int lvl) {
+  SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
-    earth.model = assets.earthStuff.earth;
+    if (settings.getBoolean("earthIsPangea", false)) {
+      if (settings.getBoolean("earthIsWest", true)) {
+        earth.model = assets.earthStuff.earthPangea1;
+      } else {
+        earth.model = assets.earthStuff.earthPangea2;
+      }
+    } else {
+      if (settings.getBoolean("earthIsWest", true)) {
+        earth.model = assets.earthStuff.earth;
+      } else {
+        earth.model = assets.earthStuff.earth2;
+      }
+    }
     earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
     playerIntro.model = assets.playerStuff.brontoFrames[0];
     playerIntro.y = -Player.DIST_FROM_EARTH;
@@ -79,61 +83,14 @@ class SinglePlayer extends Scene {
     roidManager.initRoidPool(assets.roidStuff.roidFrames);
     roidManager.initSplodePool(assets.roidStuff.explosionFrames);
 
-    playerIntro.spawningStart = millis();
-
     starsSystem.spawnSomeStars();
     currentColor.update();
 
     ufo = new UFO(assets.ufostuff.ufoSVG);
-    ufo.startCountDown();
     ufoRespawn = new UFORespawn(assets.ufostuff.ufoSVG);
 
-    //sceneID = TRIASSIC + lvl - 1;
-
-    //eventManager = new EventManager();
-    //time = new Time(eventManager);
-    ////earth = new Earth(time, eventManager, lvl);
-    //earth = new Earth();
-    //camera = new Camera();
-    //roids = new RoidManager(earth, eventManager, time);
-    //currentColor = new ColorDecider();
-    //volcanoManager = new VolcanoManager(eventManager, time, currentColor, earth, lvl);
-    //starManager = new StarManager(currentColor, time, eventManager, lvl);
-    //gameText = new GameScreenMessages(eventManager, currentColor);
-    //playerManager = new PlayerManager(eventManager, earth, time, volcanoManager, starManager, camera);
-    //trexManager = new TrexManager(eventManager, time, earth, playerManager, currentColor, lvl);
-    //ui = new UIStory(eventManager, time, currentColor, lvl);
-    //ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager, time);
-    //musicManager = new MusicManager(eventManager, lvl);
-    //finaleManager = new FinaleStuff(eventManager, earth, playerManager, starManager, camera, time);
-
-    //updaters.add(time);
-    //updaters.add(ui);
-    ////updaters.add(earth);
-    //updaters.add(roids);
-    //updaters.add(camera);
-    //updaters.add(currentColor);
-    //updaters.add(starManager);
-    //updaters.add(ufoManager);
-    //updaters.add(playerManager);
-    //updaters.add(volcanoManager);
-    //updaters.add(trexManager);
-    //updaters.add(musicManager);
-    //updaters.add(finaleManager);
-
-    //renderers.add(ufoManager);
-    //renderers.add(volcanoManager);
-    //renderers.add(playerManager);
-    //renderers.add(trexManager);
-    //renderers.add(finaleManager);
-    ////renderers.add(earth);
-    //renderers.add(roids);
-    //renderers.add(starManager);
-
-    //screenRenderers.add(gameText);
-    //screenRenderers.add(ui);
-
-    //status = RUNNING;
+    volcanoSystem = new VolcanoSystem(assets.volcanoStuff.volcanoFrames, assets.roidStuff.explosionFrames[0]);
+    volcanoSystem.addVolcanos(earth);
 
     //float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
     //float dipheight = assets.uiStuff.DIPswitchesBtn.height;
@@ -151,11 +108,24 @@ class SinglePlayer extends Scene {
     //launchFinderButton = new Rectangle(-HEIGHT_REF_HALF + 10, directoryTextYPos, HEIGHT_REFERENCE - 20, HEIGHT_REF_HALF - directoryTextYPos - 20);
   }
 
+  void play (int lvl) {
+    println("level: " + lvl);
+    if (lvl == JURASSIC) {
+      volcanoSystem.spawn();
+      volcanoSystem.startCountdown();
+    }
+    
+    playerIntro.spawningStart = millis();
+    ufo.startCountDown();
+  }
+
   void update () {
 
     time.update();
     starsSystem.spin(time.getTimeScale());
     currentColor.update();
+
+    // check if it's time to go from intro -> player control
     playerIntro.update();
     if (playerIntro.state == PlayerIntro.SPAWNING) {
       playerIntro.state = PlayerIntro.DONE;
@@ -164,6 +134,7 @@ class SinglePlayer extends Scene {
       earth.addChild(player);
     }
 
+    // respawn following getting extra life
     boolean canSpawn = playerRespawn.update(time.getClock());
     if (keys.anykey && canSpawn) {
       playerRespawn.enabled = false;
@@ -172,8 +143,18 @@ class SinglePlayer extends Scene {
       earth.addChild(player);
       ufo.resumeCountDown();
     }
-    earth.r += earth.dr * time.getTimeScale();
-    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock());
+
+    // default to earth in normal state. if any volcano is erupting, make earth shake
+    earth.state = Earth.NORM;
+    for (Volcano v : volcanoSystem.volcanos) {
+      if (v.state==Volcano.ERUPTING) {
+        earth.state = Earth.SHAKING; 
+        break;
+      }
+    }
+
+    earth.move(time.getTimeScale());
+    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), volcanoSystem.volcanos);
     roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
 
@@ -184,12 +165,15 @@ class SinglePlayer extends Scene {
       playerRespawn.respawn();
     }
 
+    // respawn following losing extra life 
     Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
     if (ufoRespawned != null) {
       player.enabled = true;
       player.setPosition(ufoRespawned.globalPos());
       earth.addChild(player);
     }
+
+    volcanoSystem.update(time.getClock(), time.getTimeScale());
 
     // handle roids hitting earth
     ArrayList<Roid> earthHits = roidManager.anyRoidsHittingThisCircle(earth.x, earth.y, Earth.EARTH_RADIUS);
@@ -256,24 +240,13 @@ class SinglePlayer extends Scene {
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
     scale(SCALE);
     rotate(camera.globalRote());
-
     playerRespawn.render();
     ufo.render(currentColor.getColor());
     ufoRespawn.render(currentColor.getColor());
-    earth.simpleRenderImage();
+    volcanoSystem.render(currentColor.getColor());
+    earth.render();
     playerIntro.render();
     player.render();
-    //pushStyle();
-    //noFill();
-    //stroke(30, 70, 70, 1);
-    //strokeWeight(2);
-    //float angDegrees = utils.angleOf(earth.globalPos(), player.globalPos());
-    //PVector arc1 = new PVector(earth.globalPos().x + cos(radians(angDegrees - Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS, earth.globalPos().y + sin(radians(angDegrees - Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS);
-    //PVector arc2 = new PVector(earth.globalPos().x + cos(radians(angDegrees + Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS, earth.globalPos().y + sin(radians(angDegrees + Player.BOUNDING_ARC/2)) * Earth.EARTH_RADIUS);
-    //circle(arc1.x, arc1.y, 10);
-    //circle(arc2.x, arc2.y, 10);
-    ////circle(player.globalPos().x, player.globalPos().y, Player.BOUNDING_CIRCLE);
-    //popStyle();
     roidManager.renderRoids();
     roidManager.renderSplodes();
     starsSystem.render(currentColor.getColor());

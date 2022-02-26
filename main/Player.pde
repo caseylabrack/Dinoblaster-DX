@@ -21,18 +21,40 @@ class Player extends Entity implements abductable {
     this.abductModel = abductModel;
   }
 
-  public void move(boolean left, boolean right, float delta, float clock) {
+  public void move(boolean left, boolean right, float delta, float clock, obstacle[] blockers) {
     if (!enabled) return;
-    if (left != right) {
+
+    PVector targetPos = localPos();
+
+    // running or not. if running, update target position
+    if (left != right) { 
       facing = left ? -1 : 1;
-      PVector targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * delta * facing * tarpitFactor);
-      setPosition(targetPos);
-      r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+      targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * delta * facing * tarpitFactor);
       int frame = (clock % runFrameRate) > runFrameRate / 2 ? 1 : 2;
       model = frames[frame];
     } else {
       model = frames[0];
     }
+
+    //check for blockers (volcanos)
+    for (obstacle b : blockers) {
+      if (!b.enabled() || b.isPassable()) continue;
+      float targetAngle = utils.angleOf(utils.ZERO_VECTOR, targetPos);
+
+      // find closest blocker angle (edge of the closest side of the blocker)
+      float blockerAngle = b.getAngle();
+      float blockerArc = b.getArc();
+      if (utils.unsignedAngleDiff(targetAngle, blockerAngle) < blockerArc) { // movement would place player inside obstacle
+        float blockerEdge1 = blockerAngle - blockerArc;
+        float blockerEdge2 = blockerAngle + blockerArc;
+        float blockerClosestEdgeAngle = utils.unsignedAngleDiff(targetAngle, blockerEdge1) < utils.unsignedAngleDiff(targetAngle, blockerEdge2) ? blockerEdge1 : blockerEdge2;
+        float currentPositionAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
+        targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, utils.signedAngleDiff(currentPositionAngle, blockerClosestEdgeAngle)); // correct target position to edge of obstacle
+      }
+    }
+
+    setPosition(targetPos);
+    r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
   }
 
   public void render() {

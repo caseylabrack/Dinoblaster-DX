@@ -55,9 +55,9 @@ class Entity {
     y = pos.y;
   }
 
-  void setPosition (float _x, float _y) {
-    x = _x;
-    y = _y;
+  void setPosition (float x, float y) {
+    this.x = x;
+    this.y = y;
   }
 
   PVector localPos () {

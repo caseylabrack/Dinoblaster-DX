@@ -54,14 +54,15 @@ class UFO extends Entity {
   Entity abductedGuy = new Entity();
   PVector snatchStartPos = new PVector();
 
-  boolean enabled = true;
+  boolean enabled = false;
 
   UFO (PShape model) {
     modelVector = model;
   }
 
   void startCountDown () {
-    spawnCountDown = 3e3;//random(5, 90) * 1000;
+    spawnCountDown = random(5, 90) * 1000;
+    enabled = true;
   }
 
   void pauseCountDown () {
@@ -239,7 +240,7 @@ class UFO extends Entity {
     pushStyle();
     fill(0, 0, 0, 1);
     stroke(funkyColor);
-    simpleRenderImage(model);
+    simpleRenderImageVector();
     popStyle();
   }
 }

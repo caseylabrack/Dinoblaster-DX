@@ -35,6 +35,8 @@ float WIDTH_REF_HALF = WIDTH_REFERENCE/2;
 float HEIGHT_REFERENCE = 768;
 float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
+SinglePlayer singlePlayer;
+
 void setup () {
   //size(500, 500, P2D);
   size(1024, 768, P2D);
@@ -143,10 +145,11 @@ void setup () {
   triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
   jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
   cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
-
-  //currentScene = new SinglePlayer(UIStory.TRIASSIC);
-  //currentScene = new Oviraptor(Scene.OVIRAPTOR);
-  //currentScene = new SinglePlayer(chooseNextLevel());
+  
+  singlePlayer = new SinglePlayer(settings, assets);
+  singlePlayer.play(SinglePlayer.TRIASSIC);
+  
+  currentScene = singlePlayer;
 }
 
 void keyPressed() {
@@ -158,10 +161,10 @@ void keyPressed() {
     if (keyCode==LEFT) keys.setKey(Keys.LEFT, true);
     if (keyCode==RIGHT) keys.setKey(Keys.RIGHT, true);
   } else {
-    if (key=='1' || key==triassicSelect || key=='2' || key==jurassicSelect || key=='3' || key==cretaceousSelect) currentScene.cleanup();
-    if (key=='1' || key==triassicSelect) currentScene = new SinglePlayer(UIStory.TRIASSIC);
-    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) currentScene = new SinglePlayer(UIStory.JURASSIC);
-    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) currentScene = new SinglePlayer(UIStory.CRETACEOUS);
+    //if (key=='1' || key==triassicSelect || key=='2' || key==jurassicSelect || key=='3' || key==cretaceousSelect) currentScene.cleanup();
+    if (key=='1' || key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
+    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
+    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
     if (key==leftkey) keys.setKey(Keys.LEFT, true);
     if (key==rightkey) keys.setKey(Keys.RIGHT, true);
     if (key=='r') {
@@ -202,10 +205,10 @@ void mouseReleased () {
 
 void draw () {
 
-  if (frameCount==1) {
-    currentScene = new SinglePlayer(chooseNextLevel()); 
-    return;
-  }
+  //if (frameCount==1) {
+  //  currentScene = new SinglePlayer(chooseNextLevel()); 
+  //  return;
+  //}
 
   //if(touches.length==0) {
   //  keys.setKey(Keys.LEFT, false);
@@ -218,10 +221,10 @@ void draw () {
     background(0, 0, 0, 1);
     //fill(0,0,0,.2);
     //rect(0,0,width,height);
-    if (currentScene.status==Scene.DONE) {
-      currentScene.cleanup();
-      currentScene = new SinglePlayer(chooseNextLevel());
-    }
+    //if (currentScene.status==Scene.DONE) {
+    //  currentScene.cleanup();
+    //  currentScene = new SinglePlayer(chooseNextLevel());
+    //}
     currentScene.update();
     currentScene.render();
   }

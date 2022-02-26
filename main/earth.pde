@@ -2,10 +2,45 @@ class Earth extends Entity {
   final static float DEFAULT_EARTH_ROTATION = 2.3;
   final static float EARTH_RADIUS = 167;
 
-  void rote(float dt) {
-    x += dx;// * time.getTimeScale();
-    y += dy;// * time.getTimeScale();
+  final static int NORM = 0;
+  final static int SHAKING = 1;
+  int state = NORM;
+
+  final static float VOLCANO_SHAKING_MAGNITUDE = 10;
+  float shakingMag;
+
+  float steadyXPosition = 0;
+  float steadyYPosition = 0;
+
+  //float shakeX = 0;
+  //float shakeY = 0;
+
+  void startShaking(float mag) {
+    shakingMag = mag;
+    state = SHAKING;
+  }
+
+  void move(float dt) {
+
+    steadyXPosition += dx * dt;
+    steadyYPosition += dy * dt;
     r += dr * dt;
+
+    switch(state) {
+    case NORM: 
+      x = steadyXPosition;
+      y = steadyYPosition;
+      break;
+
+    case SHAKING:
+      x = steadyXPosition + cos(random(TWO_PI)) * random(VOLCANO_SHAKING_MAGNITUDE);
+      y = steadyYPosition + sin(random(TWO_PI)) * random(VOLCANO_SHAKING_MAGNITUDE);
+      break;
+    }
+  }
+
+  void render() {
+    simpleRenderImage();
   }
 }
 

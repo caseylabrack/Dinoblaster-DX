@@ -40,5 +40,5 @@ earthIsWest: true
 roidImpactRateInMilliseconds: 300.0
 roidImpactRateVariation: 100.0
 
-JurassicUnlocked: false
-CretaceousUnlocked: false
+JurassicUnlocked: true
+CretaceousUnlocked: true
