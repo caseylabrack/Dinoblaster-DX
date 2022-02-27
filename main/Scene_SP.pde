@@ -1,15 +1,8 @@
 abstract class Scene {
-  //public int sceneID;
-
-  //public int status;
-  //final static int RUNNING = 1;
-  //final static int DONE = 2;
 
   abstract void update();
   abstract void render();
   abstract void mouseUp();
-  //abstract void cleanup();
-  //abstract int nextScene();
 }
 
 class SinglePlayer extends Scene {
@@ -37,6 +30,7 @@ class SinglePlayer extends Scene {
   PlayerRespawn playerRespawn;
   PlayerIntro playerIntro = new PlayerIntro();
   GameOver gameOver = new GameOver();
+  EggHatch egg;
 
   //boolean options = false;
   //Rectangle dipswitchesButton;
@@ -94,6 +88,9 @@ class SinglePlayer extends Scene {
     volcanoSystem.addVolcanos(earth);
 
     hypercube = new Hypercube();
+    
+    egg = new EggHatch(assets.trexStuff.eggCracked, assets.trexStuff.eggBurst, assets.trexStuff.trexIdle);
+    earth.addChild(egg);
 
     //float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
     //float dipheight = assets.uiStuff.DIPswitchesBtn.height;
@@ -121,6 +118,13 @@ class SinglePlayer extends Scene {
     playerIntro.spawningStart = millis();
     ufo.startCountDown();
     hypercube.startCountDown();
+    
+    if(lvl == CRETACEOUS) {
+      float angle = random(359);
+      egg.x = cos(radians(angle));
+      egg.y = sin(radians(angle));
+      egg.startAnimation();
+    }
   }
 
   void update () {
@@ -157,7 +161,7 @@ class SinglePlayer extends Scene {
       }
     }
 
-    //earth.move(time.getTimeScale());
+    earth.move(time.getTimeScale());
     player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), volcanoSystem.volcanos);
     //roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
@@ -243,6 +247,13 @@ class SinglePlayer extends Scene {
       starsSystem.setHyperspace(false);
       hypercube.startCountDown();
     }
+    
+    egg.update(time.getClock());
+    
+    // handle egg hatching animations complete
+    if(egg.state == EggHatch.DONE) {
+      egg.reset();
+    }
 
     //if (!options) {
     //  for (updateable u : updaters) u.update();
@@ -279,13 +290,14 @@ class SinglePlayer extends Scene {
     roidManager.renderSplodes();
     starsSystem.render(currentColor.getColor());
     hypercube.render(time.getTimeScale(), currentColor.getColor());
-    pushStyle();
-    noFill();
-    stroke(0, 80, 80, 1);
-    strokeWeight(4);
-    circle(hypercube.x, hypercube.y, Hypercube.BOUNDING_CIRCLE_RADIUS * 2);
-    circle(player.globalPos().x, player.globalPos().y, Player.BOUNDING_CIRCLE_RADIUS * 2);
-    popStyle();
+    egg.render(currentColor.getColor());
+    //pushStyle();
+    //noFill();
+    //stroke(0, 80, 80, 1);
+    //strokeWeight(4);
+    //circle(hypercube.x, hypercube.y, Hypercube.BOUNDING_CIRCLE_RADIUS * 2);
+    //circle(player.globalPos().x, player.globalPos().y, Player.BOUNDING_CIRCLE_RADIUS * 2);
+    //popStyle();
     popMatrix(); 
 
     //PVector m = screenspaceToWorldspace(mouseX, mouseY);

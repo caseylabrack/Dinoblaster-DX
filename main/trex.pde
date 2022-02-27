@@ -1,3 +1,124 @@
+class EggHatch extends Entity {
+  final float startY = 115;
+  final static float EARTH_DIST_FINAL = 190;
+  final float risingDuration = 1e3;
+  final float idleDuration = 1e3;
+  final float crackedDuration = 3e3;
+  float startTime;
+  float angle;
+  boolean enabled = false;
+
+  final int WIGGLES_NUM = 3;
+  int wiggleCount = 0;
+  final float wiggleDuration = .5e3;
+  final float WIGGLE_POWER_START = 90;
+  float wigglePower;
+  float uprightR;
+
+  final static int RISING = 0;
+  final static int WIGGLES = 1;
+  final static int IDLE = 2;
+  final static int CRACKED = 3;
+  final static int DONE = 4;
+  public int state = RISING;
+
+  PImage modelCracked;
+  PImage modelBurst;
+  PImage trex;
+
+  EggHatch (PImage modelCracked, PImage modelBurst, PImage trex) {
+    this.modelCracked = modelCracked;
+    this.modelBurst = modelBurst;
+    this.trex = trex;
+    model = modelCracked;
+  }
+
+  void startAnimation () {
+    enabled = true;
+    startTime = millis();
+    state = RISING;
+    angle = utils.angleOf(utils.ZERO_VECTOR, localPos());
+    r = angle + 90;
+    uprightR = r;
+  }
+
+  void update (float clock) {
+    if (!enabled) return;
+
+    float progress;
+
+    switch(state) {
+
+    case RISING:
+      progress = (clock - startTime) / risingDuration;
+      if (progress < 1) {
+        //float dist = utils.easeLinear(progress,startY,endY-startY,1);
+        float t = utils.easeOutBounce(progress);
+        //float t = utils.easeOutElastic(progress);
+        float dist = startY + (EARTH_DIST_FINAL - startY) * t;
+        x = cos(radians(angle)) * dist;
+        y = sin(radians(angle)) * dist;
+      } else {
+        state = IDLE;
+        startTime = clock;
+      }
+      break;
+
+    case IDLE:
+      progress = (clock - startTime) / idleDuration;
+      if (progress > 1) {
+        if (wiggleCount < WIGGLES_NUM) {
+          state = WIGGLES;
+          assets.trexStuff.eggWiggle.play();
+        } else {
+          state = CRACKED;
+          model = assets.trexStuff.eggBurst;
+          assets.trexStuff.eggHatch.play();
+        }
+        startTime = clock;
+      }
+      break;
+
+    case WIGGLES:
+      progress = (clock - startTime) / wiggleDuration;
+      if (progress < 1) {
+        wigglePower = utils.easeInQuad(progress, WIGGLE_POWER_START, 0 - WIGGLE_POWER_START, 1);
+        r = uprightR + sin(clock) * wigglePower;
+      } else {
+        r = uprightR;
+        wiggleCount++;        
+        state = IDLE;
+        startTime = clock;
+      }
+      break;
+
+    case CRACKED:
+      progress = (clock - startTime) / crackedDuration;
+      if (round(progress * 10) % 2 == 0) {
+        model = modelBurst;
+      } else {
+        model = trex;
+      }
+      if (progress > 1) {
+        state = DONE;
+      }
+      break;
+    }
+  }
+
+  void render(color funkyColor) {
+    if (!enabled) return;
+    pushStyle();
+    stroke(funkyColor);
+    simpleRenderImage();
+    popStyle();
+  }
+
+  void reset () {
+    enabled = false;
+  }
+}
+
 //class TrexManager implements updateable, renderable, levelChangeEvent, gameFinaleEvent {
 
 //  EventManager events;
@@ -105,126 +226,6 @@
 //    if (egg!=null) egg.render();
 //  }
 //}
-
-//class EggTrex extends Entity implements updateable, renderable {
-
-//  Earth earth;
-//  Time time;
-//  ColorDecider currentColor;
-
-//  final float startY = 115;
-//  final static float EARTH_DIST_FINAL = 190;
-//  final float risingDuration = 1e3;
-//  final float idleDuration = 1e3;
-//  final float crackedDuration = 3e3;
-//  float startTime;
-//  float angle;
-
-//  final int WIGGLES_NUM = 3;
-//  int wiggleCount = 0;
-//  final float wiggleDuration = .5e3;
-//  final float WIGGLE_POWER_START = 90;
-//  float wigglePower;
-//  float uprightR;
-
-//  final static int RISING = 0;
-//  final static int WIGGLES = 1;
-//  final static int IDLE = 2;
-//  final static int CRACKED = 3;
-//  final static int DONE = 4;
-//  public int state = RISING;
-
-//  PImage model;
-
-//  EggTrex (Earth e, Time t, ColorDecider c) {
-//    earth = e;
-//    time = t;
-//    currentColor = c;
-
-//    model = assets.trexStuff.eggCracked;
-
-//    earth.addChild(this);
-
-//    angle = earth.getTarpitAngleDegrees() + 180;
-//    setPosition(new PVector(cos(radians(angle)), sin(radians(angle))));
-//    r = angle + 90;
-//    uprightR = r;
-
-//    startTime = time.getClock();
-//  }
-
-//  void update () {
-
-//    float progress;
-
-//    switch(state) {
-
-//    case RISING:
-//      progress = (time.getClock() - startTime) / risingDuration;
-//      if (progress < 1) {
-//        //float dist = utils.easeLinear(progress,startY,endY-startY,1);
-//        float t = utils.easeOutBounce(progress);
-//        //float t = utils.easeOutElastic(progress);
-//        float dist = startY + (EARTH_DIST_FINAL - startY) * t;
-//        x = cos(radians(angle)) * dist;
-//        y = sin(radians(angle)) * dist;
-//      } else {
-//        state = IDLE;
-//        startTime = time.getClock();
-//      }
-
-//      break;
-
-//    case IDLE:
-//      progress = (time.getClock() - startTime) / idleDuration;
-//      if (progress > 1) {
-//        if (wiggleCount < WIGGLES_NUM) {
-//          state = WIGGLES;
-//          assets.trexStuff.eggWiggle.play();
-//        } else {
-//          state = CRACKED;
-//          model = assets.trexStuff.eggBurst;
-//          assets.trexStuff.eggHatch.play();
-//        }
-//        startTime = time.getClock();
-//      }
-//      break;
-
-//    case WIGGLES:
-//      progress = (time.getClock() - startTime) / wiggleDuration;
-//      if (progress < 1) {
-//        wigglePower = utils.easeInQuad(progress, WIGGLE_POWER_START, 0 - WIGGLE_POWER_START, 1);
-//        r = uprightR + sin(time.getClock()) * wigglePower;
-//      } else {
-//        r = uprightR;
-//        wiggleCount++;        
-//        state = IDLE;
-//        startTime = time.getClock();
-//      }
-//      break;
-
-//    case CRACKED:
-//      progress = (time.getClock() - startTime) / crackedDuration;
-//      if (round(progress * 10) % 2 == 0) {
-//        model = assets.trexStuff.eggBurst;
-//      } else {
-//        model = assets.trexStuff.trexIdle;
-//      }
-//      if (progress > 1) {
-//        state = DONE;
-//      }
-//      break;
-//    }
-//  }
-
-//  void render() {
-//    pushStyle();
-//    tint(currentColor.getColor());
-//    simpleRenderImage(model);
-//    popStyle();
-//  }
-//}
-
 
 //class Trex extends Entity implements gameOverEvent, updateable, renderable {
 

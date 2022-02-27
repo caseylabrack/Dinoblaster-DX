@@ -147,7 +147,7 @@ void setup () {
   cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
   
   singlePlayer = new SinglePlayer(settings, assets);
-  singlePlayer.play(SinglePlayer.TRIASSIC);
+  singlePlayer.play(SinglePlayer.CRETACEOUS);
   
   currentScene = singlePlayer;
 }
