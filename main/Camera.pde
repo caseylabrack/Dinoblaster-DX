@@ -81,7 +81,6 @@ class Time {
     elapsed = millis() - lastmillis;
     clock += elapsed * timeScale;
     lastmillis = millis();
-
     delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
     lastNanos = frameRateLastNanos;
 
@@ -98,6 +97,15 @@ class Time {
     }
   }
 
+  void setHyperspace (boolean h) {
+    isHyperSpace = h;
+    if (h) {
+      timeScale = HYPERSPACE_DEFAULT_TIME;
+    } else {
+      timeScale = DEFAULT_DEFAULT_TIME_SCALE;
+    }
+  }
+
   public void deathStart () {
     state = DEATH;
     stateStart = millis();
@@ -111,7 +119,7 @@ class Time {
   public float getClock() {
     return clock;
   }
-  
+
   public void restart () {
     isDying = false;
     state = NORM;

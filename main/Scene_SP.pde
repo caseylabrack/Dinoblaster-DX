@@ -17,7 +17,7 @@ class SinglePlayer extends Scene {
   final static int TRIASSIC = 0;
   final static int JURASSIC = 1;
   final static int CRETACEOUS = 3;
-  
+
   Earth earth = new Earth();
   Time time = new Time();
   StarsSystem starsSystem = new StarsSystem();
@@ -28,6 +28,7 @@ class SinglePlayer extends Scene {
   UFO ufo;
   UFORespawn ufoRespawn;
   Camera camera = new Camera();
+  Hypercube hypercube;
   //TrexManager trexManager;
   //GameScreenMessages gameText;
   //MusicManager musicManager;
@@ -92,6 +93,8 @@ class SinglePlayer extends Scene {
     volcanoSystem = new VolcanoSystem(assets.volcanoStuff.volcanoFrames, assets.roidStuff.explosionFrames[0]);
     volcanoSystem.addVolcanos(earth);
 
+    hypercube = new Hypercube();
+
     //float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
     //float dipheight = assets.uiStuff.DIPswitchesBtn.height;
     //dipswitchesButton = new Rectangle(HEIGHT_REF_HALF + (WIDTH_REF_HALF - HEIGHT_REF_HALF) / 2 - dipwidth/2, HEIGHT_REF_HALF - dipheight, dipwidth, dipheight);
@@ -114,9 +117,10 @@ class SinglePlayer extends Scene {
       volcanoSystem.spawn();
       volcanoSystem.startCountdown();
     }
-    
+
     playerIntro.spawningStart = millis();
     ufo.startCountDown();
+    hypercube.startCountDown();
   }
 
   void update () {
@@ -153,9 +157,9 @@ class SinglePlayer extends Scene {
       }
     }
 
-    earth.move(time.getTimeScale());
+    //earth.move(time.getTimeScale());
     player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), volcanoSystem.volcanos);
-    roidManager.fireRoids(time.getClock(), earth.globalPos());
+    //roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
 
     boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
@@ -216,6 +220,30 @@ class SinglePlayer extends Scene {
       roidManager.restart();
     }
 
+    hypercube.update(starsSystem.xShiftThisFrame(), starsSystem.yShiftThisFrame());
+    // time to spawn a hypercube?
+    if (hypercube.state == Hypercube.READY) {
+      hypercube.setPosition(starsSystem.lookAhead(Hypercube.hypercubeLead, Hypercube.hypercubeOffset));
+      hypercube.state = Hypercube.NORM;
+      println("spawn hypercube");
+    }
+
+    // player touching a hypercube?
+    if (hypercube.state == Hypercube.NORM) {
+      if (PVector.dist(player.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
+        hypercube.goHyperspace();
+        time.setHyperspace(true);
+        starsSystem.setHyperspace(true);
+      }
+    }
+
+    // hyperspace finished?
+    if (hypercube.state == Hypercube.HYPERSPACE_DONE) {
+      time.setHyperspace(false);
+      starsSystem.setHyperspace(false);
+      hypercube.startCountDown();
+    }
+
     //if (!options) {
     //  for (updateable u : updaters) u.update();
     //} else {
@@ -250,6 +278,14 @@ class SinglePlayer extends Scene {
     roidManager.renderRoids();
     roidManager.renderSplodes();
     starsSystem.render(currentColor.getColor());
+    hypercube.render(time.getTimeScale(), currentColor.getColor());
+    pushStyle();
+    noFill();
+    stroke(0, 80, 80, 1);
+    strokeWeight(4);
+    circle(hypercube.x, hypercube.y, Hypercube.BOUNDING_CIRCLE_RADIUS * 2);
+    circle(player.globalPos().x, player.globalPos().y, Player.BOUNDING_CIRCLE_RADIUS * 2);
+    popStyle();
     popMatrix(); 
 
     //PVector m = screenspaceToWorldspace(mouseX, mouseY);

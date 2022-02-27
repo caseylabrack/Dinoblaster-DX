@@ -4,7 +4,7 @@ class Player extends Entity implements abductable {
   final static float TARPIT_SLOW_FACTOR = .25;
   final static float TARPIT_BOTTOM_DIST = 110;
   final float TARPIT_RISE_FACTOR = 2;
-  final static float BOUNDING_CIRCLE = 35;
+  final static float BOUNDING_CIRCLE_RADIUS = 30;
   final static float BOUNDING_ARC = 15;
 
   boolean enabled = false;

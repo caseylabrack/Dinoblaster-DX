@@ -3,12 +3,14 @@ class StarsSystem {
   PVector[] stars = new PVector[800];
   float r = 2000;
   float a = 0;//PI/2;
+  float pa = a;
   final float defaultStarSpeed = TWO_PI / (360 * 40);
+  final float hyperspaceStarSpeed = defaultStarSpeed * 5;
   float starSpeed = defaultStarSpeed;
-  
-  final int SPINNING = 0;
-  final int HYPERSPACE = 1;
-  final int ZOOMING = 2;
+
+  final static int SPINNING = 0;
+  final static int HYPERSPACE = 1;
+  final static int ZOOMING = 2;
   int state = SPINNING;
 
   void spawnSomeStars() {
@@ -20,11 +22,31 @@ class StarsSystem {
       }
     }
   }
-
-  void spin (float dt) {
-    a += starSpeed * dt;
+  
+  void setHyperspace (boolean h) {
+    starSpeed = h ? hyperspaceStarSpeed : defaultStarSpeed;
+    state = h ? HYPERSPACE : SPINNING;
   }
 
+  void spin (float dt) {
+    pa = a;
+    a += starSpeed * dt;
+  }
+  
+  float xShiftThisFrame() {
+    return cos(a) * r - cos(pa) * r;
+  }
+  
+  float yShiftThisFrame() {
+    return sin(a) * r - sin(pa) * r;
+  }
+  
+  PVector lookAhead(float lead, float rOffset) {
+    PVector virtualHere = new PVector(cos(a) * r, sin(a) * r);
+    PVector virtualThere = new PVector(cos(a + radians(lead)) * (r + rOffset), sin(a + radians(lead)) * (r + rOffset));
+    return virtualThere.sub(virtualHere);
+  }
+  
   void render(color currentColor) {
     float x = cos(a) * r;
     float y = sin(a) * r;
