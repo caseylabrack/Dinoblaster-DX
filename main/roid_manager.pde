@@ -15,6 +15,8 @@ class RoidManager {
   Explosion[] splodes = new Explosion[SPLODES_POOL_SIZE];
   int splodeindex = 0;
   
+  boolean enabled = true;
+  
   Explosion killer = null;
 
   private ArrayList<Roid> hits = new ArrayList<Roid>();
@@ -37,6 +39,7 @@ class RoidManager {
   }
 
   void fireRoids (float clock, PVector target) {
+    if(!enabled) return;
     if (clock - lastFire > spawnInterval) {
       lastFire = clock;
       spawnInterval = random(minSpawnInterval, maxSpawnInterval);
@@ -57,22 +60,6 @@ class RoidManager {
       r.x += r.dx * delta;
       r.y += r.dy * delta;
       r.r += Roid.dr * delta;
-
-      //if (PVector.dist(r.globalPos(), earth.globalPos()) < Earth.EARTH_RADIUS ) {
-      //  r.enabled = false;
-      //  Explosion splode = splodes[splodeindex++ % splodes.length]; // increment splode index and wrap to length of pool
-      //  events.dispatchRoidImpact(r.globalPos());
-
-      //  splode.enabled = true;
-      //  splode.start = time.getClock();
-      //  float angle = utils.angleOfRadians(earth.globalPos(), r.globalPos());
-      //  float offset = 20;
-      //  PVector adjustedPosition = new PVector(earth.x + cos(angle) * (Earth.EARTH_RADIUS + offset), earth.y + sin(angle) * (Earth.EARTH_RADIUS + offset));
-      //  splode.setPosition(earth.globalToLocalPos(adjustedPosition));
-      //  splode.r = utils.angleOf(earth.localPos(), splode.localPos()) + 90;
-
-      //  assets.roidStuff.hits[floor(random(0, 5))].play();
-      //}
     }
   }
 

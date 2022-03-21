@@ -4,8 +4,7 @@ main/application.*
 main/build
 main/data/_music
 main/data/_music/*
-controls-settings.txt
-game-settings.txt
 highscore.dat
 picade.txt
 video/
+DIP-switches.txt

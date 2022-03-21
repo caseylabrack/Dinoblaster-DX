@@ -136,6 +136,10 @@ static class utils {
   static float easeOutCubicT(float x) {
     return 1 - pow(1 - x, 3);
   }
+
+  static float easeOutExpoT(float x) {
+    return x == 1 ? 1 : 1 - pow(2, -10 * x);
+  }
 } 
 
 class Rectangle {

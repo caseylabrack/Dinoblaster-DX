@@ -89,6 +89,7 @@ void setup () {
       "trexEnabled: " + true, 
       "volcanosEnabled: " + true, 
       "ufosEnabled: " + true, 
+      "tarpitsEnabled: " + true,
       "", 
       "hypercubesEnabled: " + true, 
       "hyperspaceDuration: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
@@ -148,6 +149,7 @@ void setup () {
   
   singlePlayer = new SinglePlayer(settings, assets);
   singlePlayer.play(SinglePlayer.CRETACEOUS);
+  //singlePlayer.play(SinglePlayer.JURASSIC);
   
   currentScene = singlePlayer;
 }
@@ -244,50 +246,50 @@ void draw () {
   }
 }
 
-int highestUnlockedLevel () {
-  int nextlvl = UIStory.TRIASSIC;
-  int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
-  switch(highscorefloor) {
-  case 0:  
-    nextlvl = UIStory.TRIASSIC;
-    break;
-  case 1:  
-    nextlvl = UIStory.JURASSIC;
-    break;
-  case 2:  
-    nextlvl = UIStory.CRETACEOUS;
-    break;
-  }
+//int highestUnlockedLevel () {
+  //int nextlvl = UIStory.TRIASSIC;
+  //int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
+  //switch(highscorefloor) {
+  //case 0:  
+  //  nextlvl = UIStory.TRIASSIC;
+  //  break;
+  //case 1:  
+  //  nextlvl = UIStory.JURASSIC;
+  //  break;
+  //case 2:  
+  //  nextlvl = UIStory.CRETACEOUS;
+  //  break;
+  //}
 
-  if (settings.getBoolean("JurassicUnlocked", false)) nextlvl = max(nextlvl, UIStory.JURASSIC);
-  if (settings.getBoolean("CretaceousUnlocked", false)) nextlvl = max(nextlvl, UIStory.CRETACEOUS);
+  //if (settings.getBoolean("JurassicUnlocked", false)) nextlvl = max(nextlvl, UIStory.JURASSIC);
+  //if (settings.getBoolean("CretaceousUnlocked", false)) nextlvl = max(nextlvl, UIStory.CRETACEOUS);
 
-  return nextlvl;
-}
+  //return nextlvl;
+//}
 
-int chooseNextLevel () {
+//int chooseNextLevel () {
 
-  int startAt = settings.getInt("startAtLevel", 4);
-  int unlocked = highestUnlockedLevel();
-  int chosen = unlocked; // default to highest level unlocked. user can choose this with any number 4+
+//  int startAt = settings.getInt("startAtLevel", 4);
+//  int unlocked = highestUnlockedLevel();
+//  int chosen = unlocked; // default to highest level unlocked. user can choose this with any number 4+
 
-  switch(startAt) {
-  case 0:
-  case 1:
-    chosen = UIStory.TRIASSIC;
-    break;
+//  switch(startAt) {
+//  case 0:
+//  case 1:
+//    chosen = UIStory.TRIASSIC;
+//    break;
 
-  case 2: 
-    if (settings.getBoolean("JurassicUnlocked", false) || unlocked >= UIStory.JURASSIC) chosen = UIStory.JURASSIC;
-    break;
+//  case 2: 
+//    if (settings.getBoolean("JurassicUnlocked", false) || unlocked >= UIStory.JURASSIC) chosen = UIStory.JURASSIC;
+//    break;
 
-  case 3: 
-    if (settings.getBoolean("CretaceousUnlocked", false) || unlocked >= UIStory.CRETACEOUS) chosen = UIStory.CRETACEOUS;
-    break;
-  }
+//  case 3: 
+//    if (settings.getBoolean("CretaceousUnlocked", false) || unlocked >= UIStory.CRETACEOUS) chosen = UIStory.CRETACEOUS;
+//    break;
+//  }
 
-  return chosen;
-}
+//  return chosen;
+//}
 
 //void writeOutControls () {
 //  PrintWriter output;

@@ -55,13 +55,15 @@ class AssetManager {
     ufostuff.ufoFinalDuo.disableStyle();
     ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
     ufostuff.ufoFinalDuoZoom.disableStyle();
-    
+
     ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
     sounds.add(ufostuff.ufoSound);
 
     uiStuff.extinctType = createFont("Hyperspace.otf", 150);
     //uiStuff.extinctSign = loadImage("gameover-lettering.png");
-    uiStuff.letterbox = loadImage("letterboxes2.png");
+    //uiStuff.letterbox = loadImage("letterboxes2.png");
+    uiStuff.letterbox = loadImage("letterboxes2c.png");
+    uiStuff.screenShine = loadImage("screenShine.png");
     uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
     uiStuff.progressBG = loadImage("progress-bg.png");
     uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
@@ -106,6 +108,7 @@ class AssetManager {
     trexStuff.trexIdle = loadImage("trex-idle.png");
     trexStuff.trexRun1 = loadImage("trex-run1.png");
     trexStuff.trexRun2 = loadImage("trex-run2.png");
+    trexStuff.trexHead = loadImage("trex-head.png");
     trexStuff.eggCracked = loadImage("egg-cracked.png");
     trexStuff.eggBurst = loadImage("egg-burst.png");
     trexStuff.eggHatch = raspi ? new SoundM("_audio/trex-and-egg/egg-hatch.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-hatch.wav", context);
@@ -214,6 +217,7 @@ class AssetManager {
   class UIStuff {
     //PImage extinctSign;
     PImage letterbox;
+    PImage screenShine;
     PFont MOTD;
     PImage progressBG;
     PImage extraDinosBG;
@@ -255,6 +259,7 @@ class AssetManager {
     PImage trexIdle;
     PImage trexRun1;
     PImage trexRun2;
+    PImage trexHead;
     PImage eggCracked;
     PImage eggBurst;
     SoundPlayable eggHatch;
@@ -277,7 +282,7 @@ class AssetManager {
     PImage doodadHead;
     PImage doodadRibs;
   }
-  
+
   class MusicStuff {
     SoundPlayable lvl1a;
     SoundPlayable lvl1b;

@@ -6,41 +6,191 @@ class Earth extends Entity {
   final static int SHAKING = 1;
   int state = NORM;
 
+  PShader pixelMask;
+  PGraphics tarpitDynamicMask;
+  final float TARPIT_AMPLITUDE = 20;
+  final static float TARPIT_ARC = 45;
+  final static float TARPIT_SINK_DURATION = 4e3;
+  float tarpitArcStart;
+  float tarpitAngle;
+  boolean tarpitEnabled = false;
+  final static float TARPIT_SINK_RATE = 2;
+
   final static float VOLCANO_SHAKING_MAGNITUDE = 10;
-  float shakingMag;
+  boolean shakeMomentary = false;
+  float shakeDuration;
+  boolean shakeContinuous = false;
+  float shakeMagnitude;
+  float shakeStart;
 
   float steadyXPosition = 0;
   float steadyYPosition = 0;
 
-  //float shakeX = 0;
-  //float shakeY = 0;
+  Earth (PImage model, PShader pixelMask) {
+    this.model = model;
+    this.pixelMask = pixelMask;
 
-  void startShaking(float mag) {
-    shakingMag = mag;
-    state = SHAKING;
+    int side = assets.earthStuff.earth.width; // square asset
+    tarpitDynamicMask = createGraphics(side, side, P2D);
+    tarpitDynamicMask.noSmooth();
+    tarpitDynamicMask.ellipseMode(CENTER);
+    tarpitDynamicMask.colorMode(HSB, 360, 100, 100, 1);
+    tarpitDynamicMask.noStroke();
+    tarpitDynamicMask.fill(0, 0, 0, 1);
   }
 
-  void move(float dt) {
+  // start an earth quake, with magnitude, duration, and (scaled) start time
+  // specify only magnitude to keep shaking indefinitely
+  // cannot start a momentary shake while an indefinite shake is active
+  // pass magnitude of zero to stop all shaking, momentary or continuous
+  void shake (float mag, float dur, float clock) {
+    if (mag == 0) {
+      shakeContinuous = false;
+      shakeMomentary = false;
+      return;
+    }
+
+    shakeMagnitude = mag;
+    if (dur==0) { // shake continuously
+      shakeContinuous = true;
+      shakeMomentary = false;
+    } else {
+      if (!shakeContinuous) { // do a momentary shake, but only if we're not shaking continuously already
+        shakeMomentary = true;
+        shakeDuration = dur;
+        shakeStart = clock;
+      }
+    }
+  }
+
+  void shake(float mag) {
+    shake(mag, 0, 0);
+  }
+
+  void move(float dt, float clock) {
 
     steadyXPosition += dx * dt;
     steadyYPosition += dy * dt;
     r += dr * dt;
 
-    switch(state) {
-    case NORM: 
-      x = steadyXPosition;
-      y = steadyYPosition;
-      break;
+    x = steadyXPosition;
+    y = steadyYPosition;
 
-    case SHAKING:
-      x = steadyXPosition + cos(random(TWO_PI)) * random(VOLCANO_SHAKING_MAGNITUDE);
-      y = steadyYPosition + sin(random(TWO_PI)) * random(VOLCANO_SHAKING_MAGNITUDE);
-      break;
+    if (shakeContinuous) {
+      x += cos(random(TWO_PI)) * random(shakeMagnitude);
+      x += sin(random(TWO_PI)) * random(shakeMagnitude);
+    } else if (shakeMomentary) {
+      float progress = (clock - shakeStart) / shakeDuration;
+      if (progress < 1) {
+        float t = 1 - progress;
+        //float t = 1 - utils.easeOutExpoT(progress);
+        x += cos(random(TWO_PI)) * (shakeMagnitude * t);
+        x += sin(random(TWO_PI)) * (shakeMagnitude * t);
+      } else {
+        shakeMomentary = false;
+      }
     }
   }
 
-  void render() {
+  void spawnTarpit () {
+    tarpitEnabled = true;
+
+    tarpitArcStart = random(360-TARPIT_ARC);
+
+    int side = assets.earthStuff.earth.width; // square asset
+    tarpitDynamicMask.beginDraw();
+    tarpitDynamicMask.clear();
+    tarpitDynamicMask.translate(side/2, side/2);
+    tarpitDynamicMask.beginShape();
+    tarpitDynamicMask.vertex(cos(radians(tarpitArcStart)) * (EARTH_RADIUS+100), sin(radians(tarpitArcStart)) * (EARTH_RADIUS+100));
+    tarpitDynamicMask.vertex(cos(radians(tarpitArcStart + TARPIT_ARC)) * (EARTH_RADIUS + 100), sin(radians(tarpitArcStart + TARPIT_ARC)) * (EARTH_RADIUS+100));    
+    tarpitDynamicMask.vertex(cos(radians(tarpitArcStart + TARPIT_ARC)) * (EARTH_RADIUS - 40), sin(radians(tarpitArcStart + TARPIT_ARC)) * (EARTH_RADIUS - 40));
+    tarpitDynamicMask.vertex(cos(radians(tarpitArcStart)) * (EARTH_RADIUS-40), sin(radians(tarpitArcStart)) * (EARTH_RADIUS-40));
+    tarpitDynamicMask.endShape();
+    tarpitDynamicMask.endDraw();
+    assets.earthStuff.mask.set("mask", tarpitDynamicMask);
+
+    PVector mypoint = new PVector(cos(radians(tarpitArcStart + TARPIT_ARC/2)), sin(radians(tarpitArcStart + TARPIT_ARC/2)));
+    tarpitAngle = utils.angleOf(new PVector(0, 0), mypoint);
+  }
+
+  public void setStuckInTarpit (tarpitSinkable sinker) {
+    if (!tarpitEnabled || !sinker.sinkingEnabled()) return;
+    sinker.setInTarpit(utils.unsignedAngleDiff(sinker.angleOnEarth(), tarpitAngle) < TARPIT_ARC/2 - sinker.nudgeMargin());
+  }
+
+  void render(float clock) {
+
+    if (tarpitEnabled) shader(pixelMask);
     simpleRenderImage();
+    if (tarpitEnabled) resetShader();
+
+    if (!tarpitEnabled) return;
+
+    pushTransforms();
+    pushStyle();
+    strokeWeight(assets.STROKE_WIDTH);
+    stroke(0, 0, 100, 1);
+    fill(0, 0, 0, 1);
+    beginShape();
+
+    // tarpit surface
+    float arcDist = EARTH_RADIUS - 10;
+    vertex(cos(radians(tarpitArcStart)) * (arcDist), sin(radians(tarpitArcStart)) * (arcDist));
+    float x, y;
+    float amp = 4;
+    float step = 6;
+    float phase = 1.822;
+    for (int i = (int)tarpitArcStart+(int)step; i < tarpitArcStart + TARPIT_ARC - step; i+=step) {
+      x = cos(radians(i)) * (arcDist);
+      y = sin(radians(i)) * (arcDist);
+      x += cos(i * phase + clock/500) * amp;
+      y += sin(i * phase + clock/500) * amp;
+      //circle(x, y, 2);
+      vertex(x, y);
+    }
+    vertex(cos(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist), sin(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist));
+
+    // tarpit floor
+    float cx = cos(radians(tarpitArcStart + TARPIT_ARC/2)) * (arcDist * .75);
+    float cy = sin(radians(tarpitArcStart + TARPIT_ARC/2)) * (arcDist * .75);
+    float offset = tarpitArcStart + TARPIT_ARC * 2;
+    for (int i = 0; i < 200; i+=35) { 
+      vertex(cx + cos(radians(i + offset)) * 60, cy + sin(radians(i + offset)) * 60);
+    }
+    endShape(CLOSE);
+
+    // tarpit doodads
+    float ang = tarpitArcStart + TARPIT_ARC - 8;
+    float d = (EARTH_RADIUS - 65) + (floor(sin(radians(0) + clock/1e3)) * 5); // bob up and down in a square wave
+    pushMatrix();
+    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    rotate(radians(tarpitArcStart + 200));
+    image(assets.earthStuff.doodadHead, 0, 0);
+    popMatrix();
+
+    ang = tarpitArcStart + 15;
+    d = (EARTH_RADIUS - 85) + (floor(sin(radians(60) + clock/1e3)) * 5); // bob up and down in a square wave
+    pushMatrix();
+    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    rotate(radians(tarpitArcStart + 90));
+    image(assets.earthStuff.doodadRibs, 0, 0);
+    popMatrix();
+
+    ang = tarpitArcStart + 10;
+    d = (EARTH_RADIUS - 55) + (floor(sin(radians(120) + clock/1e3)) * 5); // bob up and down in a square wave
+    pushMatrix();
+    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    rotate(radians(tarpitArcStart + 180));
+    image(assets.earthStuff.doodadBone, 0, 0);
+    popMatrix();
+
+    popMatrix();
+    popStyle();
+  }
+
+  void restart() {
+    tarpitEnabled = false;
   }
 }
 

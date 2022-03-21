@@ -63,7 +63,7 @@ class Time {
   float elapsed;
   final static float HYPERSPACE_DEFAULT_TIME = 1.75;
   final static float DEFAULT_DEFAULT_TIME_SCALE = 1;
-  final static float DEATH_SCALING_DURATION = 2e3;
+  final static float DEATH_SCALING_DURATION = 3e3;
 
   float defaultTimeScale = DEFAULT_DEFAULT_TIME_SCALE;
   float hyperspaceTimeScale = HYPERSPACE_DEFAULT_TIME;
@@ -118,6 +118,10 @@ class Time {
 
   public float getClock() {
     return clock;
+  }
+
+  public float getScaledElapsed () {
+    return elapsed * timeScale;
   }
 
   public void restart () {

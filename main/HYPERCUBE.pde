@@ -20,8 +20,10 @@ class Hypercube extends Entity {
 
   final static float DEFAULT_HYPERSPACE_DURATION = 15e3;
 
-  final static float DEFAULT_MIN_SPAWN = 1e3;//10e3;
-  final static float DEFAULT_MAX_SPAWN = 2e3;//80e3;
+  final static float DEFAULT_MIN_SPAWN = 10e3;
+  final static float DEFAULT_MAX_SPAWN = 80e3;
+  float minSpawn = DEFAULT_MIN_SPAWN;
+  float maxSpawn = DEFAULT_MAX_SPAWN;
   float spawnCountDown;
   float stateStart;
 
@@ -64,7 +66,7 @@ class Hypercube extends Entity {
     enabled = true;
     stateStart = millis();
     state = COUNTING_DOWN;
-    spawnCountDown = random(DEFAULT_MIN_SPAWN, DEFAULT_MAX_SPAWN);
+    spawnCountDown = random(minSpawn, maxSpawn);
   }
 
   void goHyperspace () {

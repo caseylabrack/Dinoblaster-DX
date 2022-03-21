@@ -72,7 +72,7 @@ class EggHatch extends Entity {
           assets.trexStuff.eggWiggle.play();
         } else {
           state = CRACKED;
-          model = assets.trexStuff.eggBurst;
+          model = modelBurst;//assets.trexStuff.eggBurst;
           assets.trexStuff.eggHatch.play();
         }
         startTime = clock;
@@ -116,6 +116,142 @@ class EggHatch extends Entity {
 
   void reset () {
     enabled = false;
+  }
+}
+
+class Trex extends Entity implements tarpitSinkable {
+  boolean visible = true;
+  float runSpeed = .25;
+  boolean chasing = true;
+  float attackAngle = 110;
+  final static float BOUNDING_ARC = 16;
+  final static float BOUNDING_ARC_TARPIT_NUDGE = 6;
+
+  boolean alive = true;
+  final float TARPIT_BOTTOM_DIST = 120;
+  float tarpitSink = 0;
+
+  final static int WALKING = 0;
+  final static int SINKING = 1;
+  final static int DONE = 2;
+  final static int STUNNED = 3;
+  final static int HEAD = 4;
+  int state = WALKING;
+  boolean enabled = false;
+  boolean inTarpit = false;
+
+  boolean isStomping = false;
+
+  PImage idle;
+  PImage[] runFrames = new PImage[2];
+  PImage head;
+  SoundPlayable stompSound;
+
+  Trex (PImage idle, PImage head, PImage runFrame1, PImage runFrame2, SoundPlayable stompSound) {
+    this.idle = idle;
+    this.head = head;
+    runFrames[0] = runFrame1;
+    runFrames[1] = runFrame2;
+    this.stompSound = stompSound;
+    model = this.idle;
+    facing = -1;
+  }
+
+  boolean isDeadly () {
+    return enabled && state==WALKING;
+  }
+
+  void update(float dt, float scaledElapsed, targetable target) {
+    if (!enabled) return;
+
+    switch(state) {
+
+    case WALKING:
+      isStomping = false;
+
+      if (target.isTargettable()) {
+        float targetAngle = utils.angleOf(utils.ZERO_VECTOR, target.position());
+        float myAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
+
+        float diff = utils.signedAngleDiff(myAngle, targetAngle);
+
+        if (abs(diff) < attackAngle) {
+
+          if (!chasing) {
+            stompSound.play(true);
+          }
+          chasing = true;
+          facing = diff > 0 ? 1 : -1;
+        } else {
+          chasing = false;
+        }
+      } else {
+        chasing = false;
+      }
+
+      if (chasing) {
+        boolean edgeflag = model==runFrames[1] || model==idle;
+        model = runFrames[utils.cycleRangeWithDelay(runFrames.length, 8, frameCount)];
+        isStomping = model == runFrames[0] && edgeflag; // detect the leading edge of the change from one frame to the other (so you stomp only once per run cycle)
+        setPosition(utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * dt * facing));
+      } else {
+        model = idle;
+        stompSound.stop_();
+      }
+
+      r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+      break;
+
+    case SINKING: 
+      tarpitSink += scaledElapsed / Earth.TARPIT_SINK_DURATION;
+      float sink = EggHatch.EARTH_DIST_FINAL - (EggHatch.EARTH_DIST_FINAL - TARPIT_BOTTOM_DIST) * tarpitSink;
+      PVector tarpitAdjusted = new PVector(cos(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink, sin(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink);
+      setPosition(tarpitAdjusted);
+      model = runFrames[utils.cycleRangeWithDelay(runFrames.length, 8, frameCount)];
+
+      if (tarpitSink > 1) {
+        state = HEAD;
+        model = head;
+      }
+      break;
+
+    case HEAD:
+      break;
+
+    case STUNNED:
+      // do nothing but get hit by The Big One
+      break;
+    }
+  }
+
+  void render() {
+    if (!enabled) return;
+    simpleRenderImage();
+  }
+  
+  void restart() {
+     enabled = false; 
+  }
+  
+  float angleOnEarth () {
+    return r - 90;
+  }
+  
+  float nudgeMargin () {
+    return BOUNDING_ARC_TARPIT_NUDGE;
+  }
+  
+  void setInTarpit (boolean inTarpit) {
+    if (!this.inTarpit && inTarpit) { // set once
+      this.inTarpit = true;
+      state = SINKING;
+      stompSound.stop_();
+      isStomping = false;
+    }
+  }
+  
+  boolean sinkingEnabled () {
+    return enabled && state == WALKING;
   }
 }
 

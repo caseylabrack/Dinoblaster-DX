@@ -8,7 +8,7 @@ class GameOver {
   //void GameOver(PFont f) {
   //   extinctFont = f; 
   //}
-  
+
   void restart () {
     enabled = false;
     readyToRestart = false;
@@ -20,22 +20,59 @@ class GameOver {
   }
 
   void update() {
-    if(!enabled) return;
-    if(millis() - start > DURATION) readyToRestart = true;
+    if (!enabled) return;
+    if (millis() - start > DURATION) readyToRestart = true;
   }
 
   void render() {
-    if(!enabled) return;
-    
+    if (!enabled) return;
   }
 }
 
 class UIStory {
-  final static int TRIASSIC = 0;
-  final static int JURASSIC = 1;
-  final static int CRETACEOUS = 2;
-  final static int FINAL = 3;
+  //final static int TRIASSIC = 0;
+  //final static int JURASSIC = 1;
+  //final static int CRETACEOUS = 2;
+  //final static int FINAL = 3;
   final static String SCORE_DATA_FILENAME = "highscore.dat";
+
+  int lives;
+
+  PImage letterbox;
+
+  UIStory (PImage letterbox) {
+    this.letterbox = letterbox;
+  }
+
+  //void update(int lives) {
+  //  this.lives = lives;
+  //}
+
+  void render(int extralives, int score) {
+    push();
+    imageMode(CORNER);
+    image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+    image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+    pop();
+
+    image(extralives>=1 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    image(extralives>=2 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    image(extralives>=3 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+
+    push();
+    //tint(0,60,99,1);
+    imageMode(CENTER);
+    float p = ((float)score)/300.0;
+    float totalpixels = HEIGHT_REFERENCE - 80;
+    float fillupto = p * totalpixels;
+    float tickheight = 10;//assets.uiStuff.tick.height;
+    for (int i = 0; i < fillupto; i+=tickheight) {
+      image(assets.uiStuff.tick, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+    }
+    pop();
+
+    image(letterbox, 0, 0);
+  }
 }
 
 //class GameScreenMessages implements gameOverEvent, renderableScreen {

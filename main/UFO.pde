@@ -60,6 +60,11 @@ class UFO extends Entity {
     modelVector = model;
   }
 
+  void restart () {
+    enabled = false;
+    state = IDLE;
+  }
+
   void startCountDown () {
     spawnCountDown = random(5, 90) * 1000;
     enabled = true;
@@ -206,7 +211,7 @@ class UFO extends Entity {
       break;
 
     default:
-      println("ufo state wut");
+      println("ufo unhandled state change");
       break;
     }
 
