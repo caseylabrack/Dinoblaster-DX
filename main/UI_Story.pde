@@ -1,3 +1,98 @@
+class InGameText {
+
+  boolean extinct = false;
+  boolean showingTip = false;
+  String tip;
+  int tipIndex = 0;
+  final float TIP_DURATION = 6e3;
+  float tipStart;
+
+  final float EXTINCT_FLICKER_RATE_START = 30;
+  float extinctFlickerRate = EXTINCT_FLICKER_RATE_START;
+  final float EXTINCT_FLICKERING_DURATION = 1900;
+  float extinctFlickeringStart;
+  float extinctLastFlicker;
+  boolean extinctDisplay = false;
+
+  PFont extinctFont;
+  PFont tipFont;
+  StringList tips = new StringList();
+
+  InGameText (PFont extinctFont, PFont tipFont, String[] tips) {
+    this.extinctFont = extinctFont;
+    this.tipFont = tipFont;
+
+    for (int i = 0; i < tips.length; i++) this.tips.append(tips[i]);
+    this.tips.shuffle();
+  }
+
+  void goExtinct() {
+    extinctFlickeringStart = millis();
+    extinctLastFlicker = millis();
+    //state = EXTINCT;
+    extinct = true;
+    extinctFlickerRate = EXTINCT_FLICKER_RATE_START;
+  }
+
+  void showRandomTip () {
+    showingTip = true;
+    tipStart = millis();
+    tip = tips.get(tipIndex);
+
+    tipIndex++;
+    if (tipIndex > tips.size() - 1) {
+      tips.shuffle();
+      tipIndex = 0;
+    }
+  }
+
+  void update() {
+    if (!extinct && !showingTip) return;
+
+    if (extinct) {
+      if (millis() - extinctFlickeringStart < EXTINCT_FLICKERING_DURATION) {
+        if (millis() - extinctLastFlicker > extinctFlickerRate) {
+          extinctDisplay = !extinctDisplay;
+          extinctLastFlicker = millis();
+        }
+      } else {
+        extinctDisplay = true;
+      }
+    }
+
+    if (showingTip) {
+      if (millis() - tipStart > TIP_DURATION) showingTip = false;
+    }
+  }
+
+  void render(color funkyColor) {
+    if (!extinct && !showingTip) return;
+
+    if (extinct) {
+      pushStyle();
+      fill(funkyColor);
+      textFont(extinctFont);
+      textAlign(CENTER, CENTER);
+
+      if (extinctDisplay) text("EXTINCT", 15, -15);
+      popStyle();
+    }
+
+    if (showingTip) {
+      pushStyle();
+      textFont(tipFont);
+      textAlign(CENTER, CENTER);
+      text(tip, 0, -HEIGHT_REF_HALF + 50);
+      popStyle();
+    }
+  }
+
+  void restart () {
+    extinct = false;
+    showingTip = false;
+  }
+}
+
 class GameOver {
   float start;
   final static float DURATION = 5e3;
@@ -30,10 +125,6 @@ class GameOver {
 }
 
 class UIStory {
-  //final static int TRIASSIC = 0;
-  //final static int JURASSIC = 1;
-  //final static int CRETACEOUS = 2;
-  //final static int FINAL = 3;
   final static String SCORE_DATA_FILENAME = "highscore.dat";
 
   int lives;
@@ -43,10 +134,6 @@ class UIStory {
   UIStory (PImage letterbox) {
     this.letterbox = letterbox;
   }
-
-  //void update(int lives) {
-  //  this.lives = lives;
-  //}
 
   void render(int extralives, int score) {
     push();

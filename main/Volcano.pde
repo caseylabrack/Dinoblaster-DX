@@ -82,6 +82,12 @@ class VolcanoSystem {
       v.render(funkyColor);
     }
   }
+  
+  void restart() {
+    for(Volcano v: volcanos) {
+       v.enabled = false; 
+    }
+  }
 }
 
 class Volcano extends Entity implements obstacle {

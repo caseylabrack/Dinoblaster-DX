@@ -75,7 +75,7 @@ class Earth extends Entity {
 
     x = steadyXPosition;
     y = steadyYPosition;
-
+    
     if (shakeContinuous) {
       x += cos(random(TWO_PI)) * random(shakeMagnitude);
       x += sin(random(TWO_PI)) * random(shakeMagnitude);
@@ -191,6 +191,8 @@ class Earth extends Entity {
 
   void restart() {
     tarpitEnabled = false;
+    shakeContinuous = false;
+    shakeMomentary = false;
   }
 }
 

@@ -10,13 +10,14 @@ class SinglePlayer extends Scene {
   final static int TRIASSIC = 0;
   final static int JURASSIC = 1;
   final static int CRETACEOUS = 3;
+  int stage;
 
   Earth earth;
   Time time = new Time();
   StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
   VolcanoSystem volcanoSystem;
-  ColorDecider currentColor = new ColorDecider();
+  ColorDecider currentColor;
   UIStory ui;
   UFO ufo;
   UFORespawn ufoRespawn;
@@ -32,10 +33,12 @@ class SinglePlayer extends Scene {
   EggHatch egg;
   Trex trex;
   GibsSystem playerDeathAnimation;
+  InGameText gameText;
 
   int score;
   float lastScoreTick;
   boolean scoring;
+
 
   //boolean options = false;
   //Rectangle dipswitchesButton;
@@ -87,7 +90,6 @@ class SinglePlayer extends Scene {
     roidManager.enabled = settings.getBoolean("roidsEnabled", true);
 
     starsSystem.spawnSomeStars();
-    currentColor.update();
 
     ufo = new UFO(assets.ufostuff.ufoSVG);
     ufoRespawn = new UFORespawn(assets.ufostuff.ufoSVG);
@@ -106,6 +108,10 @@ class SinglePlayer extends Scene {
     playerDeathAnimation = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
 
     ui = new UIStory(assets.uiStuff.letterbox);
+
+    gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD, settings.getStrings("tips", assets.DEFAULT_TIPS));
+
+    currentColor = new ColorDecider(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
 
     //float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
     //float dipheight = assets.uiStuff.DIPswitchesBtn.height;
@@ -126,8 +132,27 @@ class SinglePlayer extends Scene {
   void play (int lvl) {
     println("level: " + lvl);
 
+    // restart stuff
+    player.restart();
+    gameOver.restart();
+    roidManager.restart();
+    ufo.restart();
+    volcanoSystem.restart();
+    egg.reset();
+    trex.restart();
+    earth.restart();
+    hypercube.restart();
+    time.setHyperspace(false);
+    starsSystem.setHyperspace(false);
+    gameText.restart();
+
+    gameText.showRandomTip();
+
+    playerIntro.startIntro();
     playerIntro.spawningStart = millis();
     ufo.startCountDown();
+
+    stage = lvl;
 
     if (lvl == TRIASSIC) {
       if (settings.getBoolean("hypercubesEnabled", true)) hypercube.startCountDown();
@@ -152,9 +177,7 @@ class SinglePlayer extends Scene {
       }
 
       if (settings.getBoolean("trexEnabled", true)) {
-        egg.x = cos(radians(angle));
-        egg.y = sin(radians(angle));
-        egg.startAnimation();
+        egg.startAnimation(angle);
       }
       score = 200;
     }
@@ -168,6 +191,8 @@ class SinglePlayer extends Scene {
     time.update();
     starsSystem.spin(time.getTimeScale());
     currentColor.update();
+
+    gameText.update();
 
     // check if it's time to go from intro -> player control
     playerIntro.update();
@@ -188,8 +213,9 @@ class SinglePlayer extends Scene {
       ufo.resumeCountDown();
     }
 
+    // volcano eruption
     for (Volcano v : volcanoSystem.volcanos) {
-      if (v.state==Volcano.ERUPTING) {
+      if (v.enabled && v.state==Volcano.ERUPTING) {
         earth.shake(10);
         break;
       }
@@ -208,18 +234,7 @@ class SinglePlayer extends Scene {
       playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 0, .75, .5);
       earth.addChild(playerDeathAnimation);
       println("died in tarpit");
-      if (player.extraLives <= 0) {
-        player.restart();
-        gameOver.callGameover();
-        time.deathStart();
-      } else {
-        player.extraLives--;
-        println("extra lives: " + player.extraLives);
-        player.restart();
-        time.deathStart();
-        ufo.pauseCountDown();
-        ufoRespawn.dispatch(player, earth.globalPos());
-      }
+      playerKilled();
     }
 
     boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
@@ -265,19 +280,7 @@ class SinglePlayer extends Scene {
 
             println("died from roid");
 
-            if (player.extraLives <= 0) {
-              player.restart();
-              gameOver.callGameover();
-              time.deathStart();
-              roidManager.killer = splode;
-            } else {
-              player.extraLives--;
-              println("extra lives: " + player.extraLives);
-              player.restart();
-              time.deathStart();
-              ufo.pauseCountDown();
-              ufoRespawn.dispatch(player, earth.globalPos());
-            }
+            playerKilled();
           }
         }
       }
@@ -294,7 +297,7 @@ class SinglePlayer extends Scene {
     }
 
     // player touching a hypercube?
-    if (hypercube.state == Hypercube.NORM) {
+    if (hypercube.state == Hypercube.NORM && hypercube.enabled) {
       if (PVector.dist(player.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
         hypercube.goHyperspace();
         time.setHyperspace(true);
@@ -332,35 +335,18 @@ class SinglePlayer extends Scene {
         playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 10, .99, .999);
         println("died from trex");
 
-        if (player.extraLives <= 0) {
-          player.restart();
-          gameOver.callGameover();
-          time.deathStart();
-        } else {
-          player.extraLives--;
-          println("extra lives: " + player.extraLives);
-          player.restart();
-          time.deathStart();
-          ufo.pauseCountDown();
-          ufoRespawn.dispatch(player, earth.globalPos());
-        }
+        playerKilled();
       }
     }
 
     playerDeathAnimation.update(time.getTimeScale(), time.getClock());
 
+    gameText.update();
+
     // restart
     gameOver.update();
     if (gameOver.readyToRestart && keys.anykey) {
-      playerIntro.startIntro();
-      gameOver.restart();
-      roidManager.restart();
-      ufo.restart();
-      trex.restart();
-      earth.restart();
-      time.setHyperspace(false);
-      starsSystem.setHyperspace(false);
-      play(TRIASSIC);
+      play(stage);
     }
 
     if (time.getClock() - lastScoreTick > 1000 && scoring) {
@@ -412,6 +398,7 @@ class SinglePlayer extends Scene {
     egg.render(currentColor.getColor());
     trex.render();
     playerDeathAnimation.render();
+    gameText.render(currentColor.getColor());
     popMatrix(); 
 
     assets.applyGlowiness();
@@ -547,6 +534,23 @@ class SinglePlayer extends Scene {
     //rect((width-w)/2 + w, 0, (width-w)/2, height);
     //popStyle();
     //popMatrix();
+  }
+
+  void playerKilled() {
+    if (player.extraLives <= 0) {
+      player.restart();
+      gameOver.callGameover();
+      time.deathStart();
+      gameText.goExtinct();
+      assets.playerStuff.extinct.play(false);
+    } else {
+      player.extraLives--;
+      player.restart();
+      time.deathStart();
+      ufo.pauseCountDown();
+      ufoRespawn.dispatch(player, earth.globalPos());
+      assets.playerStuff.littleDeath.play(false);
+    }
   }
 
   void mouseUp() {

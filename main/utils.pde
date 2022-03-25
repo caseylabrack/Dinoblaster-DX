@@ -229,9 +229,28 @@ class SimpleTXTParser {
     return result;
   }
 
+  char getChar (String _key, char _default) {
+    char result = _default;
+    //String[] m = match(txt, _key + ":\\s*(\\w+)");
+    //String[] m = match(txt, _key + ":\\s*([\\w+\\"])");
+    String[] m = match(txt, _key + ":\\s*\"?(.)");
+    if (m != null) {
+      try {
+        result = m[1].charAt(0);
+      } 
+      catch(Exception e) {
+      }
+    } else {
+      if (errors) println("getChar no match: ", _key);
+    }
+    return result;
+  }
+
   String getString (String _key, String _default) {
     String result = _default;
-    String[] m = match(txt, _key + ":\\s*(\\w+)");
+    //String[] m = match(txt, _key + ":\\s*(\\w+)");
+    //String[] m = match(txt, _key + ":\\s*([\\w+\\"])");
+    String[] m = match(txt, _key + ":\\s*([^\"])");
     if (m != null) {
       try {
         result = m[1];
@@ -240,6 +259,24 @@ class SimpleTXTParser {
       }
     } else {
       if (errors) println("getString no match: ", _key);
+    }
+    return result;
+  }
+
+  String[] getStrings (String _key, String[] _default) {
+    String[] result = _default;
+    String[] line = match(txt, _key + ":([^\n\r]+)$"); // get the whole text line. the dot would consume line terminators apparently
+    String[][] m = null;
+    if (line!=null) {
+      m = matchAll(line[1], "\"([^\"]+)\""); // within that line, find all strings (character sequences enclosed in double quotes)
+    }
+    if (m != null) {
+      result = new String[m.length];
+      for (int i = 0; i < m.length; i++) {
+        result[i] = m[i][1];
+      }
+    } else {
+      if (errors) println("getStrings no match: ", _key);
     }
     return result;
   }

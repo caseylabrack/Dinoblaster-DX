@@ -20,8 +20,8 @@ class Hypercube extends Entity {
 
   final static float DEFAULT_HYPERSPACE_DURATION = 15e3;
 
-  final static float DEFAULT_MIN_SPAWN = 10e3;
-  final static float DEFAULT_MAX_SPAWN = 80e3;
+  final static float DEFAULT_MIN_SPAWN = 1e3;//10e3;
+  final static float DEFAULT_MAX_SPAWN = 2e3;//80e3;
   float minSpawn = DEFAULT_MIN_SPAWN;
   float maxSpawn = DEFAULT_MAX_SPAWN;
   float spawnCountDown;
@@ -97,11 +97,12 @@ class Hypercube extends Entity {
       x -= shiftX;
       y -= shiftY;
       break;
-    }    
+    }
   }
 
   void render (float dt, color funkyColor) {
-    if (state != NORM && state != HYPERSPACE) return;
+    if (!enabled || state == COUNTING_DOWN) return;
+    //if (state != NORM && state != HYPERSPACE) return;
 
     pg.beginDraw();
     pg.pushMatrix();
@@ -190,6 +191,10 @@ class Hypercube extends Entity {
     PVector a = points[i+offset];
     PVector b = points[j+offset];
     pg.line(a.x, a.y, a.z, b.x, b.y, b.z);
+  }
+
+  void restart() {
+    enabled = false;
   }
 }
 

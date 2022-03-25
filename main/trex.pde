@@ -30,16 +30,18 @@ class EggHatch extends Entity {
     this.modelCracked = modelCracked;
     this.modelBurst = modelBurst;
     this.trex = trex;
-    model = modelCracked;
   }
 
-  void startAnimation () {
+  void startAnimation (float angle) {
     enabled = true;
+    model = modelCracked;
     startTime = millis();
     state = RISING;
-    angle = utils.angleOf(utils.ZERO_VECTOR, localPos());
+    this.angle = angle;
+    //angle = utils.angleOf(utils.ZERO_VECTOR, localPos());
     r = angle + 90;
     uprightR = r;
+    wiggleCount = 0;
   }
 
   void update (float clock) {
@@ -50,7 +52,7 @@ class EggHatch extends Entity {
     switch(state) {
 
     case RISING:
-      progress = (clock - startTime) / risingDuration;
+      progress = (millis() - startTime) / risingDuration;
       if (progress < 1) {
         //float dist = utils.easeLinear(progress,startY,endY-startY,1);
         float t = utils.easeOutBounce(progress);

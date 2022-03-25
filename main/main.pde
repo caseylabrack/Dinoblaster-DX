@@ -61,35 +61,35 @@ void setup () {
     println("problem load game settings");
     PrintWriter output;
     output = createWriter("DIP-switches.txt");
-    String spacer = "          ";
+    String spacer = "     ";
     String settingsString = String.join("\n", 
       "--Edit this text file to change your controls, set preferences, and even cheat.", 
       "--(Restart DinoBlaster for changes to take effect.)", 
       "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
       "", 
-      "",
-      "----CONTROLS----",
-      "player1LeftKey: a",
-      "player1RightKey: d",
-      "",
-      "triassicSelect: 1",
-      "jurassicSelect: 2",
-      "cretaceousSelect: 3",
-      "",
+      "", 
+      "----CONTROLS----", 
+      "player1LeftKey: a", 
+      "player1RightKey: d", 
+      "", 
+      "triassicSelect: 1", 
+      "jurassicSelect: 2", 
+      "cretaceousSelect: 3", 
+      "", 
       "sfxVolume: 100", 
-      "musicVolume: 100",
-      "",
+      "musicVolume: 100", 
+      "", 
       "startAtLevel: 4", 
       "hideDIPSwitchesButton: false", 
-      "glowiness: " + assets.DEFAULT_GLOWINESS,
-      "",
-      "",
-      "----GAMEPLAY----",
+      "glowiness: " + assets.DEFAULT_GLOWINESS, 
+      "", 
+      "", 
+      "----GAMEPLAY----", 
       "roidsEnabled: " + true, 
       "trexEnabled: " + true, 
       "volcanosEnabled: " + true, 
       "ufosEnabled: " + true, 
-      "tarpitsEnabled: " + true,
+      "tarpitsEnabled: " + true, 
       "", 
       "hypercubesEnabled: " + true, 
       "hyperspaceDuration: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
@@ -107,7 +107,13 @@ void setup () {
       "roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
       "", 
       "JurassicUnlocked: " + false, 
-      "CretaceousUnlocked: " + false
+      "CretaceousUnlocked: " + false, 
+      "", 
+      "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"",
+      "-- put tips inside double quotes, don't linebreak",
+      "",
+      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"",
+      "-- put colors inside double quotes. colors can be hexadecimal, like \"#ff3800\", or one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)"
       );
     output.println(settingsString);
     output.flush();
@@ -141,16 +147,16 @@ void setup () {
 
   jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
-  leftkey = settings.getString("player1LeftKey", "a").charAt(0);
-  rightkey = settings.getString("player1RightKey", "d").charAt(0);
+  leftkey = settings.getChar("player1LeftKey", 'a');
+  rightkey = settings.getChar("player1RightKey", 'd');
   triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
   jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
   cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
-  
+
   singlePlayer = new SinglePlayer(settings, assets);
   singlePlayer.play(SinglePlayer.CRETACEOUS);
   //singlePlayer.play(SinglePlayer.JURASSIC);
-  
+
   currentScene = singlePlayer;
 }
 
@@ -247,24 +253,24 @@ void draw () {
 }
 
 //int highestUnlockedLevel () {
-  //int nextlvl = UIStory.TRIASSIC;
-  //int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
-  //switch(highscorefloor) {
-  //case 0:  
-  //  nextlvl = UIStory.TRIASSIC;
-  //  break;
-  //case 1:  
-  //  nextlvl = UIStory.JURASSIC;
-  //  break;
-  //case 2:  
-  //  nextlvl = UIStory.CRETACEOUS;
-  //  break;
-  //}
+//int nextlvl = UIStory.TRIASSIC;
+//int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
+//switch(highscorefloor) {
+//case 0:  
+//  nextlvl = UIStory.TRIASSIC;
+//  break;
+//case 1:  
+//  nextlvl = UIStory.JURASSIC;
+//  break;
+//case 2:  
+//  nextlvl = UIStory.CRETACEOUS;
+//  break;
+//}
 
-  //if (settings.getBoolean("JurassicUnlocked", false)) nextlvl = max(nextlvl, UIStory.JURASSIC);
-  //if (settings.getBoolean("CretaceousUnlocked", false)) nextlvl = max(nextlvl, UIStory.CRETACEOUS);
+//if (settings.getBoolean("JurassicUnlocked", false)) nextlvl = max(nextlvl, UIStory.JURASSIC);
+//if (settings.getBoolean("CretaceousUnlocked", false)) nextlvl = max(nextlvl, UIStory.CRETACEOUS);
 
-  //return nextlvl;
+//return nextlvl;
 //}
 
 //int chooseNextLevel () {

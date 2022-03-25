@@ -298,7 +298,6 @@ class GibsSystem extends Entity {
 
     PVector centerOffset = new PVector(model.width, model.height).div(2);
     opticalCenterPoint.sub(centerOffset);
-    println("optical " + opticalCenterPoint);
 
     for (int i = 0; i < gibs.length; i++) {
       g = gibs[i] = new Gib();
