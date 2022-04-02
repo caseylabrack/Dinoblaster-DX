@@ -111,7 +111,7 @@ class EggHatch extends Entity {
   void render(color funkyColor) {
     if (!enabled) return;
     pushStyle();
-    stroke(funkyColor);
+    tint(funkyColor);
     simpleRenderImage();
     popStyle();
   }
@@ -123,9 +123,11 @@ class EggHatch extends Entity {
 
 class Trex extends Entity implements tarpitSinkable {
   boolean visible = true;
-  float runSpeed = .25;
+  final static float DEFAULT_RUNSPEED = .25;
+  float runSpeed = DEFAULT_RUNSPEED;
   boolean chasing = true;
-  float attackAngle = 110;
+  final static float DEFAULT_ATTACK_ANGLE = 110;
+  float attackAngle = DEFAULT_ATTACK_ANGLE;
   final static float BOUNDING_ARC = 16;
   final static float BOUNDING_ARC_TARPIT_NUDGE = 6;
 
@@ -148,13 +150,15 @@ class Trex extends Entity implements tarpitSinkable {
   PImage[] runFrames = new PImage[2];
   PImage head;
   SoundPlayable stompSound;
+  SoundPlayable rawr;
 
-  Trex (PImage idle, PImage head, PImage runFrame1, PImage runFrame2, SoundPlayable stompSound) {
+  Trex (PImage idle, PImage head, PImage runFrame1, PImage runFrame2, SoundPlayable stompSound, SoundPlayable rawr) {
     this.idle = idle;
     this.head = head;
     runFrames[0] = runFrame1;
     runFrames[1] = runFrame2;
     this.stompSound = stompSound;
+    this.rawr = rawr;
     model = this.idle;
     facing = -1;
   }
@@ -230,263 +234,44 @@ class Trex extends Entity implements tarpitSinkable {
     if (!enabled) return;
     simpleRenderImage();
   }
-  
+
   void restart() {
-     enabled = false; 
+    enabled = false;
   }
-  
+
   float angleOnEarth () {
     return r - 90;
   }
-  
+
   float nudgeMargin () {
     return BOUNDING_ARC_TARPIT_NUDGE;
   }
-  
+
   void setInTarpit (boolean inTarpit) {
     if (!this.inTarpit && inTarpit) { // set once
       this.inTarpit = true;
       state = SINKING;
       stompSound.stop_();
+      rawr.play();
       isStomping = false;
     }
   }
-  
+
   boolean sinkingEnabled () {
     return enabled && state == WALKING;
   }
+
+  void stun () {
+    if (state == WALKING) {
+      state = STUNNED;
+      model = idle;
+      stompSound.stop_();
+    }
+  }
+
+  void vanish() {
+    if (state == STUNNED) {
+      enabled = false;
+    }
+  }
 }
-
-//class TrexManager implements updateable, renderable, levelChangeEvent, gameFinaleEvent {
-
-//  EventManager events;
-//  Time time;  
-//  Earth earth;
-//  Trex trex;
-//  EggTrex egg;
-//  PlayerManager playerManager;
-//  ColorDecider currentColor;
-
-//  final int SPAWN_DELAY = 25;
-//  int spawnSchedule = -1;
-
-//  boolean finalePositioningTrex = false;
-//  final float FINALE_TREX_POSITIONING_LEADING = 60;
-
-//  TrexManager (EventManager e, Time t, Earth w, PlayerManager pm, ColorDecider c, int lvl) {
-//    events = e;
-//    time = t;
-//    earth = w;
-//    currentColor = c;
-//    playerManager = pm;
-
-//    events.levelChangeSubscribers.add(this);
-//    events.gameFinaleSubscribers.add(this);
-
-//    if (!settings.getBoolean("trexEnabled", true)) return;
-//    if (lvl==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
-//  }
-
-//  void levelChangeHandle(int stage) {
-
-//    if (stage==UIStory.CRETACEOUS) spawnSchedule = SPAWN_DELAY; //spawn();
-//  }
-
-//  void finaleHandle() {
-//    // deactivate any t-rexs
-//    if (trex!=null) {
-//      trex.disable();
-//      if (trex.state == trex.STUNNED) {
-//        finalePositioningTrex = true;
-//      } else {
-//        events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
-//      }
-//    } else {
-//      println("no trex to position");
-//      events.dispatchFinaleTrexPositioned(utils.ZERO_VECTOR);
-//    }
-//  }
-
-//  void finaleClose() {}
-
-//  public void spawnTrex(PVector pos) {
-//    trex = new Trex(earth, playerManager, time, pos);
-//  }
-
-//  public void spawnTrex() {
-//    trex = new Trex(earth, playerManager, time, new PVector(0, -120));
-//  }
-
-//  void finaleTrexHandled(PVector _) {
-//  }
-//  void finaleImpact() {
-//    // make trex explode maybe
-//  }
-
-//  void update () {
-
-//    if (finalePositioningTrex) {
-//      float currentAngle = utils.angleOf(utils.ZERO_VECTOR, trex.globalPos());
-//      float targetAngle = utils.angleOf(utils.ZERO_VECTOR, new PVector(-HEIGHT_REF_HALF, -HEIGHT_REF_HALF));
-//      float diff = utils.signedAngleDiff(currentAngle, targetAngle);
-//      if (diff > 0 && diff < FINALE_TREX_POSITIONING_LEADING) {
-//        events.dispatchFinaleTrexPositioned(trex.globalPos());
-//        finalePositioningTrex = false;
-//      }
-//    }
-
-//    if (spawnSchedule > -1) {
-//      spawnSchedule--;
-//      if (spawnSchedule==0) {
-//        spawnSchedule = -1;
-//        egg = new EggTrex(earth, time, currentColor);
-//      }
-//    }
-
-//    if (egg!=null) {
-//      egg.update();
-//      if (egg.state==EggTrex.DONE) {
-//        spawnTrex(egg.localPos());
-//        egg = null;
-//      }
-//    }
-
-//    if (trex!=null) {
-//      trex.update();
-//      if (trex.state == Trex.DONE) {
-//        trex = null;
-//      }
-//    }
-//  }
-
-//  void render() {
-//    if (trex!=null) trex.render();
-//    if (egg!=null) egg.render();
-//  }
-//}
-
-//class Trex extends Entity implements gameOverEvent, updateable, renderable {
-
-//  PImage model;
-//  PImage idle;
-//  PImage[] runFrames = new PImage[2];
-//  boolean visible = true;
-//  float runSpeed = .75;
-//  boolean chasing = true;
-//  float attackAngle = 110;
-//  final float HITBOX_ANGLE = 16;
-
-//  Earth earth;
-//  PlayerManager playerManager;
-//  Time time;
-
-//  boolean alive = true;
-//  final float TARPIT_BOTTOM_DIST = 110;
-//  float tarpitSink = 0;
-
-//  final static int WALKING = 0;
-//  final static int SINKING = 1;
-//  final static int DONE = 2;
-//  final static int STUNNED = 3;
-//  int state = WALKING;
-
-//  Trex (Earth _earth, PlayerManager pm, Time t, PVector pos) {
-//    earth = _earth; 
-//    playerManager = pm;
-//    time = t;
-//    idle = assets.trexStuff.trexIdle;//frames[0];
-//    runFrames[0] = assets.trexStuff.trexRun1;//frames[1];
-//    runFrames[1] = assets.trexStuff.trexRun2;//frames[2];
-//    model = idle;
-//    facing = -1;
-//    earth.addChild(this);
-//    setPosition(pos);
-//    r = utils.angleOf(new PVector(0, 0), localPos()) + 90;
-
-//    assets.trexStuff.rawr.play();
-//  }
-
-//  void gameOverHandle () {
-//    chasing = false;
-//  }
-
-//  void disable () {
-//    if (state == SINKING) return;
-//    state = STUNNED;
-//  }
-
-//  void update () {
-
-//    switch(state) {
-
-//    case WALKING:
-//      float playerDist = playerManager.player!=null ? utils.signedAngleDiff(r, playerManager.player.r) : 1e9;
-
-//      if (abs(playerDist) < HITBOX_ANGLE) {
-//        playerManager.roidImpactHandle(this.globalPos());
-//      }
-
-//      if (abs(playerDist) < attackAngle) {
-//        if (!chasing) { 
-//          assets.trexStuff.stomp.play(true);
-//        }
-//        chasing = true;
-//        facing = playerDist > 0 ? 1 : -1;
-//      } else {
-//        chasing = false;
-//        assets.trexStuff.stomp.stop_();
-//      }
-
-//      if (chasing) {
-//        model = runFrames[utils.cycleRangeWithDelay(runFrames.length, 12, frameCount)];
-//        if (model==runFrames[1]) earth.shake(2.5);
-//        setPosition(utils.rotateAroundPoint(localPos(), new PVector(0, 0), runSpeed * time.getTimeScale() * facing));
-//        dr += runSpeed * time.getTimeScale() * facing;
-//      } else {
-//        model = idle;
-//      }
-
-//      x += dx;
-//      y += dy;
-//      r += dr;
-
-//      dx = 0;
-//      dy = 0;
-//      dr = 0;
-
-//      if (earth.isInTarpit(localPos())) {
-//        state = SINKING;
-//        assets.trexStuff.stomp.stop_();
-//        //assets.trexStuff.sinking.play();
-//        assets.trexStuff.rawr.play();
-//      }
-
-//      break;
-
-//    case SINKING: 
-//      tarpitSink += time.getScaledElapsed() / Earth.TARPIT_SINK_DURATION;
-//      float sink = EggTrex.EARTH_DIST_FINAL - (EggTrex.EARTH_DIST_FINAL - TARPIT_BOTTOM_DIST) * tarpitSink;
-//      PVector tarpitAdjusted = new PVector(cos(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink, sin(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink);
-//      setPosition(tarpitAdjusted);
-
-//      if (tarpitSink > 1) state = DONE;
-//      break;
-
-//    case STUNNED:
-//      // do nothing but get hit by The Big One
-//      break;
-//    }
-//  }
-
-//  void render () {
-//    simpleRenderImage(model);
-//    //pushTransforms();
-//    //pushStyle();
-//    //noFill();
-//    //stroke(60,60,60);
-//    //strokeWeight(3);
-//    //circle(0, 0, HIT_RADIUS);
-//    //popStyle();
-//    //popMatrix();
-//  }
-//}

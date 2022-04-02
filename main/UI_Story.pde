@@ -97,12 +97,7 @@ class GameOver {
   float start;
   final static float DURATION = 5e3;
   boolean enabled = false;
-  PFont extinctFont;
   boolean readyToRestart = false;
-
-  //void GameOver(PFont f) {
-  //   extinctFont = f; 
-  //}
 
   void restart () {
     enabled = false;
@@ -128,14 +123,18 @@ class UIStory {
   final static String SCORE_DATA_FILENAME = "highscore.dat";
 
   int lives;
-
+  boolean enabled = true;
   PImage letterbox;
+  PImage screenShine;
 
-  UIStory (PImage letterbox) {
+  UIStory (PImage letterbox, PImage screenShine) {
     this.letterbox = letterbox;
+    this.screenShine = screenShine;
   }
 
   void render(int extralives, int score) {
+    if(!enabled) return;
+    
     push();
     imageMode(CORNER);
     image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
@@ -158,73 +157,10 @@ class UIStory {
     }
     pop();
 
+    image(screenShine, 0, 0);
     image(letterbox, 0, 0);
   }
 }
-
-//class GameScreenMessages implements gameOverEvent, renderableScreen {
-
-//  ColorDecider currentColor;
-//  EventManager eventManager;
-
-//  boolean isGameOver = false;
-//  float gameOverGracePeriodStart;
-//  boolean extinctDisplay = true;
-//  final float EXTINCT_FLICKER_RATE_START = 100;
-//  float extinctFlickerRate = 100;
-//  final float EXTINCT_FLICKERING_DURATION = 3e3;
-//  float extinctFlickeringStart;
-
-//  String motd;
-//  float motdStart;
-//  final float MOTD_DURATION = 4e3;
-
-//  GameScreenMessages (EventManager e, ColorDecider c) {
-//    eventManager = e;
-//    currentColor = c;
-//    eventManager.gameOverSubscribers.add(this);
-
-//    motd = assets.getMOTD();
-//    motdStart = millis();
-//  }
-
-//  void gameOverHandle() {
-//    isGameOver = true;
-//    extinctFlickeringStart = millis();
-//  }
-
-//  void render () {
-
-//    if (millis() - motdStart < MOTD_DURATION) {
-//      pushStyle();
-//      textFont(assets.uiStuff.MOTD);
-//      textAlign(CENTER, CENTER);
-//      text(motd, 0, -HEIGHT_REF_HALF + 50);
-//      popStyle();
-//    }
-
-//    if (isGameOver) {
-//      pushStyle();
-//      fill(currentColor.getColor());
-//      textFont(assets.uiStuff.extinctType);
-//      textAlign(CENTER, CENTER);
-
-//      if (millis() - extinctFlickeringStart < EXTINCT_FLICKERING_DURATION) {
-//        extinctDisplay = !extinctDisplay;
-//        if (extinctDisplay) {
-//          text("EXTINCT", 
-//            15, // optical margin adjustment 
-//            -15);
-//        }
-//      } else {
-//        text("EXTINCT", 
-//          15, // optical margin adjustment 
-//          -15);
-//      }
-//      popStyle();
-//    }
-//  }
-//}
 
 //class UIStory implements gameOverEvent, abductionEvent, playerDiedEvent, playerSpawnedEvent, playerRespawnedEvent, updateable, renderableScreen {
 //  boolean isGameOver = false;

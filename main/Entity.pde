@@ -12,19 +12,6 @@ class Entity {
     child.parent = this;
   } 
 
-  //public Entity clone () {
-  //  Entity e = new Entity();
-  //  e.x = this.x;
-  //  e.y = this.y;
-  //  e.r = this.r;
-  //  e.dx = this.dx;
-  //  e.dy = this.dy;
-  //  e.dr = this.dr;
-  //  e.facing = this.facing;
-  //  e.parent = this.parent;
-  //  return e;
-  //}
-
   public PVector globalToLocalPos (PVector globalPoint) {
     PVector mypos = globalPos();
     float d = dist(mypos.x, mypos.y, globalPoint.x, globalPoint.y);

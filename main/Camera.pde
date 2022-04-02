@@ -200,12 +200,12 @@ class ColorDecider implements updateable {
       if (hm.containsKey(s)) s = hm.get(s);
       s = s.replace("#", "");
       if (s.length()==6) s = "ff" + s;
-      if (s.length()==8) cs.append(unhex(s));
+      if (match(s, "[a-fA-F0-9]{8}") != null) cs.append(unhex(s)); // is it actually a color hex
     }
-    
+
     // couldn't parse user colors, use default
-    if(cs.size()==0) {
-      for(String h : defaulthues) cs.append(unhex("ff"+h));
+    if (cs.size()==0) {
+      for (String h : defaulthues) cs.append(unhex("ff"+h.replace("#", "")));
     }
   }
 
@@ -259,6 +259,11 @@ class Time {
         timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
       }
     }
+  }
+
+  void setTimeScale(float n) {
+    defaultTimeScale = n;
+    timeScale = n;
   }
 
   void setHyperspace (boolean h) {

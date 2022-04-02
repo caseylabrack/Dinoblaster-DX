@@ -19,7 +19,7 @@ Scene currentScene;
 // recording
 int fcount = 0;
 boolean rec = false;
-final int RECORD_FRAMERATE = 2;
+final int RECORD_FRAMERATE = 4;
 
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
@@ -106,14 +106,23 @@ void setup () {
       "roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
       "roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
       "", 
+      "trexSpeed: " + Trex.DEFAULT_RUNSPEED,
+      "trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE + spacer + "-- how far the trex \"sees\", in degrees",
+      "",
       "JurassicUnlocked: " + false, 
       "CretaceousUnlocked: " + false, 
       "", 
-      "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"",
-      "-- put tips inside double quotes, don't linebreak",
+      "----MISC----",
+      "showSidePanels: " + true,
       "",
-      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"",
-      "-- put colors inside double quotes. colors can be hexadecimal, like \"#ff3800\", or one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)"
+      "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
+      "-- put tips inside double quotes, don't linebreak", 
+      "", 
+      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
+      "-- put colors inside double quotes, don't linebreak", 
+      "-- colors can be hexadecimal, like \"#FF69B4\"", 
+      "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
+      "-- you can have any number of colors. make a list with only fuschia, or one that creates a gradient, or one where the colors get brighter and darker, etc"
       );
     output.println(settingsString);
     output.flush();
@@ -149,13 +158,17 @@ void setup () {
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
   leftkey = settings.getChar("player1LeftKey", 'a');
   rightkey = settings.getChar("player1RightKey", 'd');
-  triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
-  jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
-  cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
+  triassicSelect = settings.getChar("triassicSelect", '1');
+  jurassicSelect = settings.getChar("jurassicSelect", '2');
+  cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
+  //triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
+  //jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
+  //cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
 
   singlePlayer = new SinglePlayer(settings, assets);
-  singlePlayer.play(SinglePlayer.CRETACEOUS);
+  singlePlayer.play(SinglePlayer.TRIASSIC);
   //singlePlayer.play(SinglePlayer.JURASSIC);
+  //singlePlayer.play(SinglePlayer.CRETACEOUS);
 
   currentScene = singlePlayer;
 }

@@ -65,7 +65,7 @@ class AssetManager {
     uiStuff.extinctType = createFont("Hyperspace.otf", 150);
     //uiStuff.extinctSign = loadImage("gameover-lettering.png");
     //uiStuff.letterbox = loadImage("letterboxes2.png");
-    uiStuff.letterbox = loadImage("letterboxes2c.png");
+    uiStuff.letterbox = loadImage("letterboxes2.png");
     uiStuff.screenShine = loadImage("screenShine.png");
     uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
     uiStuff.progressBG = loadImage("progress-bg.png");
@@ -114,6 +114,7 @@ class AssetManager {
     trexStuff.trexHead = loadImage("trex-head.png");
     trexStuff.eggCracked = loadImage("egg-cracked.png");
     trexStuff.eggBurst = loadImage("egg-burst.png");
+    trexStuff.deth = loadShape("trexDeth.svg");
     trexStuff.eggHatch = raspi ? new SoundM("_audio/trex-and-egg/egg-hatch.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-hatch.wav", context);
     sounds.add(trexStuff.eggHatch);
     trexStuff.eggWiggle = raspi ? new SoundM("_audio/trex-and-egg/egg-wiggle.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-wiggle.wav", context);
@@ -265,6 +266,7 @@ class AssetManager {
     PImage trexHead;
     PImage eggCracked;
     PImage eggBurst;
+    PShape deth;
     SoundPlayable eggHatch;
     SoundPlayable eggWiggle;
     SoundPlayable rawr;

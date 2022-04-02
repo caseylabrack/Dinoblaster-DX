@@ -70,6 +70,10 @@ class UFO extends Entity {
     enabled = true;
   }
 
+  void windDown() {
+    countingDown = false;
+  }
+
   void pauseCountDown () {
     if (state!=IDLE) state = LEAVING;
     countingDown = false;
@@ -137,7 +141,6 @@ class UFO extends Entity {
       break;
 
     case SCANNING:
-
       float scantime = clock - startState;
 
       if (scantime < scanDuration) {
