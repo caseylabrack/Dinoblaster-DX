@@ -269,9 +269,9 @@ class Time {
   void setHyperspace (boolean h) {
     isHyperSpace = h;
     if (h) {
-      timeScale = HYPERSPACE_DEFAULT_TIME;
+      timeScale = hyperspaceTimeScale;
     } else {
-      timeScale = DEFAULT_DEFAULT_TIME_SCALE;
+      timeScale = defaultTimeScale;
     }
   }
 

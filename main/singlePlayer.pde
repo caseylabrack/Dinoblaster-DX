@@ -24,9 +24,6 @@ class SinglePlayer extends Scene {
   UFORespawn ufoRespawn;
   Camera camera = new Camera();
   Hypercube hypercube;
-  //GameScreenMessages gameText;
-  //MusicManager musicManager;
-  //FinaleStuff finaleManager;
   Player player;
   PlayerRespawn playerRespawn;
   PlayerIntro playerIntro = new PlayerIntro();
@@ -47,7 +44,7 @@ class SinglePlayer extends Scene {
   SoundPlayable music;
 
   //boolean options = false;
-  //Rectangle dipswitchesButton;
+  Rectangle dipswitchesButton;
   //Rectangle optionsButton;
   //Rectangle soundButton;
   //Rectangle restartButton;
@@ -56,10 +53,6 @@ class SinglePlayer extends Scene {
   //float directoryTextYPos = 0;//32 + 10 + 32 + 10 + 32 + 10 + 10;
   //float yoffset = -5; // optically vertically center align text within rectangle buttons
   //IntList validLvls = new IntList();
-
-  //ArrayList<updateable> updaters = new ArrayList<updateable>();
-  //ArrayList<renderableScreen> screenRenderers = new ArrayList<renderableScreen>();
-  //ArrayList<renderable> renderers =  new ArrayList<renderable>();
 
   SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
@@ -104,6 +97,7 @@ class SinglePlayer extends Scene {
     volcanoSystem.addVolcanos(earth);
 
     hypercube = new Hypercube();
+    hypercube.hyperspaceDuration = settings.getFloat("hyperspaceDuration", Hypercube.DEFAULT_HYPERSPACE_DURATION) * 1e3;
 
     egg = new EggHatch(assets.trexStuff.eggCracked, assets.trexStuff.eggBurst, assets.trexStuff.trexIdle);
     earth.addChild(egg);
@@ -119,6 +113,9 @@ class SinglePlayer extends Scene {
 
     ui = new UIStory(assets.uiStuff.letterbox, assets.uiStuff.screenShine);
     ui.enabled = settings.getBoolean("showSidePanels", true);
+    
+    time.hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
+    time.setTimeScale(settings.getFloat("defaultTimeScale", 1));
 
     gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD, settings.getStrings("tips", assets.DEFAULT_TIPS));
 
@@ -128,9 +125,9 @@ class SinglePlayer extends Scene {
 
     music = assets.musicStuff.lvl1a;
 
-    //float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
-    //float dipheight = assets.uiStuff.DIPswitchesBtn.height;
-    //dipswitchesButton = new Rectangle(HEIGHT_REF_HALF + (WIDTH_REF_HALF - HEIGHT_REF_HALF) / 2 - dipwidth/2, HEIGHT_REF_HALF - dipheight, dipwidth, dipheight);
+    float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
+    float dipheight = assets.uiStuff.DIPswitchesBtn.height;
+    dipswitchesButton = new Rectangle(HEIGHT_REF_HALF + (WIDTH_REF_HALF - HEIGHT_REF_HALF) / 2 - dipwidth/2, HEIGHT_REF_HALF - dipheight, dipwidth, dipheight);
     //optionsButton = new Rectangle(WIDTH_REF_HALF - 100, HEIGHT_REF_HALF - 125, 100, 100);
     //float y = -HEIGHT_REF_HALF + 125; // 125 pixels from top of screen
     //float optionsDY = 75;
@@ -204,11 +201,12 @@ class SinglePlayer extends Scene {
       if (settings.getBoolean("trexEnabled", true)) {
         egg.startAnimation(angle);
       }
-      score = 285;
+      score = 200;
       music = assets.musicStuff.lvl3;
     }
 
     lastScoreTick = time.getClock();
+    //earth.addChild(camera);
   }
 
   void update () {
@@ -498,7 +496,8 @@ class SinglePlayer extends Scene {
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
     scale(SCALE);
     //scale(2);
-    rotate(camera.globalRote());
+    //rotate(radians(-player.globalRote()));
+    rotate(radians(-camera.globalRote()));
     playerRespawn.render();
     ufo.render(currentColor.getColor());
     ufoRespawn.render(currentColor.getColor());
@@ -538,21 +537,6 @@ class SinglePlayer extends Scene {
     imageMode(CENTER);
     ui.render(player.extraLives, score);
     popMatrix();
-
-    //PVector m = screenspaceToWorldspace(mouseX, mouseY);
-
-    //pushMatrix(); // world-space
-    //translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
-    ////translate(camera.x, camera.y);
-    //scale(SCALE);
-    //rotate(camera.globalRote());
-    ////scale(2);
-    //if (!options) {
-    //  for (renderable r : renderers) r.render();
-    //} else {
-    //  starManager.render();
-    //}
-    //popMatrix(); 
 
     //if (options) {
     //  pushMatrix(); // screen-space (UI)
@@ -626,31 +610,16 @@ class SinglePlayer extends Scene {
     //  popStyle();
     //}
 
-    //pushMatrix(); // screen-space (UI)
-    //pushStyle();
-    //translate(width/2, height/2);
-    //scale(SCALE);
-    //if (!options) gameText.render();
-    //assets.applyGlowiness();
-    //ui.render();
-    //imageMode(CORNER);
-    //rectMode(CORNER);
-    ////if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.optionsBtn, optionsButton.x, optionsButton.y, assets.uiStuff.optionsBtn.width/2, assets.uiStuff.optionsBtn.height/2);
-    ////image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, assets.uiStuff.DIPswitchesBtn.width/2, assets.uiStuff.DIPswitchesBtn.height/2);
-    //if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
+    pushMatrix(); // screen-space (UI)
+    pushStyle();
+    translate(width/2, height/2);
+    scale(SCALE);
+    imageMode(CORNER);
+    rectMode(CORNER);
+    if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
 
-    //popStyle();
-    //popMatrix();
-
-    //pushMatrix(); // pillarboxing (for high aspect ratios)
-    //pushStyle();
-    //translate(0, 0);
-    //float w = 2678 / 2 * SCALE;
-    //fill(0, 0, 0, 1);
-    //rect(0, 0, (width-w)/2, height);
-    //rect((width-w)/2 + w, 0, (width-w)/2, height);
-    //popStyle();
-    //popMatrix();
+    popStyle();
+    popMatrix();
   }
 
   void playerKilled() {
@@ -673,20 +642,20 @@ class SinglePlayer extends Scene {
 
   void mouseUp() {
 
-    //PVector m = screenspaceToWorldspace(mouseX, mouseY);
+    PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
-    //if (dipswitchesButton.inside(m)) {
-    //  //println("you clicked dipswitch"); 
-    //  Desktop desktop = Desktop.getDesktop();
-    //  File dirToOpen = null;
-    //  try {
-    //    dirToOpen = new File(sketchPath());
-    //    desktop.open(dirToOpen);
-    //  } 
-    //  catch (Exception iae) {
-    //    System.out.println("File Not Found");
-    //  }
-    //}
+    if (dipswitchesButton.inside(m)) {
+      //println("you clicked dipswitch"); 
+      Desktop desktop = Desktop.getDesktop();
+      File dirToOpen = null;
+      try {
+        dirToOpen = new File(sketchPath());
+        desktop.open(dirToOpen);
+      } 
+      catch (Exception iae) {
+        System.out.println("File Not Found");
+      }
+    }
 
     //if (optionsButton.inside(m) && settings.getBoolean("hideDIPSwitchesButton", false)==false) {
     //  options = !options;

@@ -19,6 +19,7 @@ class Hypercube extends Entity {
   final static float hypercubeOffset = -150;
 
   final static float DEFAULT_HYPERSPACE_DURATION = 15e3;
+  float hyperspaceDuration = DEFAULT_HYPERSPACE_DURATION;
 
   final static float DEFAULT_MIN_SPAWN = 6e3;//10e3;
   final static float DEFAULT_MAX_SPAWN = 10e3;//80e3;
@@ -91,7 +92,7 @@ class Hypercube extends Entity {
       break;
 
     case HYPERSPACE:
-      if (millis() - stateStart > DEFAULT_HYPERSPACE_DURATION) {
+      if (millis() - stateStart > hyperspaceDuration) {
         state = HYPERSPACE_DONE;
       }
       x -= shiftX;
