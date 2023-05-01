@@ -3,6 +3,7 @@
 // oviraptor mode
 // 2 player
 // hide UI
+// nongaussian blur glow
 
 import java.awt.Desktop;
 import java.io.File;
