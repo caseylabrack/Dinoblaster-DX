@@ -1,3 +1,36 @@
+class EggOvi extends Entity {
+
+  boolean enabled = true;
+  int cooldown;
+
+
+  EggOvi (PImage model) {
+    this.model = model;
+  }
+
+  void update () {
+    if (!enabled) {
+      cooldown--;
+    }
+    if (cooldown<0) {
+      enabled = true;
+    }
+  }
+
+  void touched () {
+    enabled = false;
+    cooldown = 100;
+  }
+
+  void render(color funkyColor) {
+    if (!enabled) return;
+    pushStyle();
+    tint(funkyColor);
+    simpleRenderImage();
+    popStyle();
+  }
+}
+
 class EggHatch extends Entity {
   final float startY = 115;
   final static float EARTH_DIST_FINAL = 190;

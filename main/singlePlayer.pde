@@ -109,11 +109,11 @@ class SinglePlayer extends Scene {
 
     playerDeathAnimation = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
     trexDeathAnimation = new GibsSystem(assets.trexStuff.deth, new PVector(52, 41));
-    if(!settings.getBoolean("trexEnabled",true)) trexDeathAnimation.enabled = false;
+    if (!settings.getBoolean("trexEnabled", true)) trexDeathAnimation.enabled = false;
 
     ui = new UIStory(assets.uiStuff.letterbox, assets.uiStuff.screenShine);
     ui.enabled = settings.getBoolean("showSidePanels", true);
-    
+
     time.hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
     time.setTimeScale(settings.getFloat("defaultTimeScale", 1));
 
@@ -430,7 +430,7 @@ class SinglePlayer extends Scene {
       music.stop_();
 
       finale.state = trex.enabled && trex.state == Trex.WALKING ? SPFinale.WAITING_TREX : SPFinale.NO_TREX; // if trex is alive, prepare to hit it with the big one. otherwise just start big one.
-      if(!(trex.enabled && trex.state == Trex.WALKING)) trexDeathAnimation.enabled = false;
+      if (!(trex.enabled && trex.state == Trex.WALKING)) trexDeathAnimation.enabled = false;
       trex.stun();
 
       println("finale time");
@@ -468,7 +468,7 @@ class SinglePlayer extends Scene {
     if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
       music.play(true);
       float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
-      if(trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
+      if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
       trex.vanish();
     }
 
@@ -538,85 +538,13 @@ class SinglePlayer extends Scene {
     ui.render(player.extraLives, score);
     popMatrix();
 
-    //if (options) {
-    //  pushMatrix(); // screen-space (UI)
-    //  pushStyle();
-    //  translate(width/2, height/2);
-    //  scale(SCALE);
-    //  rectMode(CORNER);
-    //  textFont(assets.uiStuff.MOTD);
-    //  textAlign(CENTER, CENTER);
-
-    //  //fill(soundButton.inside(m) ? 80 : 300, 70, 70, 1);
-    //  stroke(0, 0, 100, 1);
-    //  noFill();
-    //  rect(soundButton.x, soundButton.y, soundButton.w, soundButton.h);
-    //  fill(0, 0, 100, 1);
-    //  text(settings.getInt("sfxVolume", 100) > 0 ? "Sound: < ON >" : " Sound: < OFF >", soundButton.x + soundButton.w/2, soundButton.y + soundButton.h/2 + yoffset);      
-
-    //  //fill(musicButton.inside(m) ? 80 : 300, 70, 70, 1);
-    //  stroke(0, 0, 100, 1);
-    //  noFill();
-    //  rect(musicButton.x, musicButton.y, musicButton.w, musicButton.h);
-    //  fill(0, 0, 100, 1);
-    //  text(settings.getInt("musicVolume", 100) > 0 ? "Music: < ON >" : " Music: < OFF >", musicButton.x + musicButton.w/2, musicButton.y + musicButton.h/2 + yoffset);
-
-    //  //fill(restartButton.inside(m) ? 80 : 300, 70, 70, 1);
-    //  stroke(0, 0, 100, 1);
-    //  noFill();
-    //  rect(restartButton.x, restartButton.y, restartButton.w, restartButton.h);
-    //  fill(0, 0, 100, 1);
-
-    //  //fill(launchFinderButton.inside(m) ? 80 : 300, 70, 70, 1);
-    //  stroke(0, 0, 100, 1);
-    //  //noFill();
-    //  //rect(launchFinderButton.x, launchFinderButton.y, launchFinderButton.w, launchFinderButton.h);
-    //  fill(0, 0, 100, 1);
-
-    //  switch(settings.getInt("startAtLevel", 4)) {
-    //  case 0:
-    //  case 1:
-    //    text(" Restart at: < Triassic >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
-    //    break;
-
-    //  case 2:
-    //    text(" Restart at: < Jurassic >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
-    //    break;
-
-    //  case 3:
-    //    text("   Restart at: < Cretaceous >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
-    //    break;
-    //  case 4:
-    //    text(" Restart at: < Furthest >", restartButton.x + restartButton.w/2, restartButton.y + restartButton.h/2 + yoffset);
-    //    break;
-    //  }
-
-    //  textAlign(CENTER, TOP);
-    //  textLeading(32);
-
-    //  float y = 0;
-    //  //text("More settings in\n`controls-settings.txt` and\n`game-settings.txt`", 0, y);
-    //  text("More settings in", 0, y);
-    //  y += 32 + 10;
-    //  fill(currentColor.getColor());
-    //  text("`controls-settings.txt`", 0, y);
-    //  fill(0, 0, 100, 1);
-    //  y += 32 + 10;
-    //  text("in your install folder:", 0, y);
-    //  y += 32 + 10 + 10;
-    //  text(sketchPath(), -HEIGHT_REF_HALF + 10, y, HEIGHT_REFERENCE - 10, 400);
-
-    //  popMatrix();
-    //  popStyle();
-    //}
-
     pushMatrix(); // screen-space (UI)
     pushStyle();
     translate(width/2, height/2);
     scale(SCALE);
     imageMode(CORNER);
     rectMode(CORNER);
-    if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y,dipswitchesButton.w,dipswitchesButton.h);
+    if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, dipswitchesButton.w, dipswitchesButton.h);
 
     popStyle();
     popMatrix();
@@ -646,72 +574,18 @@ class SinglePlayer extends Scene {
 
     if (dipswitchesButton.inside(m)) {
       //println("you clicked dipswitch"); 
-      Desktop desktop = Desktop.getDesktop();
-      File dirToOpen = null;
-      try {
-        dirToOpen = new File(sketchPath());
-        desktop.open(dirToOpen);
-      } 
-      catch (Exception iae) {
-        System.out.println("File Not Found");
-      }
+      //Desktop desktop = Desktop.getDesktop();
+      //File dirToOpen = null;
+      //try {
+      //  dirToOpen = new File(sketchPath());
+      //  desktop.open(dirToOpen);
+      //} 
+      //catch (Exception e) {
+      //  System.out.println("File Not Found");
+      //}
+      paused = true;
+      launch(sketchPath() + "\\DIP-switches.txt");
     }
-
-    //if (optionsButton.inside(m) && settings.getBoolean("hideDIPSwitchesButton", false)==false) {
-    //  options = !options;
-    //}
-
-    //if (options) {
-    //  if (soundButton.inside(m)) {
-    //    int sfx = settings.getInt("sfxVolume", 100);
-    //    //settings.setInt("sfxVolume", sfx > 0 ? 0 : 100);
-    //    assets.muteSFX(sfx > 0 ? true : false);
-    //    //writeOutControls();
-    //  }
-
-    //  if (musicButton.inside(m)) {
-    //    float msx = settings.getInt("musicVolume", 100);
-    //    //settings.setInt("musicVolume", msx > 0 ? 0 : 100);
-    //    assets.muteMusic(msx > 0 ? true : false);
-    //    //writeOutControls();
-    //  }
-
-    //  if (restartButton.inside(m)) {
-    //    int startAt = settings.getInt("startAtLevel", 4);
-
-    //    validLvls.clear();
-    //    validLvls.push(1);
-    //    validLvls.push(4);
-    //    if (highestUnlockedLevel() >= UIStory.JURASSIC   || settings.getBoolean("JurassicUnlocked", true)) validLvls.push(2); 
-    //    if (highestUnlockedLevel() == UIStory.CRETACEOUS || settings.getBoolean("CretaceousUnlocked", true)) validLvls.push(3);
-    //    validLvls.sort();
-
-    //    // get index of current startAt setting
-    //    int indexOfCurrent = 0;
-    //    for (int i = 0; i < validLvls.size(); i++) {
-    //      if (validLvls.get(i) == startAt) {
-    //        indexOfCurrent = i;
-    //        break;
-    //      }
-    //    }
-
-    //    int nextOption = (indexOfCurrent+1) % validLvls.size(); // choose the next valid setting in the list by incrementing and wrapping current index
-    //    //settings.setInt("startAtLevel", validLvls.get(nextOption));
-    //    //writeOutControls();
-    //  }
-
-    //  if (launchFinderButton.inside(m)) {
-    //    Desktop desktop = Desktop.getDesktop();
-    //    File dirToOpen = null;
-    //    try {
-    //      dirToOpen = new File(sketchPath());
-    //      desktop.open(dirToOpen);
-    //    } 
-    //    catch (Exception iae) {
-    //      System.out.println("File Not Found");
-    //    }
-    //  }
-    //}
   }
 
   void cleanup() {

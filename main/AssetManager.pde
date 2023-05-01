@@ -96,7 +96,8 @@ class AssetManager {
     playerStuff.brontoSVG = loadShape("bronto-idle.svg");
     playerStuff.brontoSVG.disableStyle();
     playerStuff.brontoFrames = utils.sheetToSprites(loadImage("bronto-frames.png"), 3, 1);
-    playerStuff.oviFrames = utils.sheetToSprites(loadImage("oviraptor-frames.png"), 2, 2, 1);
+    playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
+    //playerStuff.oviFrames = utils.sheetToSprites(loadImage("oviraptor-frames.png"), 2, 2, 1);
     playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", context);
     sounds.add(playerStuff.extinct);
     playerStuff.spawn = raspi ? new SoundM("_audio/player/spawn.wav", ngainSFX) : new SoundP("_audio/player/spawn.wav", context);
@@ -154,6 +155,8 @@ class AssetManager {
     if (glowiness != 0) {
       assets.glow.set("blurSize", glowiness);
       assets.glow.set("sigma", (float)glowiness/2);
+      //      assets.glow.set("blurSize", 25);
+      //assets.glow.set("sigma", 20.0);
       glowing = true;
     } else {
       glowing = false;

@@ -228,7 +228,8 @@ class UFO extends Entity {
     // tractor beam
     if (beamEnabled) {
       pushStyle();
-      strokeWeight(assets.STROKE_WIDTH);
+      //strokeWeight(assets.STROKE_WIDTH);
+      strokeWeight(2);      
       stroke(funkyColor);
       line(x, y, x + cos(radians(beamAngle + beamWidth)) * 250, y + sin(radians(beamAngle + beamWidth)) * 250);
       line(x, y, x + cos(radians(beamAngle - beamWidth)) * 250, y + sin(radians(beamAngle - beamWidth)) * 250);

@@ -1,3 +1,9 @@
+// TO DO
+// tune stroke weights
+// oviraptor mode
+// 2 player
+// hide UI
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -36,10 +42,14 @@ float HEIGHT_REFERENCE = 768;
 float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
 SinglePlayer singlePlayer;
+Oviraptor oviraptor;
 
 void setup () {
   //size(500, 500, P2D);
   size(1024, 768, P2D);
+  smooth(4);
+  frameRate(30);
+  //hint(DISABLE_OPTIMIZED_STROKE);
   //fullScreen(P2D);
   orientation(LANDSCAPE);
 
@@ -106,15 +116,15 @@ void setup () {
       "roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
       "roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
       "", 
-      "trexSpeed: " + Trex.DEFAULT_RUNSPEED,
-      "trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE + spacer + "-- how far the trex \"sees\", in degrees",
-      "",
+      "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
+      "trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE + spacer + "-- how far the trex \"sees\", in degrees", 
+      "", 
       "JurassicUnlocked: " + false, 
       "CretaceousUnlocked: " + false, 
       "", 
-      "----MISC----",
-      "showSidePanels: " + true,
-      "",
+      "----MISC----", 
+      "showSidePanels: " + true, 
+      "", 
       "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
       "-- put tips inside double quotes, don't linebreak", 
       "", 
@@ -161,16 +171,16 @@ void setup () {
   triassicSelect = settings.getChar("triassicSelect", '1');
   jurassicSelect = settings.getChar("jurassicSelect", '2');
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
-  //triassicSelect = settings.getString("triassicSelect", "1").charAt(0);
-  //jurassicSelect = settings.getString("jurassicSelect", "2").charAt(0);
-  //cretaceousSelect = settings.getString("cretaceousSelect", "3").charAt(0);  
 
   singlePlayer = new SinglePlayer(settings, assets);
   singlePlayer.play(SinglePlayer.TRIASSIC);
   //singlePlayer.play(SinglePlayer.JURASSIC);
   //singlePlayer.play(SinglePlayer.CRETACEOUS);
 
-  currentScene = singlePlayer;
+  oviraptor = new Oviraptor(settings, assets);
+
+  //currentScene = singlePlayer;
+  currentScene = oviraptor;
 }
 
 void keyPressed() {
@@ -238,6 +248,12 @@ void draw () {
   //  keys.setKey(touches[0].x < width/2 ? Keys.LEFT : Keys.RIGHT, true);
   //}
 
+  //int b = int(map(mouseX, 0, width, 0, 25));
+  //float s = map(mouseY, 0, height, 0, 20);
+
+  //assets.glow.set("blurSize", b);
+  //assets.glow.set("sigma", s);
+
   if (!paused) {
     background(0, 0, 0, 1);
     //fill(0,0,0,.2);
@@ -264,72 +280,6 @@ void draw () {
     popStyle();
   }
 }
-
-//int highestUnlockedLevel () {
-//int nextlvl = UIStory.TRIASSIC;
-//int highscorefloor = loadHighScore(UIStory.SCORE_DATA_FILENAME) / 100;
-//switch(highscorefloor) {
-//case 0:  
-//  nextlvl = UIStory.TRIASSIC;
-//  break;
-//case 1:  
-//  nextlvl = UIStory.JURASSIC;
-//  break;
-//case 2:  
-//  nextlvl = UIStory.CRETACEOUS;
-//  break;
-//}
-
-//if (settings.getBoolean("JurassicUnlocked", false)) nextlvl = max(nextlvl, UIStory.JURASSIC);
-//if (settings.getBoolean("CretaceousUnlocked", false)) nextlvl = max(nextlvl, UIStory.CRETACEOUS);
-
-//return nextlvl;
-//}
-
-//int chooseNextLevel () {
-
-//  int startAt = settings.getInt("startAtLevel", 4);
-//  int unlocked = highestUnlockedLevel();
-//  int chosen = unlocked; // default to highest level unlocked. user can choose this with any number 4+
-
-//  switch(startAt) {
-//  case 0:
-//  case 1:
-//    chosen = UIStory.TRIASSIC;
-//    break;
-
-//  case 2: 
-//    if (settings.getBoolean("JurassicUnlocked", false) || unlocked >= UIStory.JURASSIC) chosen = UIStory.JURASSIC;
-//    break;
-
-//  case 3: 
-//    if (settings.getBoolean("CretaceousUnlocked", false) || unlocked >= UIStory.CRETACEOUS) chosen = UIStory.CRETACEOUS;
-//    break;
-//  }
-
-//  return chosen;
-//}
-
-//void writeOutControls () {
-//  PrintWriter output;
-//  output = createWriter("controls-settings.txt"); 
-//  output.println("{");
-//  output.println("\t\"player1LeftKey\": " + inputs.getString("player1LeftKey", "a") + ",");
-//  output.println("\t\"player1RightKey\": " + inputs.getString("player1RightKey", "d") + ",");
-//  output.println("\t\"player2LeftKey\": " + inputs.getString("player2LeftKey", "k") + ",");
-//  output.println("\t\"player2RightKey\": " + inputs.getString("player2RightKey", "l") + ",");
-//  output.println("\t\"player2UsesArrowKeys\": " + inputs.getBoolean("player2UsesArrowKeys", false) + ",");
-//  output.println("\t\"triassicSelect\": " + inputs.getString("triassicSelect", "1") + ",");
-//  output.println("\t\"jurassicSelect\": " + inputs.getString("jurassicSelect", "2") + ",");
-//  output.println("\t\"cretaceousSelect\": " + inputs.getString("cretaceousSelect", "3") + ",");
-//  output.println("\t\"sfxVolume\": " + inputs.getInt("sfxVolume", 100) + ",");    
-//  output.println("\t\"musicVolume\": " + inputs.getInt("musicVolume", 100) + ",");
-//  output.println("\t\"startAtLevel\": " + inputs.getInt("startAtLevel", 4) + ",");
-//  output.println("\t\"hideHelpButton\": " + inputs.getBoolean("hideHelpButton", false));
-//  output.println("}");
-//  output.flush();
-//  output.close();
-//}
 
 int loadHighScore (String filename) {
   // load four bytes into one 32-bit integer by ORing bytes together

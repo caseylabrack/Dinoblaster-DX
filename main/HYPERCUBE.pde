@@ -109,7 +109,7 @@ class Hypercube extends Entity {
     pg.pushMatrix();
     pg.pushStyle();
     pg.stroke(funkyColor);
-    pg.strokeWeight(assets.STROKE_WIDTH);
+    pg.strokeWeight(3);
     pg.noFill();
     pg.clear();
 

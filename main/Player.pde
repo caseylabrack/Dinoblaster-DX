@@ -103,19 +103,21 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     }
 
     //check for blockers (volcanos)
-    for (obstacle b : blockers) {
-      if (!b.enabled() || b.isPassable()) continue;
-      float targetAngle = utils.angleOf(utils.ZERO_VECTOR, targetPos);
+    if (blockers != null) {
+      for (obstacle b : blockers) {
+        if (!b.enabled() || b.isPassable()) continue;
+        float targetAngle = utils.angleOf(utils.ZERO_VECTOR, targetPos);
 
-      // find closest blocker angle (edge of the closest side of the blocker)
-      float blockerAngle = b.getAngle();
-      float blockerArc = b.getArc();
-      if (utils.unsignedAngleDiff(targetAngle, blockerAngle) < blockerArc) { // movement would place player inside obstacle
-        float blockerEdge1 = blockerAngle - blockerArc;
-        float blockerEdge2 = blockerAngle + blockerArc;
-        float blockerClosestEdgeAngle = utils.unsignedAngleDiff(targetAngle, blockerEdge1) < utils.unsignedAngleDiff(targetAngle, blockerEdge2) ? blockerEdge1 : blockerEdge2;
-        float currentPositionAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
-        targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, utils.signedAngleDiff(currentPositionAngle, blockerClosestEdgeAngle)); // correct target position to edge of obstacle
+        // find closest blocker angle (edge of the closest side of the blocker)
+        float blockerAngle = b.getAngle();
+        float blockerArc = b.getArc();
+        if (utils.unsignedAngleDiff(targetAngle, blockerAngle) < blockerArc) { // movement would place player inside obstacle
+          float blockerEdge1 = blockerAngle - blockerArc;
+          float blockerEdge2 = blockerAngle + blockerArc;
+          float blockerClosestEdgeAngle = utils.unsignedAngleDiff(targetAngle, blockerEdge1) < utils.unsignedAngleDiff(targetAngle, blockerEdge2) ? blockerEdge1 : blockerEdge2;
+          float currentPositionAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
+          targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, utils.signedAngleDiff(currentPositionAngle, blockerClosestEdgeAngle)); // correct target position to edge of obstacle
+        }
       }
     }
 
@@ -317,7 +319,7 @@ class GibsSystem extends Entity {
       g.p2 = new PVector();
     }
   }
-  
+
   void fire(float clock, Entity guy, PVector forcePoint, float force, float gibsFriction, float overallFriction) {
     fire (clock, guy, forcePoint, force, gibsFriction, overallFriction, defaultSpreadForce);
   }

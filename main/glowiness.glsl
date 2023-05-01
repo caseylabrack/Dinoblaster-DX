@@ -16,7 +16,7 @@ uniform vec2 texOffset;
 varying vec4 vertColor;
 varying vec4 vertTexCoord;
 
-uniform int blurSize;       
+uniform int blurSize;
 uniform int horizontalPass; // 0 or 1 to indicate vertical or horizontal pass
 uniform float sigma;        // The sigma value for the gaussian function: higher value means more blur
 uniform int scale;                            // A good value for 9x9 is around 3 to 5
@@ -26,9 +26,9 @@ uniform int scale;                            // A good value for 9x9 is around 
 
 const float pi = 3.14159265;
 
-void main() {  
-  float numBlurPixelsPerSide = float(blurSize / 2); 
-  
+void main() {
+  float numBlurPixelsPerSide = float(blurSize / 2);
+
   vec2 blurMultiplyVec = 0 < horizontalPass ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
 
   // Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)
@@ -46,14 +46,14 @@ void main() {
   incrementalGaussian.xy *= incrementalGaussian.yz;
 
   // Go through the remaining 8 vertical samples (4 on each side of the center)
-  for (float i = 1.0; i <= numBlurPixelsPerSide; i++) { 
-    avgValue += texture2D(texture, vertTexCoord.st - i * texOffset * 
-                          blurMultiplyVec) * incrementalGaussian.x;         
-    avgValue += texture2D(texture, vertTexCoord.st + i * texOffset * 
-                          blurMultiplyVec) * incrementalGaussian.x;         
+  for (float i = 1.0; i <= numBlurPixelsPerSide; i++) {
+    avgValue += texture2D(texture, vertTexCoord.st - i * texOffset *
+                          blurMultiplyVec) * incrementalGaussian.x;
+    avgValue += texture2D(texture, vertTexCoord.st + i * texOffset *
+                          blurMultiplyVec) * incrementalGaussian.x;
     coefficientSum += 2.0 * incrementalGaussian.x;
     incrementalGaussian.xy *= incrementalGaussian.yz;
   }
 
-  gl_FragColor = avgValue / (coefficientSum * 1) + texture2D(texture, vertTexCoord.st) * .5;
+  gl_FragColor = avgValue / (coefficientSum * 1) + texture2D(texture, vertTexCoord.st) * 1;
 }
