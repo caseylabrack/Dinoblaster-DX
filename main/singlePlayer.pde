@@ -24,16 +24,22 @@ class SinglePlayer extends Scene {
   UFORespawn ufoRespawn;
   Camera camera = new Camera();
   Hypercube hypercube;
-  Player player;
+  //Player player;
+  Player[] players;
   PlayerRespawn playerRespawn;
-  PlayerIntro playerIntro = new PlayerIntro();
+  PlayerIntro[] playerIntros = new PlayerIntro[2];
+  //PlayerIntro playerIntro = new PlayerIntro();
   GameOver gameOver = new GameOver();
   EggHatch egg;
+  EggRescue[] rescueEggs = new EggRescue[2];
   Trex trex;
   SPFinale finale;
   GibsSystem playerDeathAnimation;
   GibsSystem trexDeathAnimation;
   InGameText gameText;
+  color[] twoPColors = new color[]{#FF00FF, #F08080};
+  int numPlayers;
+  ArrayList<obstacle> allObstacles = new ArrayList<obstacle>();
 
   boolean showingUI;
 
@@ -54,7 +60,10 @@ class SinglePlayer extends Scene {
   //float yoffset = -5; // optically vertically center align text within rectangle buttons
   //IntList validLvls = new IntList();
 
-  SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
+  SinglePlayer(SimpleTXTParser settings, AssetManager assets, int numPlayers) {
+
+    this.numPlayers = numPlayers;
+    players = new Player[numPlayers];
 
     PImage earthmodel;
     if (settings.getBoolean("earthIsPangea", false)) {
@@ -73,12 +82,26 @@ class SinglePlayer extends Scene {
     earth = new Earth(earthmodel, assets.earthStuff.mask);
 
     earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    playerIntro.model = assets.playerStuff.brontoFrames[0];
-    playerIntro.y = -Player.DIST_FROM_EARTH;
+    for (int i = 0; i <=1; i++) {
+      playerIntros[i] = new PlayerIntro();
+      playerIntros[i].model = i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0];
+      playerIntros[i].y = Player.DIST_FROM_EARTH * (i==0 ? -1 : 1);
+      playerIntros[i].r = i == 0 ? 0 : 180;
+    }
 
-    player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.brontoFrames, assets.playerStuff.step, assets.playerStuff.tarStep);
-    player.extraLives = settings.getInt("extraLives", 0);
-    player.runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
+    for (int i = 0; i <= (numPlayers - 1); i++) {
+      players[i] = new Player(assets.playerStuff.brontoSVG, (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep, twoPColors[i]);
+      players[i].extraLives = settings.getInt("extraLives", 0);
+      players[i].runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
+      players[i].id = i;
+      players[i].usecolor = true;
+    }
+
+    for (int i = 0; i <= 1; i++) {
+      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggWhole);
+      //rescueEggs[i].enabled = true;
+      earth.addChild(rescueEggs[i]);
+    }
 
     playerRespawn = new PlayerRespawn(assets.playerStuff.brontoFrames[0]);
 
@@ -145,7 +168,8 @@ class SinglePlayer extends Scene {
     println("level: " + lvl);
 
     // restart stuff
-    player.restart();
+    //player.restart();
+    for (Player p : players) p.restart();
     gameOver.restart();
     roidManager.restart();
     ufo.restart();
@@ -166,8 +190,12 @@ class SinglePlayer extends Scene {
 
     gameText.showRandomTip();
 
-    playerIntro.startIntro();
-    playerIntro.spawningStart = millis();
+    for (PlayerIntro playerIntro : playerIntros) {
+      playerIntro.startIntro();
+      playerIntro.spawningStart = millis();
+    }
+    //playerIntro.startIntro();
+    //playerIntro.spawningStart = millis();
     assets.playerStuff.spawn.play();
 
     ufo.startCountDown();
@@ -218,28 +246,65 @@ class SinglePlayer extends Scene {
     gameText.update();
 
     // check if it's time to go from intro -> player control
-    playerIntro.update();
-    if (playerIntro.state == PlayerIntro.SPAWNING) {
-      playerIntro.state = PlayerIntro.DONE;
-      player.enabled = true;
-      player.y = playerIntro.y;
-      earth.addChild(player);
+    for (PlayerIntro playerIntro : playerIntros) playerIntro.update();
+    if (playerIntros[0].state == PlayerIntro.SPAWNING) {
+      playerIntros[0].state = PlayerIntro.DONE;
+      playerIntros[1].state = PlayerIntro.DONE;
+
+      for (int i = 0; i <= (numPlayers - 1); i++) {
+        players[i].enabled = true;
+        players[i].y = playerIntros[i].y;
+        players[i].r = playerIntros[i].r;
+        earth.addChild(players[i]);
+      }
+
+      //for (Player player : players) {
+      //  player.enabled = true;
+      //  player.y = playerIntro.y;
+      //  earth.addChild(player);
+      //}
+      //player.enabled = true;
+      //player.y = playerIntro.y;
+      //earth.addChild(player);
       scoring = true;
       lastScoreTick = time.getClock();
       music.play(true);
     }
+    //playerIntro.update();
+    //if (playerIntro.state == PlayerIntro.SPAWNING) {
+    //  playerIntro.state = PlayerIntro.DONE;
+
+    //  for (Player player : players) {
+    //    player.enabled = true;
+    //    player.y = playerIntro.y;
+    //    earth.addChild(player);
+    //  }
+    //  //player.enabled = true;
+    //  //player.y = playerIntro.y;
+    //  //earth.addChild(player);
+    //  scoring = true;
+    //  lastScoreTick = time.getClock();
+    //  music.play(true);
+    //}
 
     // respawn following getting extra life
-    boolean canSpawn = playerRespawn.update(time.getClock());
-    if (keys.anykey && canSpawn) {
-      playerRespawn.enabled = false;
-      player.enabled = true;
-      player.y = playerIntro.y;
-      earth.addChild(player);
-      ufo.resumeCountDown();
-      scoring = true;
-      lastScoreTick = time.getClock();
+    //boolean canSpawn = playerRespawn.update(time.getClock());
+    //if (keys.anykey && canSpawn) {
+    //  playerRespawn.enabled = false;
+    //  player.enabled = true;
+    //  player.y = playerIntro.y;
+    //  earth.addChild(player);
+    //  ufo.resumeCountDown();
+    //  scoring = true;
+    //  lastScoreTick = time.getClock();
+    //}
+    
+    if(frameCount == 90) {
+     playerKilled(1); 
     }
+
+
+    for (EggRescue r : rescueEggs) r.update(time.getClock());
 
     // volcano eruption
     for (Volcano v : volcanoSystem.volcanos) {
@@ -252,38 +317,44 @@ class SinglePlayer extends Scene {
     earth.move(time.getTimeScale(), time.getClock());
 
     // is player in tarpit
-    earth.setStuckInTarpit(player);
+    //earth.setStuckInTarpit(player);
 
-    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
+    allObstacles.clear();
+    Collections.addAll(allObstacles, volcanoSystem.volcanos);
+    Collections.addAll(allObstacles, rescueEggs);
+    //allObstacles.addAll(volcanoSystem.volcanos);
+    //for (Player player : players) player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
+    players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), allObstacles);
+    //players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
 
     // player drowned in tarpit
-    if (player.getAtTarpitBottom()) {
+    //if (player.getAtTarpitBottom()) {
 
-      playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 0, .75, .5);
-      earth.addChild(playerDeathAnimation);
-      println("died in tarpit");
-      playerKilled();
-    }
+    //  playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 0, .75, .5);
+    //  earth.addChild(playerDeathAnimation);
+    //  println("died in tarpit");
+    //  playerKilled();
+    //}
 
-    boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
-    if (abducted) {
-      player.extraLives++;
-      player.restart();
-      playerRespawn.respawn();
-      scoring = false;
-    }
+    //boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
+    //if (abducted) {
+    //  player.extraLives++;
+    //  player.restart();
+    //  playerRespawn.respawn();
+    //  scoring = false;
+    //}
 
     // respawn following losing extra life 
-    Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
-    if (ufoRespawned != null) {
-      player.enabled = true;
-      player.parent = null;
-      player.setPosition(ufoRespawned.globalPos());
-      player.r = ufoRespawned.r;
-      earth.addChild(player);
-      scoring = true;
-      lastScoreTick = time.getClock();
-    }
+    //Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
+    //if (ufoRespawned != null) {
+    //  player.enabled = true;
+    //  player.parent = null;
+    //  player.setPosition(ufoRespawned.globalPos());
+    //  player.r = ufoRespawned.r;
+    //  earth.addChild(player);
+    //  scoring = true;
+    //  lastScoreTick = time.getClock();
+    //}
 
     volcanoSystem.update(time.getClock(), time.getTimeScale());
 
@@ -305,17 +376,30 @@ class SinglePlayer extends Scene {
         assets.roidStuff.hits[int(random(0, 5))].play();
 
         // did the player get hit
-        if (player.enabled) {
-          if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
+        for (Player player : players) {
+          if (player.enabled) {
+            if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
 
-            PVector impactPointAdjusted = new PVector(earth.x + cos(incomingAngle) * Earth.EARTH_RADIUS, earth.y + sin(incomingAngle) * Earth.EARTH_RADIUS);
-            playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
+              PVector impactPointAdjusted = new PVector(earth.x + cos(incomingAngle) * Earth.EARTH_RADIUS, earth.y + sin(incomingAngle) * Earth.EARTH_RADIUS);
+              playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
 
-            println("died from roid");
+              println("died from roid");
 
-            playerKilled();
+              playerKilled(player.id);
+            }
           }
         }
+        //if (player.enabled) {
+        //  if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
+
+        //    PVector impactPointAdjusted = new PVector(earth.x + cos(incomingAngle) * Earth.EARTH_RADIUS, earth.y + sin(incomingAngle) * Earth.EARTH_RADIUS);
+        //    playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
+
+        //    println("died from roid");
+
+        //    playerKilled();
+        //  }
+        //}
       }
     }
 
@@ -330,14 +414,14 @@ class SinglePlayer extends Scene {
     }
 
     // player touching a hypercube?
-    if (hypercube.state == Hypercube.NORM && hypercube.enabled) {
-      if (PVector.dist(player.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
-        hypercube.goHyperspace();
-        time.setHyperspace(true);
-        starsSystem.setHyperspace(true);
-        music.rate(time.hyperspaceTimeScale);
-      }
-    }
+    //if (hypercube.state == Hypercube.NORM && hypercube.enabled) {
+    //  if (PVector.dist(player.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
+    //    hypercube.goHyperspace();
+    //    time.setHyperspace(true);
+    //    starsSystem.setHyperspace(true);
+    //    music.rate(time.hyperspaceTimeScale);
+    //  }
+    //}
 
     // hyperspace finished?
     if (hypercube.state == Hypercube.HYPERSPACE_DONE) {
@@ -362,19 +446,19 @@ class SinglePlayer extends Scene {
     }
 
     earth.setStuckInTarpit(trex);
-    trex.update(time.getTimeScale(), time.getScaledElapsed(), player);
+    //trex.update(time.getTimeScale(), time.getScaledElapsed(), player);
     if (trex.isStomping) earth.shake(8, 300, time.getClock());
 
     // is trex touching player
-    if (player.enabled && trex.isDeadly()) {
-      if (utils.unsignedAngleDiff(player.r, trex.r) < Player.BOUNDING_ARC/2 + Trex.BOUNDING_ARC/2) {
+    //if (player.enabled && trex.isDeadly()) {
+    //  if (utils.unsignedAngleDiff(player.r, trex.r) < Player.BOUNDING_ARC/2 + Trex.BOUNDING_ARC/2) {
 
-        playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 10, .99, .999);
-        println("died from trex");
+    //    playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 10, .99, .999);
+    //    println("died from trex");
 
-        playerKilled();
-      }
-    }
+    //    playerKilled();
+    //  }
+    //}
 
     playerDeathAnimation.update(time.getTimeScale(), time.getClock());
     trexDeathAnimation.update(time.getTimeScale(), time.getClock());
@@ -437,40 +521,40 @@ class SinglePlayer extends Scene {
     }
 
     // do the finale
-    finale.update(earth, trex, player, time);
-    if (finale.died && player.enabled) {
-      float angle = utils.angleOfRadians(earth.globalPos(), player.globalPos());
-      playerDeathAnimation.fire(time.getClock(), player, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 15, .98, .98); 
-      player.extraLives = 0;
-      playerKilled();
-    }
-    if (finale.won && player.enabled) {
-      player.restart();
-    }
-    if (finale.state == SPFinale.PULLING_AWAY) {
-      earth.dy *= .99;
-    }
-    if (finale.state == SPFinale.ZOOMING && !starsSystem.isZooming) {
-      starsSystem.startZooming();
-    } 
-    if (finale.state == SPFinale.PULLING_AWAY && finale.lastState != SPFinale.PULLING_AWAY) {
-      time.timeScale = 1;
-      earth.dx = -2;
-      earth.dy = -2;
-      earth.shake(0);
-      earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    }
-    if (finale.state == SPFinale.DONE && finale.lastState == SPFinale.ABORT) {
-      earth.shake(0);
-      time.timeScale = 1;
-      earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    }
-    if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
-      music.play(true);
-      float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
-      if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
-      trex.vanish();
-    }
+    //finale.update(earth, trex, player, time);
+    //if (finale.died && player.enabled) {
+    //  float angle = utils.angleOfRadians(earth.globalPos(), player.globalPos());
+    //  playerDeathAnimation.fire(time.getClock(), player, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 15, .98, .98); 
+    //  player.extraLives = 0;
+    //  playerKilled();
+    //}
+    //if (finale.won && player.enabled) {
+    //  player.restart();
+    //}
+    //if (finale.state == SPFinale.PULLING_AWAY) {
+    //  earth.dy *= .99;
+    //}
+    //if (finale.state == SPFinale.ZOOMING && !starsSystem.isZooming) {
+    //  starsSystem.startZooming();
+    //} 
+    //if (finale.state == SPFinale.PULLING_AWAY && finale.lastState != SPFinale.PULLING_AWAY) {
+    //  time.timeScale = 1;
+    //  earth.dx = -2;
+    //  earth.dy = -2;
+    //  earth.shake(0);
+    //  earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
+    //}
+    //if (finale.state == SPFinale.DONE && finale.lastState == SPFinale.ABORT) {
+    //  earth.shake(0);
+    //  time.timeScale = 1;
+    //  earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
+    //}
+    //if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
+    //  music.play(true);
+    //  float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
+    //  if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
+    //  trex.vanish();
+    //}
 
     //if (!options) {
     //  for (updateable u : updaters) u.update();
@@ -504,8 +588,10 @@ class SinglePlayer extends Scene {
     volcanoSystem.render(currentColor.getColor());
     finale.render(earth); // behind earth
     earth.render(time.getClock());
-    playerIntro.render();
-    player.render();
+    for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
+    for (Player player : players) player.render();
+    for (EggRescue r : rescueEggs) r.render();
+    //player.render();
     roidManager.renderRoids();
     roidManager.renderSplodes();
     starsSystem.render(currentColor.getColor());
@@ -535,7 +621,7 @@ class SinglePlayer extends Scene {
     translate(width/2, height/2);
     scale(SCALE);
     imageMode(CENTER);
-    ui.render(player.extraLives, score);
+    ui.render(players[0].extraLives, score);
     popMatrix();
 
     pushMatrix(); // screen-space (UI)
@@ -550,22 +636,29 @@ class SinglePlayer extends Scene {
     popMatrix();
   }
 
-  void playerKilled() {
+  void playerKilled(int id) {
     scoring = false;
-    time.deathStart();
-    player.restart();
+    //time.deathStart();
 
-    if (player.extraLives <= 0) {
-      gameOver.callGameover();
-      gameText.goExtinct();
-      assets.playerStuff.extinct.play(false);
-      music.stop_();
-    } else {
-      player.extraLives--;
-      ufo.pauseCountDown();
-      ufoRespawn.dispatch(player, earth.globalPos());
-      assets.playerStuff.littleDeath.play(false);
-    }
+    rescueEggs[id].setPosition(players[id].localPos());
+    rescueEggs[id].r = players[id].r;
+    rescueEggs[id].enabled = true;
+
+    players[id].restart();
+
+
+
+    //if (player.extraLives <= 0) {
+    //  gameOver.callGameover();
+    //  gameText.goExtinct();
+    //  assets.playerStuff.extinct.play(false);
+    //  music.stop_();
+    //} else {
+    //  player.extraLives--;
+    //  ufo.pauseCountDown();
+    //  ufoRespawn.dispatch(player, earth.globalPos());
+    //  assets.playerStuff.littleDeath.play(false);
+    //}
   }
 
   void mouseUp() {

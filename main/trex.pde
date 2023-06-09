@@ -31,6 +31,67 @@ class EggOvi extends Entity {
   }
 }
 
+class EggRescue extends Entity implements obstacle {
+
+  boolean enabled = false;
+  color pcolor;
+  PImage egg1;
+  private float margin = 15;
+  final static float BOUNCE_DIR = 3e3;
+  float bounceStart;
+  boolean shouldBounce = false;
+  boolean bouncing = false;
+
+  EggRescue (color c, PImage whole) {
+    pcolor = c;
+    egg1 = whole;
+    model = egg1;
+  }
+
+  void update (float clock) {
+    if (bouncing) {
+      float progress = (clock - bounceStart) / BOUNCE_DIR;
+    }
+  }
+
+  void render () {
+    if (!enabled) return;
+    pushStyle();
+    tint(pcolor);
+    simpleRenderImage();
+    popStyle();
+  }
+
+  boolean isPassable () {
+    return !enabled;
+  }
+
+  float getAngle () {
+    return utils.angleOf(utils.ZERO_VECTOR, localPos());
+  }
+
+  boolean enabled () {
+    return enabled;
+  }
+
+  float getArc() {
+    return margin;
+  }
+
+  boolean bounce () {
+    return true;
+  }
+
+  void markBounce() {
+    shouldBounce = true;
+  }
+
+  void doBounce(float clock) {
+    bounceStart = clock;
+    bouncing = true;
+  }
+}
+
 class EggHatch extends Entity {
   final float startY = 115;
   final static float EARTH_DIST_FINAL = 190;

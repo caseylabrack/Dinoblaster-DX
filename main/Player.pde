@@ -33,22 +33,29 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float tarpitFactor = 1;
   float runFrameRate = 100;
 
+  int id; // player 1 or 2
+
   int extraLives = 0;
+  color c;
+  boolean usecolor = false;
+  boolean bounceHitThisFrame = false;
 
   PImage[] frames;
   PShape abductModel;
   SoundPlayable step;
   SoundPlayable tarStep;
 
-  Player(PShape abductModel, PImage[] frames, SoundPlayable step, SoundPlayable tarStep) {
+  Player(PShape abductModel, PImage[] frames, SoundPlayable step, SoundPlayable tarStep, color c) {
     this.abductModel = abductModel;
     this.frames = frames;
     this.step = step;
     this.tarStep = tarStep;
     model = frames[0];
+    this.c = c;
   }
 
-  public void move(boolean left, boolean right, float delta, float clock, float scaleElapsed, obstacle[] blockers) {
+  public void move(boolean left, boolean right, float delta, float clock, float scaleElapsed, ArrayList<obstacle> blockers) {
+    //public void move(boolean left, boolean right, float delta, float clock, float scaleElapsed, obstacle[] blockers) {
     if (!enabled) return;
 
     PVector targetPos = localPos();
@@ -95,7 +102,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
       targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, runSpeed * delta * facing * tarpitFactor);
       int frame = (clock % runFrameRate) > runFrameRate / 2 ? 1 : 2;
       model = frames[frame];
-    } else {
+    }  else {
       state = IDLE;
       model = frames[0];
       step.stop_();
@@ -106,12 +113,19 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     if (blockers != null) {
       for (obstacle b : blockers) {
         if (!b.enabled() || b.isPassable()) continue;
+        //println("blocker", frameCount, b.enabled(), b.isPassable());
         float targetAngle = utils.angleOf(utils.ZERO_VECTOR, targetPos);
 
         // find closest blocker angle (edge of the closest side of the blocker)
         float blockerAngle = b.getAngle();
         float blockerArc = b.getArc();
         if (utils.unsignedAngleDiff(targetAngle, blockerAngle) < blockerArc) { // movement would place player inside obstacle
+          if (b.bounce()) {
+            bounceHitThisFrame = true;
+            b.markBounce();
+            println("I should bounce off this");
+          }
+
           float blockerEdge1 = blockerAngle - blockerArc;
           float blockerEdge2 = blockerAngle + blockerArc;
           float blockerClosestEdgeAngle = utils.unsignedAngleDiff(targetAngle, blockerEdge1) < utils.unsignedAngleDiff(targetAngle, blockerEdge2) ? blockerEdge1 : blockerEdge2;
@@ -138,10 +152,19 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   void setTarpitImmune (boolean b) {
     tarpitImmune = b;
   }
+  
+  boolean checkForBounce() {
+    boolean r = bounceHitThisFrame;
+    bounceHitThisFrame = false;
+    return r;
+  }
 
   public void render() {
     if (!enabled) return;
+    pushStyle();
+    if (usecolor) tint(c);
     simpleRenderImage();
+    popStyle();
   }
 
   public void restart () {

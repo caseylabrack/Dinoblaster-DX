@@ -98,6 +98,7 @@ class AssetManager {
     playerStuff.brontoFrames = utils.sheetToSprites(loadImage("bronto-frames.png"), 3, 1);
     playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
     //playerStuff.oviFrames = utils.sheetToSprites(loadImage("oviraptor-frames.png"), 2, 2, 1);
+    playerStuff.eggWhole = loadImage("egg-whole.png");
     playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", context);
     sounds.add(playerStuff.extinct);
     playerStuff.spawn = raspi ? new SoundM("_audio/player/spawn.wav", ngainSFX) : new SoundP("_audio/player/spawn.wav", context);
@@ -255,6 +256,7 @@ class AssetManager {
     PShape brontoSVG;
     PImage[] brontoFrames;
     PImage[] oviFrames;
+    PImage eggWhole;
     SoundPlayable extinct;
     SoundPlayable spawn;
     SoundPlayable step;

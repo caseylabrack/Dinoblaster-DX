@@ -3,6 +3,8 @@ interface obstacle {
   float getArc();
   boolean isPassable();
   boolean enabled();
+  boolean bounce();
+  void markBounce();
 }
 
 class VolcanoSystem {
@@ -167,6 +169,13 @@ class Volcano extends Entity implements obstacle {
 
   boolean enabled() {
     return enabled;
+  }
+
+  boolean bounce () {
+    return false;
+  }
+
+  void markBounce() {
   }
 
   void goExtinct (float clock) {

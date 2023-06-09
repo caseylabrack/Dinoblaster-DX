@@ -37,7 +37,7 @@ class Oviraptor extends Scene {
     playerIntro.model = assets.playerStuff.oviFrames[0];
     playerIntro.y = -Player.DIST_FROM_EARTH;
 
-    player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.oviFrames, assets.playerStuff.step, assets.playerStuff.tarStep);
+    player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.oviFrames, assets.playerStuff.step, assets.playerStuff.tarStep, #F08080);
     player.extraLives = settings.getInt("extraLives", 0);
     player.runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
 

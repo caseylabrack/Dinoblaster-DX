@@ -4,6 +4,12 @@
 // 2 player
 // hide UI
 // nongaussian blur glow
+// fun stuff on edge of screen for aspect ratios > 4:3
+// 40th anniversary edition
+// dipswitches circle lock thingy
+// 1 and 2 meeple buttons
+
+import java.util.Collections;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -173,15 +179,15 @@ void setup () {
   jurassicSelect = settings.getChar("jurassicSelect", '2');
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
 
-  singlePlayer = new SinglePlayer(settings, assets);
+  singlePlayer = new SinglePlayer(settings, assets, 2);
   singlePlayer.play(SinglePlayer.TRIASSIC);
   //singlePlayer.play(SinglePlayer.JURASSIC);
   //singlePlayer.play(SinglePlayer.CRETACEOUS);
 
   oviraptor = new Oviraptor(settings, assets);
 
-  //currentScene = singlePlayer;
-  currentScene = oviraptor;
+  currentScene = singlePlayer;
+  //currentScene = oviraptor;
 }
 
 void keyPressed() {
