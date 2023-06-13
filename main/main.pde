@@ -32,7 +32,7 @@ Scene currentScene;
 // recording
 int fcount = 0;
 boolean rec = false;
-final int RECORD_FRAMERATE = 4;
+final int RECORD_FRAMERATE = 1;
 
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
@@ -54,10 +54,10 @@ Oviraptor oviraptor;
 void setup () {
   //size(500, 500, P2D);
   size(1024, 768, P2D);
+  //fullScreen(P2D);
   smooth(4);
   frameRate(30);
   //hint(DISABLE_OPTIMIZED_STROKE);
-  //fullScreen(P2D);
   orientation(LANDSCAPE);
 
   //pixelDensity(displayDensity());

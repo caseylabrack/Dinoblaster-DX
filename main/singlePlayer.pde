@@ -256,6 +256,7 @@ class SinglePlayer extends Scene {
         players[i].y = playerIntros[i].y;
         players[i].r = playerIntros[i].r;
         earth.addChild(players[i]);
+        players[i].ppos.set(players[i].localPos());
       }
 
       //for (Player player : players) {
@@ -298,10 +299,10 @@ class SinglePlayer extends Scene {
     //  scoring = true;
     //  lastScoreTick = time.getClock();
     //}
-    
-    if(frameCount == 90) {
-     playerKilled(1); 
-    }
+
+    //if(frameCount == 90) {
+    // playerKilled(1); 
+    //}
 
 
     for (EggRescue r : rescueEggs) r.update(time.getClock());
@@ -325,7 +326,57 @@ class SinglePlayer extends Scene {
     //allObstacles.addAll(volcanoSystem.volcanos);
     //for (Player player : players) player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
     players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), allObstacles);
+    players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), allObstacles);
     //players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
+
+    // check for collisions between players
+    if (numPlayers==2 && players[0].enabled && players[1].enabled) {
+
+      boolean colliding = false;
+
+      //check tunnelling case
+      float localAngOld1 = utils.angleOf(utils.ZERO_VECTOR, players[0].ppos);
+      float localAngOld2 = utils.angleOf(utils.ZERO_VECTOR, players[1].ppos);
+      float localAngNew1 = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos());
+      float localAngNew2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
+      float oldDiff = utils.signedAngleDiff(localAngOld1, localAngOld2);
+      float newDiff = utils.signedAngleDiff(localAngNew1, localAngNew2);
+      if (abs(newDiff) < 90 && utils.sign(oldDiff)!=utils.sign(newDiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
+      
+      //check simple case
+      if (abs(newDiff) < Player.BOUNDING_ARC) colliding = true;
+
+      if (colliding) {
+
+        //delta rotation around earth last frame for each
+        float dr1 = localAngNew1 - localAngOld1;
+        float dr2 = localAngNew2 - localAngOld2;
+
+        //rewind to last frame, walk up to the point of collision
+        float walk1 = localAngOld1;
+        float walk2 = localAngOld2;
+        float step1 = dr1 / 100;
+        float step2 = dr2 / 100;
+        int count = 0;
+        while (utils.unsignedAngleDiff(walk1, walk2) > Player.BOUNDING_ARC) {
+          walk1 += step1;
+          walk2 += step2;
+          count++;
+          if (count > 1e6) { println("uh oh"); break;}
+        } 
+
+        players[0].x = cos(radians(walk1 - step1)) * Player.DIST_FROM_EARTH;
+        players[0].y = sin(radians(walk1 - step1)) * Player.DIST_FROM_EARTH;
+        players[0].r = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos()) + 90;
+        players[1].x = cos(radians(walk2 - step2)) * Player.DIST_FROM_EARTH;
+        players[1].y = sin(radians(walk2 - step2)) * Player.DIST_FROM_EARTH;
+        players[1].r = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos()) + 90;
+      }
+    }
+
+    // check for collisions against blockers (volcanos)
+
+
 
     // player drowned in tarpit
     //if (player.getAtTarpitBottom()) {
@@ -571,6 +622,12 @@ class SinglePlayer extends Scene {
     //  camera.setPosition(0, 0);
     //  camera.parent = ufoManager.ufo;
     //}
+
+    for (Player p : players) {
+      //p.ppos = p.globalPos();
+      p.ppos.set(p.localPos());
+      p.pr = p.r;
+    }
   }
 
   void render () {
@@ -679,6 +736,8 @@ class SinglePlayer extends Scene {
       paused = true;
       launch(sketchPath() + "\\DIP-switches.txt");
     }
+
+    //players[0].bounceStart(time.getClock());
   }
 
   void cleanup() {

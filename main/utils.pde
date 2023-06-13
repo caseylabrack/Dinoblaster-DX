@@ -70,9 +70,17 @@ static class utils {
 
     return true;
   }
+  
+  static int sign (float x) {
+    return x == 0 ? 0 : x > 0 ? 1 : -1;
+  }
 
   static float easeLinear (float t, float b, float c, float d) { 
     return b + c * (t/d);
+  }
+
+  static float easeOutCirc(float x) {
+    return sqrt(1 - pow(x - 1, 2));
   }
 
   static float easeInOutQuad (float t, float b, float c, float d) {
