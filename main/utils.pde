@@ -6,6 +6,10 @@ static class utils {
 
     return degrees(atan2(to.y - from.y, to.x - from.x));
   }
+  
+  static float angleOfOrigin(PVector a) {
+    return degrees(atan2(a.y - 0, a.x - 0));
+  }
 
   static float angleOfRadians(PVector from, PVector to) {
     return atan2(to.y - from.y, to.x - from.x);

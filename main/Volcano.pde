@@ -33,7 +33,7 @@ class VolcanoSystem {
 
   void startCountdown () {
     enabled = true;
-    spawnSpacing = random(spawnMin, spawnMax);
+    spawnSpacing = 1000000e3;//random(spawnMin, spawnMax);
     countdownStart = millis();
     spawning = true;
   }
@@ -152,7 +152,7 @@ class Volcano extends Entity implements obstacle {
   void erupt () {
     state = DELAYING;
     enabled = true;
-    activeDuration = random(minDuration, maxDuration);
+    activeDuration = 500e3;//random(minDuration, maxDuration);
   }
 
   float getAngle () {

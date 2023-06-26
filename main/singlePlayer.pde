@@ -39,7 +39,6 @@ class SinglePlayer extends Scene {
   InGameText gameText;
   color[] twoPColors = new color[]{#FF00FF, #F08080};
   int numPlayers;
-  ArrayList<obstacle> allObstacles = new ArrayList<obstacle>();
 
   boolean showingUI;
 
@@ -318,16 +317,12 @@ class SinglePlayer extends Scene {
     earth.move(time.getTimeScale(), time.getClock());
 
     // is player in tarpit
-    //earth.setStuckInTarpit(player);
+    for (Player p : players) earth.setStuckInTarpit(p);
+    //println(players[0].inTarpit, players[1].inTarpit);
 
-    allObstacles.clear();
-    Collections.addAll(allObstacles, volcanoSystem.volcanos);
-    Collections.addAll(allObstacles, rescueEggs);
-    //allObstacles.addAll(volcanoSystem.volcanos);
-    //for (Player player : players) player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
-    players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), allObstacles);
-    players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), allObstacles);
-    //players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), volcanoSystem.volcanos);
+    players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    //players[1].move(frameCount > 100 ? true : false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
 
     // check for collisions between players
     if (numPlayers==2 && players[0].enabled && players[1].enabled) {
@@ -342,41 +337,102 @@ class SinglePlayer extends Scene {
       float oldDiff = utils.signedAngleDiff(localAngOld1, localAngOld2);
       float newDiff = utils.signedAngleDiff(localAngNew1, localAngNew2);
       if (abs(newDiff) < 90 && utils.sign(oldDiff)!=utils.sign(newDiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
-      
+
       //check simple case
       if (abs(newDiff) < Player.BOUNDING_ARC) colliding = true;
 
       if (colliding) {
+        //println(utils.signedAngleDiff(players[0].r, players[1].r), frameCount);
 
         //delta rotation around earth last frame for each
-        float dr1 = localAngNew1 - localAngOld1;
-        float dr2 = localAngNew2 - localAngOld2;
+        float dr1 = utils.signedAngleDiff(localAngOld1, localAngNew1);
+        float dr2 = utils.signedAngleDiff(localAngOld2, localAngNew2);
 
-        //rewind to last frame, walk up to the point of collision
-        float walk1 = localAngOld1;
-        float walk2 = localAngOld2;
-        float step1 = dr1 / 100;
-        float step2 = dr2 / 100;
+        //rewind to last frame, then walk up to the point of collision
+        //float walk1 = localAngOld1;
+        //float walk2 = localAngOld2;
+        float a1 = localAngOld1;
+        float a2 = localAngOld2;
+        PVector oldPos1 = players[0].ppos.copy();
+        PVector oldPos2 = players[1].ppos.copy();
+        float rez = 10;
+        float step1 = dr1 / rez;
+        float step2 = dr2 / rez;
         int count = 0;
-        while (utils.unsignedAngleDiff(walk1, walk2) > Player.BOUNDING_ARC) {
-          walk1 += step1;
-          walk2 += step2;
-          count++;
-          if (count > 1e6) { println("uh oh"); break;}
-        } 
+        float newA1, newA2, angDiff;
+        float d1 = players[0].getRadius();
+        float d2 = players[1].getRadius();
+        do {
+          a1 += step1;
+          a2 += step2;
 
-        players[0].x = cos(radians(walk1 - step1)) * Player.DIST_FROM_EARTH;
-        players[0].y = sin(radians(walk1 - step1)) * Player.DIST_FROM_EARTH;
+          oldPos1.x = cos(radians(a1)) * d1;
+          oldPos1.y = sin(radians(a1)) * d1;
+
+          oldPos2.x = cos(radians(a2)) * d2;
+          oldPos2.y = sin(radians(a2)) * d2;
+
+          newA1 = utils.angleOf(utils.ZERO_VECTOR, oldPos1);
+          newA2 = utils.angleOf(utils.ZERO_VECTOR, oldPos2);
+          angDiff = utils.unsignedAngleDiff(newA1, newA2);
+
+          count++;
+          if (count > rez) { 
+            println("uh oh"); 
+            break;
+          }
+        } while (angDiff > Player.BOUNDING_ARC);
+        //println(utils.signedAngleDiff(walk1 - step1, walk2 - step2), frameCount);
+        players[0].x = cos(radians(a1 - step1)) * players[0].getRadius();
+        players[0].y = sin(radians(a1 - step1)) * players[0].getRadius();
         players[0].r = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos()) + 90;
-        players[1].x = cos(radians(walk2 - step2)) * Player.DIST_FROM_EARTH;
-        players[1].y = sin(radians(walk2 - step2)) * Player.DIST_FROM_EARTH;
+        players[1].x = cos(radians(a2 - step2)) * players[1].getRadius();
+        players[1].y = sin(radians(a2 - step2)) * players[1].getRadius();
         players[1].r = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos()) + 90;
+
+        float an1 = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos());
+        float an2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
+        float newNewDiff = utils.signedAngleDiff(an1, an2);
+
+        if (!players[0].inTarpit) players[0].bounceStart(time.getClock(), utils.sign(newNewDiff));
+        if (!players[1].inTarpit) players[1].bounceStart(time.getClock(), utils.sign(newNewDiff) * -1);
       }
     }
 
     // check for collisions against blockers (volcanos)
+    for (Player p : players) {
+      for (Volcano v : volcanoSystem.volcanos) {
 
+        if (!v.enabled || v.isPassable()) continue;
 
+        boolean colliding = false;
+        float lastR = utils.angleOfOrigin(p.ppos);
+        float currentR = utils.angleOfOrigin(p.localPos());
+        float obR = utils.angleOfOrigin(v.localPos());
+        float olddiff = utils.signedAngleDiff(lastR,obR);
+        float diff = utils.signedAngleDiff(currentR, obR);
+        // check tunnelling case
+        if (abs(diff) < 90 && utils.sign(diff)!=utils.sign(olddiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
+        if(colliding) println("tunnelled");
+        boolean tunnelled = false;
+        if(colliding) tunnelled = true;
+
+        if (abs(diff) < Player.BOUNDING_ARC / 2 + v.getArc() / 2) colliding = true;
+        if (colliding) {
+          println(utils.sign(diff), diff, frameCount);
+          if(diff==0) paused = true;
+
+          println("hit a volcano", frameCount);
+          float fixedAngle = obR + v.getArc() * 1.2 * utils.sign(diff) * (tunnelled ? 1 : -1);
+          p.x = cos(radians(fixedAngle)) * p.getRadius();
+          p.y = sin(radians(fixedAngle)) * p.getRadius();
+          p.r = utils.angleOfOrigin(p.localPos()) + 90;
+          float updatedAngle = utils.angleOfOrigin(p.localPos());
+          float updateddiff = utils.signedAngleDiff(updatedAngle,obR);
+          println("updated angle", updatedAngle, updateddiff, frameCount);
+        }
+      }
+    }
 
     // player drowned in tarpit
     //if (player.getAtTarpitBottom()) {
@@ -624,7 +680,6 @@ class SinglePlayer extends Scene {
     //}
 
     for (Player p : players) {
-      //p.ppos = p.globalPos();
       p.ppos.set(p.localPos());
       p.pr = p.r;
     }

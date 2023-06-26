@@ -93,7 +93,7 @@ class Oviraptor extends Scene {
       earth.addChild(player);
     }
 
-    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed(), null);
+    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
     playerDeathAnimation.update(time.getTimeScale(), time.getClock());
 
     starsSystem.update(time.getTimeScale());
