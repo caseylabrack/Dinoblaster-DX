@@ -329,16 +329,17 @@ class SinglePlayer extends Scene {
 
       boolean colliding = false;
 
-      //check tunnelling case
-      float localAngOld1 = utils.angleOf(utils.ZERO_VECTOR, players[0].ppos);
-      float localAngOld2 = utils.angleOf(utils.ZERO_VECTOR, players[1].ppos);
-      float localAngNew1 = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos());
-      float localAngNew2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
+      //  //check tunnelling case
+      float localAngOld1 = utils.angleOfOrigin(players[0].ppos);
+      float localAngOld2 = utils.angleOfOrigin(players[1].ppos);
+      float localAngNew1 = utils.angleOfOrigin(players[0].localPos());
+      float localAngNew2 = utils.angleOfOrigin(players[1].localPos());
       float oldDiff = utils.signedAngleDiff(localAngOld1, localAngOld2);
       float newDiff = utils.signedAngleDiff(localAngNew1, localAngNew2);
-      if (abs(newDiff) < 90 && utils.sign(oldDiff)!=utils.sign(newDiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
 
-      //check simple case
+      if (abs(newDiff) < 90 && utils.sign(oldDiff)!=utils.sign(newDiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
+      if (colliding) println("tunnelling");
+
       if (abs(newDiff) < Player.BOUNDING_ARC) colliding = true;
 
       if (colliding) {
@@ -349,8 +350,6 @@ class SinglePlayer extends Scene {
         float dr2 = utils.signedAngleDiff(localAngOld2, localAngNew2);
 
         //rewind to last frame, then walk up to the point of collision
-        //float walk1 = localAngOld1;
-        //float walk2 = localAngOld2;
         float a1 = localAngOld1;
         float a2 = localAngOld2;
         PVector oldPos1 = players[0].ppos.copy();
@@ -360,17 +359,15 @@ class SinglePlayer extends Scene {
         float step2 = dr2 / rez;
         int count = 0;
         float newA1, newA2, angDiff;
-        float d1 = players[0].getRadius();
-        float d2 = players[1].getRadius();
         do {
           a1 += step1;
           a2 += step2;
 
-          oldPos1.x = cos(radians(a1)) * d1;
-          oldPos1.y = sin(radians(a1)) * d1;
+          oldPos1.x = cos(radians(a1)) * players[0].getRadius();
+          oldPos1.y = sin(radians(a1)) * players[0].getRadius();
 
-          oldPos2.x = cos(radians(a2)) * d2;
-          oldPos2.y = sin(radians(a2)) * d2;
+          oldPos2.x = cos(radians(a2)) * players[1].getRadius();
+          oldPos2.y = sin(radians(a2)) * players[1].getRadius();
 
           newA1 = utils.angleOf(utils.ZERO_VECTOR, oldPos1);
           newA2 = utils.angleOf(utils.ZERO_VECTOR, oldPos2);
@@ -392,7 +389,8 @@ class SinglePlayer extends Scene {
 
         float an1 = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos());
         float an2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
-        float newNewDiff = utils.signedAngleDiff(an1, an2);
+        float newNewDiff = utils.signedAngleDiff(an1, an2) * -1;
+        println(newDiff, angDiff, newNewDiff);
 
         if (!players[0].inTarpit) players[0].bounceStart(time.getClock(), utils.sign(newNewDiff));
         if (!players[1].inTarpit) players[1].bounceStart(time.getClock(), utils.sign(newNewDiff) * -1);
@@ -423,7 +421,7 @@ class SinglePlayer extends Scene {
           if(diff==0) paused = true;
 
           println("hit a volcano", frameCount);
-          float fixedAngle = obR + v.getArc() * 1.2 * utils.sign(diff) * (tunnelled ? 1 : -1);
+          float fixedAngle = obR + v.getArc() * utils.sign(diff) * (tunnelled ? 1 : -1);
           p.x = cos(radians(fixedAngle)) * p.getRadius();
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
@@ -792,7 +790,7 @@ class SinglePlayer extends Scene {
       launch(sketchPath() + "\\DIP-switches.txt");
     }
 
-    //players[0].bounceStart(time.getClock());
+    players[0].bounceStart(time.getClock(), -1);
   }
 
   void cleanup() {

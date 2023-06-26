@@ -181,8 +181,8 @@ void setup () {
 
   singlePlayer = new SinglePlayer(settings, assets, 2);
   //singlePlayer.play(SinglePlayer.TRIASSIC);
-  singlePlayer.play(SinglePlayer.JURASSIC);
-  //singlePlayer.play(SinglePlayer.CRETACEOUS);
+  //singlePlayer.play(SinglePlayer.JURASSIC);
+  singlePlayer.play(SinglePlayer.CRETACEOUS);
 
   oviraptor = new Oviraptor(settings, assets);
 

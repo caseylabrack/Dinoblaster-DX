@@ -46,7 +46,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float bounceStart;
   int bounceDir;
   PVector bounceOrigin;
-  static final float BOUNCE_DURATION = .5e3;
+  //static final float BOUNCE_DURATION = .25e3;
 
   PVector ppos = new PVector(); // previous position (last frame)
   float pr; // previous angle
@@ -56,6 +56,15 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float localDist;
   float targetAngle;
   float targetDist;
+  float va = 0; // angle velocity
+  float vm = 0; // magnitude (radius) velocity
+  float aa = 0; // angle acceleration
+  float am = 0; // magnitude acceleration
+  float bounceForce = 10;
+  float bounceFriction = .75;
+  float bounceForceUp = 40;
+  float bounceGravity = 4;
+  boolean grounded = true;
 
   PImage[] frames;
   PShape abductModel;
@@ -77,13 +86,17 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     bounceStart = clock;
     bounceDir = dir;
     bouncing = true;
+    va = bounceForce * dir;
+    vm = bounceForceUp;
+    grounded = false;
   }
 
   public void move(boolean left, boolean right, float delta, float clock, float scaleElapsed) {
     if (!enabled) return;
 
     targetAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
-    targetDist = DIST_FROM_EARTH;
+    //targetDist = DIST_FROM_EARTH;
+    targetDist = dist(0, 0, x, y);
 
     if (inTarpit) {
       tarpitSink += scaleElapsed / Earth.TARPIT_SINK_DURATION;
@@ -124,10 +137,12 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
       }
 
       facing = left ? -1 : 1;
-      targetAngle += runSpeed * delta * facing * tarpitFactor;
+      if (grounded) va = runSpeed * delta * facing * tarpitFactor;
+      //if(grounded) targetAngle += runSpeed * delta * facing * tarpitFactor;
       int frame = (clock % runFrameRate) > runFrameRate / 2 ? 1 : 2;
       model = frames[frame];
     } else {
+      if (grounded) va = 0;
       state = IDLE;
       model = frames[0];
       step.stop_();
@@ -136,18 +151,30 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
     targetDist = DIST_FROM_EARTH - (DIST_FROM_EARTH - TARPIT_BOTTOM_DIST) * tarpitSink;
 
-    if (bouncing) {
-
-      float progress = (clock - bounceStart) / BOUNCE_DURATION;
-
-      if (progress > 1) {
-        bouncing = false;
-      } else {
-        float progress2 = utils.easeOutCirc(progress);
-        targetAngle = bounceOriginAngle - map(progress2, 0, 1, 0, 30) * bounceDir;
-        targetDist = DIST_FROM_EARTH + sin(radians(progress * 180)) * 25;
-      }
+    if (!grounded) {
+      va *= bounceFriction;
+      vm -= bounceGravity;
     }
+
+    targetAngle += va;
+    targetDist += vm;
+
+    //if(!grounded) 
+
+    //if (bouncing) {
+
+    //  float progress = (clock - bounceStart) / BOUNCE_DURATION;
+
+    //  if (progress > 1) {
+    //    bouncing = false;
+    //  } else {
+    //    float progress2 = utils.easeOutCirc(progress);
+    //    va *= bounceFriction;
+    //    targetAngle += va;
+    //    //targetAngle = bounceOriginAngle - map(progress2, 0, 1, 0, 30) * bounceDir;
+    //    targetDist = DIST_FROM_EARTH + sin(radians(progress * 180)) * 25;
+    //  }
+    //}
 
 
     //setPosition(utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, targetR - r));
@@ -158,6 +185,14 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     x = cos(radians(targetAngle)) * targetDist;
     y = sin(radians(targetAngle)) * targetDist;
     r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+
+    //if (dist(0, 0, x, y) < DIST_FROM_EARTH) {
+    if(!grounded && dist(0, 0, x, y) < DIST_FROM_EARTH) {
+      targetDist = DIST_FROM_EARTH;
+      vm = 0;
+      grounded = true;
+    }
+
     //check for blockers (volcanos)
     //if (blockers != null) {
     //  for (obstacle b : blockers) {
