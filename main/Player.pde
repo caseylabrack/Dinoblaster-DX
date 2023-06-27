@@ -38,15 +38,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   int extraLives = 0;
   color c;
   boolean usecolor = false;
-  boolean bounceHitThisFrame = false;
-  boolean bouncing;
-  float bounceOriginR;
-  float bounceOriginAngle;
-  float bounceOriginM;
-  float bounceStart;
   int bounceDir;
-  PVector bounceOrigin;
-  //static final float BOUNCE_DURATION = .25e3;
 
   PVector ppos = new PVector(); // previous position (last frame)
   float pr; // previous angle
@@ -58,13 +50,13 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float targetDist;
   float va = 0; // angle velocity
   float vm = 0; // magnitude (radius) velocity
-  float aa = 0; // angle acceleration
-  float am = 0; // magnitude acceleration
   float bounceForce = 10;
   float bounceFriction = .75;
-  float bounceForceUp = 40;
+  float bounceForceUp = 20;
   float bounceGravity = 4;
   boolean grounded = true;
+  final static float TAR_SINK_RATE = -2;
+  final static float TAR_RISE_RATE = 4;
 
   PImage[] frames;
   PShape abductModel;
@@ -80,12 +72,8 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     this.c = c;
   }
 
-  void bounceStart (float clock, int dir) {
-    bounceOrigin = localPos();
-    bounceOriginAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
-    bounceStart = clock;
+  void bounceStart (int dir) {
     bounceDir = dir;
-    bouncing = true;
     va = bounceForce * dir;
     vm = bounceForceUp;
     grounded = false;
@@ -96,11 +84,9 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
     targetAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
     //targetDist = DIST_FROM_EARTH;
-    targetDist = dist(0, 0, x, y);
+    targetDist = (inTarpit || !grounded) ? dist(0, 0, x, y) : DIST_FROM_EARTH;
 
-    if (inTarpit) {
-      tarpitSink += scaleElapsed / Earth.TARPIT_SINK_DURATION;
-    }
+    if (inTarpit && !tarpitImmune) vm = TAR_SINK_RATE;
 
     // running or not. if running, update target angle
     if (left != right) { 
@@ -126,19 +112,21 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
       float tarpitFactor = 1;
       if (inTarpit) {
-        tarpitSink -= (scaleElapsed / Earth.TARPIT_SINK_DURATION) * TARPIT_RISE_FACTOR; // if you're running, you rise out of the tarpit faster than you sink
-        if (tarpitSink < 0) {
-          tarpitSink = 0;
-        }
+        vm += TAR_RISE_RATE;
+
         // on tarpit surface, run at a slow factor unless immunity set. 
         // beneath surface, can't run (but can rise)
         // setting tarpit immunity disables sinking motion but retains rising motion, so player can start ignore tarpits even if below the surface
-        tarpitFactor = tarpitSink == 0 ? (tarpitImmune ? 1 : TARPIT_SLOW_FACTOR) : 0;
+        tarpitFactor = 0;
+        if (targetDist + vm > DIST_FROM_EARTH) {
+          vm = DIST_FROM_EARTH - targetDist;
+          tarpitFactor = TARPIT_SLOW_FACTOR;
+        }
+        if (tarpitImmune) tarpitFactor = 1;
       }
 
       facing = left ? -1 : 1;
       if (grounded) va = runSpeed * delta * facing * tarpitFactor;
-      //if(grounded) targetAngle += runSpeed * delta * facing * tarpitFactor;
       int frame = (clock % runFrameRate) > runFrameRate / 2 ? 1 : 2;
       model = frames[frame];
     } else {
@@ -149,84 +137,29 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
       tarStep.stop_();
     }
 
-    targetDist = DIST_FROM_EARTH - (DIST_FROM_EARTH - TARPIT_BOTTOM_DIST) * tarpitSink;
-
     if (!grounded) {
       va *= bounceFriction;
       vm -= bounceGravity;
+      if(targetDist + vm < DIST_FROM_EARTH) {
+        //vm = DIST_FROM_EARTH - targetDist;
+        grounded = true;
+        vm = 0;
+        targetDist = DIST_FROM_EARTH;
+      }
     }
 
     targetAngle += va;
     targetDist += vm;
 
-    //if(!grounded) 
-
-    //if (bouncing) {
-
-    //  float progress = (clock - bounceStart) / BOUNCE_DURATION;
-
-    //  if (progress > 1) {
-    //    bouncing = false;
-    //  } else {
-    //    float progress2 = utils.easeOutCirc(progress);
-    //    va *= bounceFriction;
-    //    targetAngle += va;
-    //    //targetAngle = bounceOriginAngle - map(progress2, 0, 1, 0, 30) * bounceDir;
-    //    targetDist = DIST_FROM_EARTH + sin(radians(progress * 180)) * 25;
-    //  }
-    //}
-
-
-    //setPosition(utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, targetR - r));
-    //setPosition(utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, targetAngle));
-    //setPosition(new PVector(cos(targetAngle) * DIST_FROM_EARTH, sin(targetAngle) * DIST_FROM_EARTH));
-    //PVector tarpitAdjusted = new PVector(cos(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * targetM, sin(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * targetM);
-    //setPosition(tarpitAdjusted);
     x = cos(radians(targetAngle)) * targetDist;
     y = sin(radians(targetAngle)) * targetDist;
-    r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
+    r = utils.angleOfOrigin(localPos()) + 90;
 
-    //if (dist(0, 0, x, y) < DIST_FROM_EARTH) {
-    if(!grounded && dist(0, 0, x, y) < DIST_FROM_EARTH) {
-      targetDist = DIST_FROM_EARTH;
-      vm = 0;
-      grounded = true;
-    }
-
-    //check for blockers (volcanos)
-    //if (blockers != null) {
-    //  for (obstacle b : blockers) {
-    //    if (!b.enabled() || b.isPassable()) continue;
-    //    //println("blocker", frameCount, b.enabled(), b.isPassable());
-    //    float targetAngle = utils.angleOf(utils.ZERO_VECTOR, targetPos);
-
-    //    // find closest blocker angle (edge of the closest side of the blocker)
-    //    float blockerAngle = b.getAngle();
-    //    float blockerArc = b.getArc();
-    //    if (utils.unsignedAngleDiff(targetAngle, blockerAngle) < blockerArc) { // movement would place player inside obstacle
-    //      if (b.bounce()) {
-    //        bounceHitThisFrame = true;
-    //        b.markBounce();
-    //        println("I should bounce off this");
-    //      }
-
-    //      float blockerEdge1 = blockerAngle - blockerArc;
-    //      float blockerEdge2 = blockerAngle + blockerArc;
-    //      float blockerClosestEdgeAngle = utils.unsignedAngleDiff(targetAngle, blockerEdge1) < utils.unsignedAngleDiff(targetAngle, blockerEdge2) ? blockerEdge1 : blockerEdge2;
-    //      float currentPositionAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
-    //      targetPos = utils.rotateAroundPoint(localPos(), utils.ZERO_VECTOR, utils.signedAngleDiff(currentPositionAngle, blockerClosestEdgeAngle)); // correct target position to edge of obstacle
-    //    }
-    //  }
+    //if (!grounded && dist(0, 0, x, y) < DIST_FROM_EARTH) {
+    //  targetDist = DIST_FROM_EARTH;
+    //  vm = 0;
+    //  grounded = true;
     //}
-
-    //setPosition(targetPos);
-    //r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90; // recompute R to avoid accumulation of error
-    //println(r, targetR % 360);
-
-
-    //float sink = DIST_FROM_EARTH - (DIST_FROM_EARTH - TARPIT_BOTTOM_DIST) * tarpitSink;
-    //PVector tarpitAdjusted = new PVector(cos(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink, sin(radians(utils.angleOf(utils.ZERO_VECTOR, localPos()))) * sink);
-    //setPosition(tarpitAdjusted);
 
     wasInTarpitLastFrame = inTarpit;
   }
@@ -236,36 +169,12 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     return targetDist;
   }
 
-  //void doBounce(float clock) {
-  //  float progress = (clock - bounceStart) / BOUNCE_DURATION;
-
-  //  if (progress > 1) {
-  //    bouncing = false;
-  //  } else {
-  //    float progress2 = utils.easeOutCirc(progress);
-  //    //targetR = bounceOriginR - map(progress2, 0, 1, 0, 30) * bounceDir;
-  //    targetAngle = bounceOriginAngle - map(progress2, 0, 1, 0, 30) * bounceDir;
-  //    //targetM = DIST_FROM_EARTH + sin(radians(progress * 180)) * 25;
-  //    targetDist = DIST_FROM_EARTH + sin(radians(progress * 180)) * 25;
-  //  }
-
-  //  x = cos(radians(targetAngle)) * targetDist;
-  //  y = sin(radians(targetAngle)) * targetDist;
-  //  r = utils.angleOf(utils.ZERO_VECTOR, localPos()) + 90;
-  //}
-
   boolean getAtTarpitBottom () {
     return tarpitSink > 1;
   }
 
   void setTarpitImmune (boolean b) {
     tarpitImmune = b;
-  }
-
-  boolean checkForBounce() {
-    boolean r = bounceHitThisFrame;
-    bounceHitThisFrame = false;
-    return r;
   }
 
   public void render() {

@@ -317,12 +317,19 @@ class SinglePlayer extends Scene {
     earth.move(time.getTimeScale(), time.getClock());
 
     // is player in tarpit
-    for (Player p : players) earth.setStuckInTarpit(p);
+    //for (Player p : players) earth.setStuckInTarpit(p);
     //println(players[0].inTarpit, players[1].inTarpit);
+    for (Player p : players) {
+      if (!earth.tarpitEnabled) continue;
+      if (!p.grounded) continue;
+      p.inTarpit = utils.unsignedAngleDiff(utils.angleOfOrigin(p.localPos()), earth.tarpitAngle) < Earth.TARPIT_ARC / 2;
+      //if(utils.unsignedAngleDiff(utils.angleOfOrigin(p.localPos()), earth.tarpitAngle) < Earth.TARPIT_ARC / 2) p.inTarpit = true;
+      //sinker.setInTarpit(utils.unsignedAngleDiff(sinker.angleOnEarth(), tarpitAngle) < TARPIT_ARC/2 - sinker.nudgeMargin());
+    }
 
     players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
-    players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
-    //players[1].move(frameCount > 100 ? true : false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    //players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    players[1].move(frameCount > 100 ? true : false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
 
     // check for collisions between players
     if (numPlayers==2 && players[0].enabled && players[1].enabled) {
@@ -390,10 +397,9 @@ class SinglePlayer extends Scene {
         float an1 = utils.angleOf(utils.ZERO_VECTOR, players[0].localPos());
         float an2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
         float newNewDiff = utils.signedAngleDiff(an1, an2) * -1;
-        println(newDiff, angDiff, newNewDiff);
 
-        if (!players[0].inTarpit) players[0].bounceStart(time.getClock(), utils.sign(newNewDiff));
-        if (!players[1].inTarpit) players[1].bounceStart(time.getClock(), utils.sign(newNewDiff) * -1);
+        if (!players[0].inTarpit) players[0].bounceStart(utils.sign(newNewDiff));
+        if (!players[1].inTarpit) players[1].bounceStart(utils.sign(newNewDiff) * -1);
       }
     }
 
@@ -407,27 +413,24 @@ class SinglePlayer extends Scene {
         float lastR = utils.angleOfOrigin(p.ppos);
         float currentR = utils.angleOfOrigin(p.localPos());
         float obR = utils.angleOfOrigin(v.localPos());
-        float olddiff = utils.signedAngleDiff(lastR,obR);
+        float olddiff = utils.signedAngleDiff(lastR, obR);
         float diff = utils.signedAngleDiff(currentR, obR);
         // check tunnelling case
         if (abs(diff) < 90 && utils.sign(diff)!=utils.sign(olddiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
-        if(colliding) println("tunnelled");
+        if (colliding) println("tunnelled");
         boolean tunnelled = false;
-        if(colliding) tunnelled = true;
+        if (colliding) tunnelled = true;
 
         if (abs(diff) < Player.BOUNDING_ARC / 2 + v.getArc() / 2) colliding = true;
         if (colliding) {
-          println(utils.sign(diff), diff, frameCount);
-          if(diff==0) paused = true;
+          if (diff==0) paused = true;
 
-          println("hit a volcano", frameCount);
           float fixedAngle = obR + v.getArc() * utils.sign(diff) * (tunnelled ? 1 : -1);
           p.x = cos(radians(fixedAngle)) * p.getRadius();
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
           float updatedAngle = utils.angleOfOrigin(p.localPos());
-          float updateddiff = utils.signedAngleDiff(updatedAngle,obR);
-          println("updated angle", updatedAngle, updateddiff, frameCount);
+          float updateddiff = utils.signedAngleDiff(updatedAngle, obR);
         }
       }
     }
@@ -790,7 +793,7 @@ class SinglePlayer extends Scene {
       launch(sketchPath() + "\\DIP-switches.txt");
     }
 
-    players[0].bounceStart(time.getClock(), -1);
+    //players[0].bounceStart(time.getClock(), -1);
   }
 
   void cleanup() {
