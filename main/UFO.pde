@@ -3,6 +3,9 @@ interface abductable {
   PVector getPosition();
   float getRote();
   int getFacing();
+  boolean canBeAbducted();
+  color getTint();
+  int getID();
 }
 
 class UFO extends Entity {
@@ -53,6 +56,7 @@ class UFO extends Entity {
 
   Entity abductedGuy = new Entity();
   PVector snatchStartPos = new PVector();
+  color abducteeColor;
 
   boolean enabled = false;
 
@@ -66,7 +70,7 @@ class UFO extends Entity {
   }
 
   void startCountDown () {
-    spawnCountDown = random(5, 90) * 1000;
+    spawnCountDown = 2e3;//random(5, 90) * 1000;
     enabled = true;
   }
 
@@ -83,11 +87,12 @@ class UFO extends Entity {
     countingDown = true;
   }
 
-  boolean update (float clock, float dt, PVector earth, abductable p) {
-    if (!enabled) return false;
+  // return the ID of a player abducted this tick, or zero
+  int update (float clock, float dt, PVector earth, abductable[] as) {
+    if (!enabled) return 0;
 
     float progress, angle, dist;
-    boolean snatched = false;
+    int snatched = -1;
 
     switch(state) {
 
@@ -157,18 +162,24 @@ class UFO extends Entity {
           beamWidth = maxBeamWidth;
 
           // did player get abducted
-          PVector abducteePosition = p.getPosition();
-          if (utils.unsignedAngleDiff(utils.angleOf(earth, abducteePosition), utils.angleOf(earth, globalPos())) < snatchMargin) {
-            startState = clock;
-            snatchStartPos = abducteePosition;
-            abductedGuy.setPosition(abducteePosition);
-            abductedGuy.facing = p.getFacing();
-            abductedGuy.r = p.getRote();
-            abductedGuy.modelVector = p.getModel();
+          for (abductable a : as) {
+            if(!a.canBeAbducted()) continue;
+            PVector abducteePosition = a.getPosition();
+            if (utils.unsignedAngleDiff(utils.angleOf(earth, abducteePosition), utils.angleOf(earth, globalPos())) < snatchMargin) {
+              startState = clock;
+              snatchStartPos = abducteePosition;
+              abductedGuy.setPosition(abducteePosition);
+              abductedGuy.facing = a.getFacing();
+              abductedGuy.r = a.getRote();
+              abductedGuy.modelVector = a.getModel();
+              abducteeColor = a.getTint();
 
-            startState = clock;
-            state = SNATCHING;
-            snatched = true;
+              startState = clock;
+              state = SNATCHING;
+              snatched = a.getID();
+              println(snatched);
+              break; // only abduct a single dino
+            }
           }
         }
 
@@ -240,7 +251,9 @@ class UFO extends Entity {
     if (state == SNATCHING) {
       pushStyle();
       noFill();
-      stroke(0, 0, 100, 1);
+      //stroke(0, 0, 100, 1);
+      stroke(abducteeColor);
+      //tint(abducteeColor);
       abductedGuy.simpleRenderImageVector();
       popStyle();
     }

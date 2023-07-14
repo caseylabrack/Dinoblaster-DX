@@ -31,26 +31,88 @@ class EggOvi extends Entity {
   }
 }
 
-class EggRescue extends Entity implements obstacle {
+class EggRescue extends Entity {
+
+  color pcolor;
+  int player;
+
+  private float margin = 15;
+  int hits = 0;
+  float vm = 0;
+  float dist;
+  float angle;
+  PImage[] eggFrames;
+  final static float TIMEOUT_DUR = 1e3;
+  float uprightR;
 
   boolean enabled = false;
-  color pcolor;
-  PImage egg1;
-  private float margin = 15;
-  final static float BOUNCE_DIR = 3e3;
-  float bounceStart;
-  boolean shouldBounce = false;
-  boolean bouncing = false;
+  final static int RISING = 0;
+  final static int IDLE = 1;
+  final static int BOUNCING = 2;
+  final static int BURST = 3;
+  int state;
+  float stateStart; // how long have I been in this state
 
-  EggRescue (color c, PImage whole) {
+  EggRescue (color c, PImage[] eggFrames, int player) {
     pcolor = c;
-    egg1 = whole;
-    model = egg1;
+    this.eggFrames = eggFrames;
+    model = eggFrames[0];
+    this.player = player;
   }
 
   void update (float clock) {
-    if (bouncing) {
-      float progress = (clock - bounceStart) / BOUNCE_DIR;
+    update(clock, false, false);
+  }
+
+  void update (float clock, boolean left, boolean right) {
+    if (!enabled) return;
+    
+    r = uprightR;
+
+    switch (state) {
+
+    case RISING:
+      float progress = (millis() - stateStart) / EggHatch.RISING_DURATION;
+      if (progress < 1) {
+        //float dist = utils.easeLinear(progress,startY,endY-startY,1);
+        float t = utils.easeOutBounce(progress);
+        //float t = utils.easeOutElastic(progress);
+        float dist = EggHatch.START_Y + (Player.DIST_FROM_EARTH - EggHatch.START_Y) * t;
+        x = cos(radians(angle)) * dist;
+        y = sin(radians(angle)) * dist;
+      } else {
+        state = IDLE;
+        stateStart = clock;
+      }
+      break;
+
+    case IDLE: 
+      if (left != right) { // egg only rocks if given 1 direction
+        r = uprightR + 45 * (left ? -1 : 1);
+      } else {
+        r = uprightR;
+      }
+      break;
+
+    case BOUNCING:
+      vm -= Player.bounceGravity;
+      dist += vm; 
+
+      if (dist < Player.DIST_FROM_EARTH) {
+        state = IDLE;
+        vm = 0;
+        dist = Player.DIST_FROM_EARTH;
+      }
+
+      x = cos(radians(angle)) * dist;
+      y = sin(radians(angle)) * dist;
+      break;
+
+    case BURST: 
+      if (clock - stateStart > TIMEOUT_DUR) {
+        reset();
+      }
+      break;
     }
   }
 
@@ -60,6 +122,16 @@ class EggRescue extends Entity implements obstacle {
     tint(pcolor);
     simpleRenderImage();
     popStyle();
+  }
+
+  void startAnimation (float angle) {
+    enabled = true;
+    state = RISING;
+    hits = 0;
+    stateStart = millis();
+    this.angle = angle;
+    r = angle + 90;
+    uprightR = r;
   }
 
   boolean isPassable () {
@@ -78,24 +150,36 @@ class EggRescue extends Entity implements obstacle {
     return margin;
   }
 
-  boolean bounce () {
-    return true;
+  void bounce(float clock) {
+    if (state==IDLE) {
+      hits++;
+      model = eggFrames[hits];
+
+      if (hits <= 3) {
+        //bounceStart = clock;
+        stateStart = clock;
+        vm = 10;
+        angle = utils.angleOfOrigin(localPos());
+        dist = Player.DIST_FROM_EARTH;
+        state = BOUNCING;
+      } else {
+        state = BURST;
+        stateStart = clock;
+      }
+    }
   }
 
-  void markBounce() {
-    shouldBounce = true;
-  }
-
-  void doBounce(float clock) {
-    bounceStart = clock;
-    bouncing = true;
+  void reset() {
+    hits = 0;
+    model = eggFrames[hits];
+    enabled = false;
   }
 }
 
 class EggHatch extends Entity {
-  final float startY = 115;
+  final static float START_Y = 115;
   final static float EARTH_DIST_FINAL = 190;
-  final float risingDuration = 1e3;
+  final static float RISING_DURATION = 1e3;
   final float idleDuration = 1e3;
   final float crackedDuration = 3e3;
   float startTime;
@@ -146,12 +230,12 @@ class EggHatch extends Entity {
     switch(state) {
 
     case RISING:
-      progress = (millis() - startTime) / risingDuration;
+      progress = (millis() - startTime) / RISING_DURATION;
       if (progress < 1) {
         //float dist = utils.easeLinear(progress,startY,endY-startY,1);
         float t = utils.easeOutBounce(progress);
         //float t = utils.easeOutElastic(progress);
-        float dist = startY + (EARTH_DIST_FINAL - startY) * t;
+        float dist = START_Y + (EARTH_DIST_FINAL - START_Y) * t;
         x = cos(radians(angle)) * dist;
         y = sin(radians(angle)) * dist;
       } else {

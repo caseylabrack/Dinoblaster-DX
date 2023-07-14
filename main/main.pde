@@ -1,13 +1,17 @@
 // TO DO
-// tune stroke weights
-// oviraptor mode
-// 2 player
+// user toggle between 1 and 2 player
+// ufos for 2p
+// deaths and extra lives for 2p
+// 1 and 2 meeple buttons
+// dipswitches pauses
+// on resume from dipswitches, reload settings
+// dipswitches circle lock thingy
+// title screen (turn on animation? attract mode?)
 // hide UI
 // nongaussian blur glow
-// fun stuff on edge of screen for aspect ratios > 4:3
 // 40th anniversary edition
-// dipswitches circle lock thingy
-// 1 and 2 meeple buttons
+// fun stuff on edge of screen for aspect ratios > 4:3
+// oviraptor mode
 
 import java.util.Collections;
 
@@ -40,7 +44,7 @@ SimpleTXTParser settings;
 JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked;
-char leftkey, rightkey, leftkey2p, rightkey2p, triassicSelect, jurassicSelect, cretaceousSelect;
+char leftkey1p, rightkey1p, leftkey2p, rightkey2p, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -89,9 +93,17 @@ void setup () {
       "player1LeftKey: a", 
       "player1RightKey: d", 
       "", 
+      "player2LeftKey: k", 
+      "player2RightKey: l", 
+      "", 
+      "player2GetsArrowKeys: true" + spacer + "-- in 2p mode, arrow keys move p2", 
+      "", 
       "triassicSelect: 1", 
       "jurassicSelect: 2", 
       "cretaceousSelect: 3", 
+      "", 
+      "1playerSelect: o", 
+      "2playerSelect: p", 
       "", 
       "sfxVolume: 100", 
       "musicVolume: 100", 
@@ -173,16 +185,22 @@ void setup () {
 
   jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
-  leftkey = settings.getChar("player1LeftKey", 'a');
-  rightkey = settings.getChar("player1RightKey", 'd');
+  leftkey1p = settings.getChar("player1LeftKey", 'a');
+  rightkey1p = settings.getChar("player1RightKey", 'd');
+  leftkey2p = settings.getChar("player2LeftKey", 'k');
+  rightkey2p = settings.getChar("player2RightKey", 'l');
+  //p2arrows = settings.getBoolean("player2GetsArrowKeys", true);
+  keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
   triassicSelect = settings.getChar("triassicSelect", '1');
   jurassicSelect = settings.getChar("jurassicSelect", '2');
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
+  onePlayerSelect = settings.getChar("1playerSelect", 'o');
+  twoPlayerSelect = settings.getChar("2playerSelect", 'p');
 
-  singlePlayer = new SinglePlayer(settings, assets, 2);
-  //singlePlayer.play(SinglePlayer.TRIASSIC);
+  singlePlayer = new SinglePlayer(settings, assets);
+  singlePlayer.play(SinglePlayer.TRIASSIC);
   //singlePlayer.play(SinglePlayer.JURASSIC);
-  singlePlayer.play(SinglePlayer.CRETACEOUS);
+  //singlePlayer.play(SinglePlayer.CRETACEOUS);
 
   oviraptor = new Oviraptor(settings, assets);
 
@@ -190,45 +208,8 @@ void setup () {
   //currentScene = oviraptor;
 }
 
-void keyPressed() {
-
-  //println(key, keyCode);
-  //println(key==CODED);
-
-  if (key==CODED) {
-    if (keyCode==LEFT) keys.setKey(Keys.LEFT, true);
-    if (keyCode==RIGHT) keys.setKey(Keys.RIGHT, true);
-  } else {
-    //if (key=='1' || key==triassicSelect || key=='2' || key==jurassicSelect || key=='3' || key==cretaceousSelect) currentScene.cleanup();
-    if (key=='1' || key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
-    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
-    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
-    if (key==leftkey) keys.setKey(Keys.LEFT, true);
-    if (key==rightkey) keys.setKey(Keys.RIGHT, true);
-    if (key=='r') {
-      rec = true;
-      println("recording");
-    }
-  }
-}
-
 void touchStarted() {
   //println("touch started");
-}
-
-void keyReleased() {
-
-  if (key==CODED) {
-    if (keyCode==LEFT) keys.setKey(Keys.LEFT, false);
-    if (keyCode==RIGHT) keys.setKey(Keys.RIGHT, false);
-  } else {
-    if (key==leftkey) keys.setKey(Keys.LEFT, false);
-    if (key==rightkey) keys.setKey(Keys.RIGHT, false);
-    if (key=='r') {
-      rec = false;
-      println("stopped recording");
-    }
-  }
 }
 
 void mousePressed () {
@@ -312,6 +293,55 @@ void saveHighScore (int score, String filename) {
   saveBytes(filename, nums);
 }
 
+void keyPressed() {
+
+  //println(key, keyCode);
+  //println(key==CODED);
+
+  if (key==CODED) {
+    if (keyCode==LEFT) keys.arrowleft = true;
+    if (keyCode==RIGHT) keys.arrowright = true;
+  } else {
+    if (key=='1' || key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
+    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
+    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
+    if (key==leftkey1p) keys.leftp1 = true;
+    if (key==rightkey1p) keys.rightp1 = true;
+    if (key==leftkey2p) keys.leftp2 = true;
+    if (key==rightkey2p) keys.rightp2 = true;    
+    if (key=='r') {
+      rec = true;
+      println("recording");
+    }
+  }
+}
+
+void keyReleased() {
+
+  if (key==CODED) {
+    if (keyCode==LEFT) keys.arrowleft = false; 
+    if (keyCode==RIGHT) keys.arrowright = false;
+  } else {
+    if (key==leftkey1p) keys.leftp1 = false; 
+    if (key==rightkey1p) keys.rightp1 = false;
+    if (key==leftkey2p) keys.leftp2 = false; 
+    if (key==rightkey2p) keys.rightp2 = false; 
+    if (key==onePlayerSelect) {
+      singlePlayer.numPlayers = 1;
+      keys.playingMultiplayer = false;
+      singlePlayer.play(SinglePlayer.TRIASSIC);
+    }
+    if (key==twoPlayerSelect) {
+      singlePlayer.numPlayers = 2;
+      keys.playingMultiplayer = true;
+      singlePlayer.play(SinglePlayer.TRIASSIC);
+    }
+    if (key=='r') {
+      rec = false;
+      println("stopped recording");
+    }
+  }
+}
 
 class Keys {
 
@@ -322,31 +352,35 @@ class Keys {
   // front panel:
   // |27|      |79|
 
-  static final int LEFT = 0;
-  static final int RIGHT = 1;
-  static final int MOUSEUP = 3;
-  boolean left = false;
-  boolean right = false;
-  boolean anykey = false;
+  boolean leftp1 = false;
+  boolean rightp1 = false;
+  boolean leftp2 = false;
+  boolean rightp2 = false;
+  boolean arrowleft = false;
+  boolean arrowright = false;
+  boolean p2HasArrows = false;
+  boolean playingMultiplayer = false;
 
-  void setKey(int _key, boolean _value) {
+  // in singleplayer, player always has mappable keys and arrow keys
+  // in multiplayer, p2 gets arrows keys by default. changeable in prefs
+  boolean p1Left() {
+    return keys.leftp1 || (!playingMultiplayer ?  keys.arrowleft : p2HasArrows ? false : keys.arrowleft);
+  }
 
-    switch(_key) {
+  boolean p1Right() {
+    return keys.rightp1 || (!playingMultiplayer ?  keys.arrowright : p2HasArrows ? false : keys.arrowright);
+  }
 
-    case LEFT:
-      left = _value;
-      break;
+  boolean p2Left() {
+    return keys.leftp2 || (p2HasArrows ? keys.arrowleft : false);
+  }
 
-    case RIGHT:
-      right = _value;
-      break;
+  boolean p2Right() {
+    return keys.rightp2 || (p2HasArrows ? keys.arrowright : false);
+  }
 
-    default:
-      println("unknown key press/release");
-      break;
-    }
-
-    anykey = left || right;
+  boolean anyKey () {
+    return leftp1 || rightp1 || leftp2 || rightp2;
   }
 }
 

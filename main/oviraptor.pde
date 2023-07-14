@@ -38,7 +38,7 @@ class Oviraptor extends Scene {
     playerIntro.y = -Player.DIST_FROM_EARTH;
 
     player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.oviFrames, assets.playerStuff.step, assets.playerStuff.tarStep, #F08080);
-    player.extraLives = settings.getInt("extraLives", 0);
+    //player.extraLives = settings.getInt("extraLives", 0);
     player.runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
 
     playerDeathAnimation = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
@@ -93,7 +93,7 @@ class Oviraptor extends Scene {
       earth.addChild(player);
     }
 
-    player.move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    player.move(keys.leftp1, keys.leftp2, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
     playerDeathAnimation.update(time.getTimeScale(), time.getClock());
 
     starsSystem.update(time.getTimeScale());

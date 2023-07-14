@@ -35,7 +35,6 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
   int id; // player 1 or 2
 
-  int extraLives = 0;
   color c;
   boolean usecolor = false;
   int bounceDir;
@@ -53,7 +52,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float bounceForce = 10;
   float bounceFriction = .75;
   float bounceForceUp = 20;
-  float bounceGravity = 4;
+  final static float bounceGravity = 4;
   boolean grounded = true;
   final static float TAR_SINK_RATE = -2;
   final static float TAR_RISE_RATE = 4;
@@ -140,7 +139,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     if (!grounded) {
       va *= bounceFriction;
       vm -= bounceGravity;
-      if(targetDist + vm < DIST_FROM_EARTH) {
+      if (targetDist + vm < DIST_FROM_EARTH) {
         //vm = DIST_FROM_EARTH - targetDist;
         grounded = true;
         vm = 0;
@@ -211,6 +210,18 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     return facing;
   }
 
+  boolean canBeAbducted () {
+    return enabled;
+  }
+  
+  color getTint() {
+    return usecolor ? c : #FFFFFF;
+  }
+  
+  int getID() {
+    return id;
+  }
+
   boolean isTargettable () {
     return enabled;
   }
@@ -242,7 +253,9 @@ class PlayerIntro extends Entity {
   final static int FLASHING = 0;
   final static int SPAWNING = 1;
   final static int DONE = 2;
-  int state = FLASHING;
+  int state = DONE;
+  color colour;
+  boolean usecolor = false;
 
   final float FLICKER_RATE = 16;
 
@@ -263,7 +276,10 @@ class PlayerIntro extends Entity {
   public void render () {
     if (state==DONE) return;
     if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) {
+      pushStyle();
+      if(usecolor) tint(colour);
       simpleRenderImage();
+      popStyle();
     }
   }
 }

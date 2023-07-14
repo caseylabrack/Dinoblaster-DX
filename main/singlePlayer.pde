@@ -1,4 +1,4 @@
-abstract class Scene {
+abstract class Scene { //<>//
 
   abstract void update();
   abstract void render();
@@ -25,7 +25,7 @@ class SinglePlayer extends Scene {
   Camera camera = new Camera();
   Hypercube hypercube;
   //Player player;
-  Player[] players;
+  Player[] players = new Player[2];
   PlayerRespawn playerRespawn;
   PlayerIntro[] playerIntros = new PlayerIntro[2];
   //PlayerIntro playerIntro = new PlayerIntro();
@@ -38,7 +38,9 @@ class SinglePlayer extends Scene {
   GibsSystem trexDeathAnimation;
   InGameText gameText;
   color[] twoPColors = new color[]{#FF00FF, #F08080};
-  int numPlayers;
+  int numPlayers = 1;
+
+  int extraLives, startingExtraLives;
 
   boolean showingUI;
 
@@ -59,10 +61,12 @@ class SinglePlayer extends Scene {
   //float yoffset = -5; // optically vertically center align text within rectangle buttons
   //IntList validLvls = new IntList();
 
-  SinglePlayer(SimpleTXTParser settings, AssetManager assets, int numPlayers) {
+  SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
-    this.numPlayers = numPlayers;
-    players = new Player[numPlayers];
+    //this.numPlayers = numPlayers;
+    //players = 
+
+    startingExtraLives = settings.getInt("extraLives", 0);
 
     PImage earthmodel;
     if (settings.getBoolean("earthIsPangea", false)) {
@@ -86,18 +90,17 @@ class SinglePlayer extends Scene {
       playerIntros[i].model = i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0];
       playerIntros[i].y = Player.DIST_FROM_EARTH * (i==0 ? -1 : 1);
       playerIntros[i].r = i == 0 ? 0 : 180;
+      playerIntros[i].colour = twoPColors[i];
     }
 
-    for (int i = 0; i <= (numPlayers - 1); i++) {
-      players[i] = new Player(assets.playerStuff.brontoSVG, (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep, twoPColors[i]);
-      players[i].extraLives = settings.getInt("extraLives", 0);
+    for (int i = 0; i < 2; i++) {   
+      players[i] = new Player((i==0 ? assets.playerStuff.brontoSVG : assets.playerStuff.oviSVG), (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep, twoPColors[i]);
       players[i].runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
       players[i].id = i;
-      players[i].usecolor = true;
     }
 
     for (int i = 0; i <= 1; i++) {
-      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggWhole);
+      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggFrames, i);
       //rescueEggs[i].enabled = true;
       earth.addChild(rescueEggs[i]);
     }
@@ -168,7 +171,14 @@ class SinglePlayer extends Scene {
 
     // restart stuff
     //player.restart();
-    for (Player p : players) p.restart();
+    for (Player p : players) {
+      p.restart();
+      p.usecolor = numPlayers == 2;
+    }
+    if (numPlayers==1) {
+      players[1].enabled = false;
+    } 
+    extraLives = startingExtraLives;
     gameOver.restart();
     roidManager.restart();
     ufo.restart();
@@ -189,12 +199,11 @@ class SinglePlayer extends Scene {
 
     gameText.showRandomTip();
 
-    for (PlayerIntro playerIntro : playerIntros) {
-      playerIntro.startIntro();
-      playerIntro.spawningStart = millis();
+    for (int i = 0; i < numPlayers; i++) {
+      playerIntros[i].startIntro();
+      playerIntros[i].spawningStart = millis();
+      playerIntros[i].usecolor = numPlayers == 2; 
     }
-    //playerIntro.startIntro();
-    //playerIntro.spawningStart = millis();
     assets.playerStuff.spawn.play();
 
     ufo.startCountDown();
@@ -299,12 +308,9 @@ class SinglePlayer extends Scene {
     //  lastScoreTick = time.getClock();
     //}
 
-    //if(frameCount == 90) {
-    // playerKilled(1); 
+    //if (frameCount == 90) {
+    //  playerKilled(1);
     //}
-
-
-    for (EggRescue r : rescueEggs) r.update(time.getClock());
 
     // volcano eruption
     for (Volcano v : volcanoSystem.volcanos) {
@@ -317,26 +323,21 @@ class SinglePlayer extends Scene {
     earth.move(time.getTimeScale(), time.getClock());
 
     // is player in tarpit
-    //for (Player p : players) earth.setStuckInTarpit(p);
-    //println(players[0].inTarpit, players[1].inTarpit);
     for (Player p : players) {
       if (!earth.tarpitEnabled) continue;
       if (!p.grounded) continue;
       p.inTarpit = utils.unsignedAngleDiff(utils.angleOfOrigin(p.localPos()), earth.tarpitAngle) < Earth.TARPIT_ARC / 2;
-      //if(utils.unsignedAngleDiff(utils.angleOfOrigin(p.localPos()), earth.tarpitAngle) < Earth.TARPIT_ARC / 2) p.inTarpit = true;
-      //sinker.setInTarpit(utils.unsignedAngleDiff(sinker.angleOnEarth(), tarpitAngle) < TARPIT_ARC/2 - sinker.nudgeMargin());
     }
 
-    players[0].move(keys.left, keys.right, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
-    //players[1].move(false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
-    players[1].move(frameCount > 100 ? true : false, false, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    players[0].move(keys.p1Left(), keys.p1Right(), time.getTimeScale(), time.getClock(), time.getScaledElapsed());
+    players[1].move(keys.p2Left(), keys.p2Right(), time.getTimeScale(), time.getClock(), time.getScaledElapsed());
 
     // check for collisions between players
     if (numPlayers==2 && players[0].enabled && players[1].enabled) {
 
       boolean colliding = false;
 
-      //  //check tunnelling case
+      //check tunnelling case
       float localAngOld1 = utils.angleOfOrigin(players[0].ppos);
       float localAngOld2 = utils.angleOfOrigin(players[1].ppos);
       float localAngNew1 = utils.angleOfOrigin(players[0].localPos());
@@ -403,7 +404,7 @@ class SinglePlayer extends Scene {
       }
     }
 
-    // check for collisions against blockers (volcanos)
+    // check for collisions against volcanos
     for (Player p : players) {
       for (Volcano v : volcanoSystem.volcanos) {
 
@@ -423,7 +424,10 @@ class SinglePlayer extends Scene {
 
         if (abs(diff) < Player.BOUNDING_ARC / 2 + v.getArc() / 2) colliding = true;
         if (colliding) {
-          if (diff==0) paused = true;
+          if (diff==0) {
+            paused = true;
+            println("diff zero against volcano?");
+          }
 
           float fixedAngle = obR + v.getArc() * utils.sign(diff) * (tunnelled ? 1 : -1);
           p.x = cos(radians(fixedAngle)) * p.getRadius();
@@ -432,6 +436,56 @@ class SinglePlayer extends Scene {
           float updatedAngle = utils.angleOfOrigin(p.localPos());
           float updateddiff = utils.signedAngleDiff(updatedAngle, obR);
         }
+      }
+    }
+
+    // player collision against player eggs
+    for (Player p : players) {
+      for (EggRescue e : rescueEggs) {
+
+        if (!p.enabled || !e.enabled || e.state == EggRescue.BURST || e.player == p.id) continue;
+
+        boolean colliding = false;
+        float lastR = utils.angleOfOrigin(p.ppos);
+        float currentR = utils.angleOfOrigin(p.localPos());
+        float obR = utils.angleOfOrigin(e.localPos());
+        float olddiff = utils.signedAngleDiff(lastR, obR);
+        float diff = utils.signedAngleDiff(currentR, obR);
+        // check tunnelling case
+        if (abs(diff) < 90 && utils.sign(diff)!=utils.sign(olddiff)) colliding = true; // if they were close and their angle difference just switched sign, then they tunnelled
+        if (colliding) println("tunnelled");
+        boolean tunnelled = false;
+        if (colliding) tunnelled = true;
+
+        if (abs(diff) < Player.BOUNDING_ARC / 2 + e.getArc() / 2) colliding = true;
+        if (colliding) {
+          if (diff==0) {
+            paused = true;
+            println("diff zero against egg?");
+          }
+
+          float fixedAngle = obR + e.getArc() * utils.sign(diff) * (tunnelled ? 1 : -1);
+          p.x = cos(radians(fixedAngle)) * p.getRadius();
+          p.y = sin(radians(fixedAngle)) * p.getRadius();
+          p.r = utils.angleOfOrigin(p.localPos()) + 90;
+          float updatedAngle = utils.angleOfOrigin(p.localPos());
+          float updateddiff = utils.signedAngleDiff(updatedAngle, obR);
+          e.bounce(time.getClock());
+          p.bounceStart(utils.sign(diff) * -1);
+        }
+      }
+    }
+
+    // do 2player egg rescue
+    for (EggRescue e : rescueEggs) {
+      e.update(time.getClock(), e.player == 0 ? keys.p1Left() : keys.p2Left(), e.player == 0 ? keys.p1Right() : keys.p2Right());
+      if (e.state == EggRescue.BURST && !players[e.player].enabled) {
+        earth.addChild(players[e.player]);
+        players[e.player].enabled = true;
+        players[e.player].x = e.x;
+        players[e.player].y = e.y;
+        players[e.player].r = e.r;
+        players[e.player].ppos.set(players[e.player].localPos());
       }
     }
 
@@ -444,13 +498,16 @@ class SinglePlayer extends Scene {
     //  playerKilled();
     //}
 
-    //boolean abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), player);
-    //if (abducted) {
-    //  player.extraLives++;
-    //  player.restart();
-    //  playerRespawn.respawn();
-    //  scoring = false;
-    //}
+    int abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), players);
+    if (abducted !=-1) {
+      extraLives++;
+      players[abducted].restart();
+      //player.extraLives++;
+      //player.restart();
+      //playerRespawn.respawn();
+      //scoring = false;
+      println("abducted");
+    }
 
     // respawn following losing extra life 
     //Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
@@ -575,7 +632,7 @@ class SinglePlayer extends Scene {
 
     // restart
     gameOver.update();
-    if (gameOver.readyToRestart && keys.anykey) {
+    if (gameOver.readyToRestart && keys.anyKey()) {
       play(stage);
     }
 
@@ -734,7 +791,7 @@ class SinglePlayer extends Scene {
     translate(width/2, height/2);
     scale(SCALE);
     imageMode(CENTER);
-    ui.render(players[0].extraLives, score);
+    ui.render(extraLives, score);
     popMatrix();
 
     pushMatrix(); // screen-space (UI)
@@ -753,9 +810,8 @@ class SinglePlayer extends Scene {
     scoring = false;
     //time.deathStart();
 
-    rescueEggs[id].setPosition(players[id].localPos());
-    rescueEggs[id].r = players[id].r;
-    rescueEggs[id].enabled = true;
+    float a = utils.angleOfOrigin(players[id].localPos());
+    rescueEggs[id].startAnimation(a);
 
     players[id].restart();
 
@@ -793,6 +849,7 @@ class SinglePlayer extends Scene {
       launch(sketchPath() + "\\DIP-switches.txt");
     }
 
+    playerKilled(1);
     //players[0].bounceStart(time.getClock(), -1);
   }
 
