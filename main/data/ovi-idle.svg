@@ -2,18 +2,18 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="24.355814mm"
-   height="15.957582mm"
-   viewBox="0 0 24.355814 15.957583"
+   width="26.496mm"
+   height="15.813395mm"
+   viewBox="0 0 26.496001 15.813395"
    version="1.1"
    id="svg461"
    inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
    sodipodi:docname="ovi-idle.svg"
+   xml:space="preserve"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
      id="namedview463"
      pagecolor="#4c4c4c"
      bordercolor="#000000"
@@ -24,30 +24,22 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.8385498"
-     inkscape:cx="23.8507"
-     inkscape:cy="-34.583516"
+     inkscape:zoom="1.5488348"
+     inkscape:cx="63.273373"
+     inkscape:cy="48.4235"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs458">
-	
-	
-</defs>
-  <g
+     inkscape:current-layer="layer1" /><defs
+     id="defs458" /><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-87.631691,-99.113774)">
-    <polygon
+     transform="translate(-85.808034,-99.602553)"><polygon
        class="st0"
-       points="864.7,430.9 863.8,424.2 856.7,418 858.7,412.4 837.7,424.5 843,436.9 847.8,441.7 844.5,441.9 841.7,439.3 832.3,423.9 837.7,416.7 827.4,418.3 812.2,423.4 804.2,439.5 809.4,441.2 808.9,443.2 802.2,443.2 799.9,439.8 809.1,419.8 822.4,409.3 809.5,389.5 786.6,387.2 810.1,383.9 830.2,391 857.4,402 861,399.4 864.5,385.3 872.2,386.3 877.9,384.4 875.7,394.1 870,392.4 867.3,402.5 865.8,408.5 862.7,416.7 869,423.7 872.3,424.8 873.1,429.4 868.4,428.2 "
+       points="869,423.7 872.3,424.8 873.1,429.4 868.4,428.2 864.7,430.9 863.8,424.2 856.7,418 858.7,412.4 837.7,424.5 843,436.9 847.8,441.7 844.5,441.9 841.7,439.3 832.3,423.9 837.7,416.7 827.4,418.3 812.2,423.4 804.2,439.5 809.4,441.2 808.9,443.2 802.2,443.2 799.9,439.8 809.1,419.8 822.4,409.3 809.5,389.5 786.6,387.2 810.1,383.9 830.2,391 857.4,402 861,399.4 864.5,385.3 872.2,386.3 877.9,384.4 875.7,394.1 870,392.4 867.3,402.5 865.8,408.5 862.7,416.7 "
        id="polygon138"
-       style="display:inline;fill:none;stroke:#ffffff;stroke-opacity:1"
-       transform="matrix(0.26458333,0,0,0.26458333,-120.47116,-2.3242672)" />
-  </g>
-</svg>
+       style="display:inline;fill:none;stroke:#ffffff;stroke-width:2.61315;stroke-miterlimit:11.2;stroke-dasharray:none;stroke-opacity:1"
+       transform="matrix(0.25472782,0,0,0.25472782,-111.77678,2.1877566)" /></g></svg>

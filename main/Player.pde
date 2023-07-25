@@ -213,11 +213,11 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   boolean canBeAbducted () {
     return enabled;
   }
-  
+
   color getTint() {
     return usecolor ? c : #FFFFFF;
   }
-  
+
   int getID() {
     return id;
   }
@@ -257,7 +257,7 @@ class PlayerIntro extends Entity {
   color colour;
   boolean usecolor = false;
 
-  final float FLICKER_RATE = 16;
+  final static float FLICKER_RATE = 16;
 
   public void startIntro () {
     spawningStart = millis();
@@ -277,7 +277,7 @@ class PlayerIntro extends Entity {
     if (state==DONE) return;
     if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) {
       pushStyle();
-      if(usecolor) tint(colour);
+      if (usecolor) tint(colour);
       simpleRenderImage();
       popStyle();
     }
@@ -297,6 +297,8 @@ class PlayerRespawn extends Entity {
   float flickerStart;
   boolean enabled = false;
   boolean canSpawn = false;
+  color colour;
+  boolean usecolor = false;
 
   PlayerRespawn (PImage model) {
     this.model = model;
@@ -334,12 +336,18 @@ class PlayerRespawn extends Entity {
 
   void render() {
     if (!enabled) return;
-    if (display) simpleRenderImage();
+    if (display) { 
+      pushStyle();
+      if (usecolor) tint(colour);
+      simpleRenderImage();
+      popStyle();
+    }
   }
 
   void restart() {
     display = false;
     y = startY;
+    enabled = false;
   }
 }
 

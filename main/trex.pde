@@ -50,14 +50,18 @@ class EggRescue extends Entity {
   final static int IDLE = 1;
   final static int BOUNCING = 2;
   final static int BURST = 3;
+  final static int DONE = 4;
   int state;
   float stateStart; // how long have I been in this state
 
-  EggRescue (color c, PImage[] eggFrames, int player) {
+  PImage playerModel;
+
+  EggRescue (color c, PImage[] eggFrames, int player, PImage playerModel) {
     pcolor = c;
     this.eggFrames = eggFrames;
     model = eggFrames[0];
     this.player = player;
+    this.playerModel = playerModel;
   }
 
   void update (float clock) {
@@ -66,7 +70,7 @@ class EggRescue extends Entity {
 
   void update (float clock, boolean left, boolean right) {
     if (!enabled) return;
-    
+
     r = uprightR;
 
     switch (state) {
@@ -109,19 +113,34 @@ class EggRescue extends Entity {
       break;
 
     case BURST: 
-      if (clock - stateStart > TIMEOUT_DUR) {
-        reset();
-      }
+      //if (clock - stateStart > TIMEOUT_DUR) {
+      //  reset();
+      //}
+      break;
+
+    case DONE:
       break;
     }
   }
 
   void render () {
     if (!enabled) return;
-    pushStyle();
-    tint(pcolor);
-    simpleRenderImage();
-    popStyle();
+    if (state == BURST) {
+      if (frameCount % 4 > 4 / 2) {
+        pushStyle();
+        tint(pcolor);
+        pushTransforms();
+        image(playerModel, 0, 0);
+        image(model, 0, 0);
+        popMatrix();
+        popStyle();
+      }
+    } else {
+      pushStyle();
+      tint(pcolor);
+      simpleRenderImage();
+      popStyle();
+    }
   }
 
   void startAnimation (float angle) {
@@ -170,6 +189,13 @@ class EggRescue extends Entity {
   }
 
   void reset() {
+    hits = 0;
+    model = eggFrames[hits];
+    enabled = false;
+  }
+
+  void spawn () {
+    state = DONE;
     hits = 0;
     model = eggFrames[hits];
     enabled = false;

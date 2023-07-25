@@ -1,17 +1,20 @@
 // TO DO
-// user toggle between 1 and 2 player
-// ufos for 2p
-// deaths and extra lives for 2p
+// allow reloading settings
+// allow hot reloading settings
+// different gibs for nonslowmo death in 2p
+// scoring in 2p with deaths?
 // 1 and 2 meeple buttons
 // dipswitches pauses
+// on resume from dipswitches, title screen
 // on resume from dipswitches, reload settings
-// dipswitches circle lock thingy
-// title screen (turn on animation? attract mode?)
-// hide UI
+// title screen: 40th anniversary edition (turn on animation? attract mode?)
+// dipswitch option for hide UI
+// try-catch for launching dipswitches notepad
+// fix: caps-lock messes with input keys
+// dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // nongaussian blur glow
-// 40th anniversary edition
 // fun stuff on edge of screen for aspect ratios > 4:3
-// oviraptor mode
+// oviraptor mode (make its own release maybe)
 
 import java.util.Collections;
 
@@ -57,8 +60,8 @@ Oviraptor oviraptor;
 
 void setup () {
   //size(500, 500, P2D);
-  size(1024, 768, P2D);
-  //fullScreen(P2D);
+  //size(1024, 768, P2D);
+  fullScreen(P2D);
   smooth(4);
   frameRate(30);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -218,6 +221,7 @@ void mousePressed () {
 
 void mouseReleased () {
   currentScene.mouseUp();
+  paused = false;
   //frameRate(60);
   //rec = true;
 }
@@ -380,7 +384,15 @@ class Keys {
   }
 
   boolean anyKey () {
-    return leftp1 || rightp1 || leftp2 || rightp2;
+    return leftp1 || rightp1 || leftp2 || rightp2 || keys.arrowleft || keys.arrowright;
+  }
+
+  boolean p1anykey() {
+    return p1Left() || p1Right();
+  }
+
+  boolean p2anykey() {
+    return p2Left() || p2Right();
   }
 }
 

@@ -26,7 +26,7 @@ class SinglePlayer extends Scene {
   Hypercube hypercube;
   //Player player;
   Player[] players = new Player[2];
-  PlayerRespawn playerRespawn;
+  PlayerRespawn[] playerRespawns = new PlayerRespawn[2];
   PlayerIntro[] playerIntros = new PlayerIntro[2];
   //PlayerIntro playerIntro = new PlayerIntro();
   GameOver gameOver = new GameOver();
@@ -34,7 +34,7 @@ class SinglePlayer extends Scene {
   EggRescue[] rescueEggs = new EggRescue[2];
   Trex trex;
   SPFinale finale;
-  GibsSystem playerDeathAnimation;
+  GibsSystem[] playerDeathAnimations = new GibsSystem[2];
   GibsSystem trexDeathAnimation;
   InGameText gameText;
   color[] twoPColors = new color[]{#FF00FF, #F08080};
@@ -100,12 +100,16 @@ class SinglePlayer extends Scene {
     }
 
     for (int i = 0; i <= 1; i++) {
-      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggFrames, i);
+      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggFrames, i, i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
       //rescueEggs[i].enabled = true;
       earth.addChild(rescueEggs[i]);
     }
 
-    playerRespawn = new PlayerRespawn(assets.playerStuff.brontoFrames[0]);
+    for (int i = 0; i < 2; i++) {
+      playerRespawns[i] = new PlayerRespawn(i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
+      playerRespawns[i].colour = twoPColors[i];
+    }
+    //playerRespawn = new PlayerRespawn(assets.playerStuff.brontoFrames[0]);
 
     roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
@@ -132,7 +136,10 @@ class SinglePlayer extends Scene {
     trex.attackAngle = settings.getFloat("trexAttackAngle", Trex.DEFAULT_ATTACK_ANGLE);
     earth.addChild(trex);
 
-    playerDeathAnimation = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
+    for (int i=0; i<2; i++) {
+      //playerDeathAnimations[i] = new GibsSystem(i==0 ? assets.playerStuff.dethSVG : assets.playerStuff.oviDethSVG, new PVector(28, 45));
+      playerDeathAnimations[i] = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
+    }
     trexDeathAnimation = new GibsSystem(assets.trexStuff.deth, new PVector(52, 41));
     if (!settings.getBoolean("trexEnabled", true)) trexDeathAnimation.enabled = false;
 
@@ -178,10 +185,16 @@ class SinglePlayer extends Scene {
     if (numPlayers==1) {
       players[1].enabled = false;
     } 
+    for (PlayerRespawn p : playerRespawns) {
+      p.restart();
+      p.usecolor = numPlayers == 2;
+    }
+    for (EggRescue r : rescueEggs) r.reset();
     extraLives = startingExtraLives;
     gameOver.restart();
     roidManager.restart();
     ufo.restart();
+    ufoRespawn.restart();
     volcanoSystem.restart();
     egg.reset();
     trex.restart();
@@ -202,7 +215,7 @@ class SinglePlayer extends Scene {
     for (int i = 0; i < numPlayers; i++) {
       playerIntros[i].startIntro();
       playerIntros[i].spawningStart = millis();
-      playerIntros[i].usecolor = numPlayers == 2; 
+      playerIntros[i].usecolor = numPlayers == 2;
     }
     assets.playerStuff.spawn.play();
 
@@ -259,7 +272,7 @@ class SinglePlayer extends Scene {
       playerIntros[0].state = PlayerIntro.DONE;
       playerIntros[1].state = PlayerIntro.DONE;
 
-      for (int i = 0; i <= (numPlayers - 1); i++) {
+      for (int i = 0; i < numPlayers; i++) {
         players[i].enabled = true;
         players[i].y = playerIntros[i].y;
         players[i].r = playerIntros[i].r;
@@ -296,7 +309,6 @@ class SinglePlayer extends Scene {
     //  music.play(true);
     //}
 
-    // respawn following getting extra life
     //boolean canSpawn = playerRespawn.update(time.getClock());
     //if (keys.anykey && canSpawn) {
     //  playerRespawn.enabled = false;
@@ -479,13 +491,14 @@ class SinglePlayer extends Scene {
     // do 2player egg rescue
     for (EggRescue e : rescueEggs) {
       e.update(time.getClock(), e.player == 0 ? keys.p1Left() : keys.p2Left(), e.player == 0 ? keys.p1Right() : keys.p2Right());
-      if (e.state == EggRescue.BURST && !players[e.player].enabled) {
+      if (e.state == EggRescue.BURST && !players[e.player].enabled && (e.player==0 ? keys.p1anykey() : keys.p2anykey())) {
         earth.addChild(players[e.player]);
         players[e.player].enabled = true;
         players[e.player].x = e.x;
         players[e.player].y = e.y;
         players[e.player].r = e.r;
         players[e.player].ppos.set(players[e.player].localPos());
+        e.spawn();
       }
     }
 
@@ -498,28 +511,48 @@ class SinglePlayer extends Scene {
     //  playerKilled();
     //}
 
+    // player abducted by UFO?
     int abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), players);
     if (abducted !=-1) {
       extraLives++;
       players[abducted].restart();
-      //player.extraLives++;
-      //player.restart();
-      //playerRespawn.respawn();
       //scoring = false;
+      playerRespawns[abducted].respawn();
+      //paused = true;
       println("abducted");
     }
 
-    // respawn following losing extra life 
-    //Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anykey);
-    //if (ufoRespawned != null) {
-    //  player.enabled = true;
-    //  player.parent = null;
-    //  player.setPosition(ufoRespawned.globalPos());
-    //  player.r = ufoRespawned.r;
-    //  earth.addChild(player);
-    //  scoring = true;
-    //  lastScoreTick = time.getClock();
-    //}
+    // respawn following getting extra life
+    for (int i = 0; i < 2; i++) {
+      boolean canSpawn = playerRespawns[i].update(time.getClock());
+      if (canSpawn && (i==0 ? keys.p1anykey() : keys.p2anykey())) {
+        playerRespawns[i].enabled = false;
+        players[i].enabled = true;
+
+        players[i].y = -Player.DIST_FROM_EARTH; //playerIntro.y;
+        players[i].x = 0;
+        earth.addChild(players[i]);
+
+        //paused = true;
+        ufo.resumeCountDown();
+        scoring = true;
+        lastScoreTick = time.getClock();
+      }
+    }
+
+    // respawn death (rescue UFO) 
+    Entity ufoRespawned = ufoRespawn.update(time.getClock(), time.getTimeScale(), earth.globalPos(), keys.anyKey());
+    if (ufoRespawned != null) {
+      players[ufoRespawn.whichDino].enabled = true;
+      players[ufoRespawn.whichDino].parent = null;
+      //player.enabled = true;
+      //player.parent = null;
+      players[ufoRespawn.whichDino].setPosition(ufoRespawned.globalPos());
+      players[ufoRespawn.whichDino].r = ufoRespawned.r;
+      earth.addChild(players[ufoRespawn.whichDino]);
+      //scoring = true;
+      lastScoreTick = time.getClock();
+    }
 
     volcanoSystem.update(time.getClock(), time.getTimeScale());
 
@@ -546,7 +579,8 @@ class SinglePlayer extends Scene {
             if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
 
               PVector impactPointAdjusted = new PVector(earth.x + cos(incomingAngle) * Earth.EARTH_RADIUS, earth.y + sin(incomingAngle) * Earth.EARTH_RADIUS);
-              playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
+              //playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
+              playerDeathAnimations[player.id].fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
 
               println("died from roid");
 
@@ -554,17 +588,6 @@ class SinglePlayer extends Scene {
             }
           }
         }
-        //if (player.enabled) {
-        //  if (utils.unsignedAngleDiff(splode.r, player.r) < Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2) {
-
-        //    PVector impactPointAdjusted = new PVector(earth.x + cos(incomingAngle) * Earth.EARTH_RADIUS, earth.y + sin(incomingAngle) * Earth.EARTH_RADIUS);
-        //    playerDeathAnimation.fire(time.getClock(), player, impactPointAdjusted, 15, .98, .98); 
-
-        //    println("died from roid");
-
-        //    playerKilled();
-        //  }
-        //}
       }
     }
 
@@ -625,7 +648,7 @@ class SinglePlayer extends Scene {
     //  }
     //}
 
-    playerDeathAnimation.update(time.getTimeScale(), time.getClock());
+    for (GibsSystem p : playerDeathAnimations) p.update(time.getTimeScale(), time.getClock());
     trexDeathAnimation.update(time.getTimeScale(), time.getClock());
 
     gameText.update();
@@ -752,7 +775,7 @@ class SinglePlayer extends Scene {
     //scale(2);
     //rotate(radians(-player.globalRote()));
     rotate(radians(-camera.globalRote()));
-    playerRespawn.render();
+    for (PlayerRespawn p : playerRespawns) p.render();
     ufo.render(currentColor.getColor());
     ufoRespawn.render(currentColor.getColor());
     volcanoSystem.render(currentColor.getColor());
@@ -768,7 +791,7 @@ class SinglePlayer extends Scene {
     hypercube.render(time.getTimeScale(), currentColor.getColor());
     egg.render(currentColor.getColor());
     trex.render();
-    playerDeathAnimation.render();
+    for (GibsSystem p : playerDeathAnimations) p.render();
     trexDeathAnimation.render();
     gameText.render(currentColor.getColor());
     finale.renderBigOne(); // in front of earth
@@ -800,34 +823,56 @@ class SinglePlayer extends Scene {
     scale(SCALE);
     imageMode(CORNER);
     rectMode(CORNER);
-    if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, dipswitchesButton.w, dipswitchesButton.h);
+    //if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, dipswitchesButton.w, dipswitchesButton.h);
 
     popStyle();
     popMatrix();
   }
 
   void playerKilled(int id) {
-    scoring = false;
-    //time.deathStart();
 
-    float a = utils.angleOfOrigin(players[id].localPos());
-    rescueEggs[id].startAnimation(a);
+    if (numPlayers==1) {
+      scoring = false;
+      if (extraLives <= 0) {
+        gameOver.callGameover();
+        gameText.goExtinct();
+        assets.playerStuff.extinct.play(false);
+        music.stop_();
+      } else {
+        extraLives--;
+        ufo.pauseCountDown();
+        ufoRespawn.dispatch(players[id], earth.globalPos());
+        assets.playerStuff.littleDeath.play(false);
+      }
+    } else {
 
+      // if other player is dead, gameover
+      // other player isn't really dead if they're in the process of respawning through: rising animation, ufo, or egg
+      if (!players[id==1 ? 0 : 1].enabled && !ufoRespawn.inTheProcessOfReturningPlayer() && !playerRespawns[id==1 ? 0 : 1].enabled && rescueEggs[id==1 ? 0 : 1].state!=EggRescue.BURST) {
+        if (extraLives <= 0) {
+          //gameover
+          scoring = false;
+          gameOver.callGameover();
+          gameText.goExtinct();
+          assets.playerStuff.extinct.play(false);
+          music.stop_();
+        } else {
+          //rescue UFO
+          extraLives--;
+          ufo.pauseCountDown();
+          ufoRespawn.dispatch(players[id], earth.globalPos());
+          assets.playerStuff.littleDeath.play(false);
+        }
+      } else {
+        // otherwise spawn an egg
+        float a = utils.angleOfOrigin(players[id].localPos());
+        rescueEggs[id].startAnimation(a);
+      }
+    }
+
+    players[id].enabled = false;
     players[id].restart();
-
-
-
-    //if (player.extraLives <= 0) {
-    //  gameOver.callGameover();
-    //  gameText.goExtinct();
-    //  assets.playerStuff.extinct.play(false);
-    //  music.stop_();
-    //} else {
-    //  player.extraLives--;
-    //  ufo.pauseCountDown();
-    //  ufoRespawn.dispatch(player, earth.globalPos());
-    //  assets.playerStuff.littleDeath.play(false);
-    //}
+    time.deathStart();
   }
 
   void mouseUp() {
@@ -849,7 +894,7 @@ class SinglePlayer extends Scene {
       launch(sketchPath() + "\\DIP-switches.txt");
     }
 
-    playerKilled(1);
+    //playerKilled(1);
     //players[0].bounceStart(time.getClock(), -1);
   }
 

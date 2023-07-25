@@ -67,6 +67,8 @@ class UFO extends Entity {
   void restart () {
     enabled = false;
     state = IDLE;
+    beamEnabled = false;
+    abductedGuy.identity();
   }
 
   void startCountDown () {
@@ -79,7 +81,10 @@ class UFO extends Entity {
   }
 
   void pauseCountDown () {
-    if (state!=IDLE) state = LEAVING;
+    if (state!=IDLE) {
+      state = LEAVING;
+      beamEnabled = false;
+    }
     countingDown = false;
   }
 
@@ -89,7 +94,7 @@ class UFO extends Entity {
 
   // return the ID of a player abducted this tick, or zero
   int update (float clock, float dt, PVector earth, abductable[] as) {
-    if (!enabled) return 0;
+    if (!enabled) return -1;
 
     float progress, angle, dist;
     int snatched = -1;
@@ -163,7 +168,7 @@ class UFO extends Entity {
 
           // did player get abducted
           for (abductable a : as) {
-            if(!a.canBeAbducted()) continue;
+            if (!a.canBeAbducted()) continue;
             PVector abducteePosition = a.getPosition();
             if (utils.unsignedAngleDiff(utils.angleOf(earth, abducteePosition), utils.angleOf(earth, globalPos())) < snatchMargin) {
               startState = clock;
@@ -177,7 +182,8 @@ class UFO extends Entity {
               startState = clock;
               state = SNATCHING;
               snatched = a.getID();
-              println(snatched);
+              abductedGuy.setPosition(PVector.lerp(snatchStartPos, globalPos(), 0));
+              abductedGuy.scale = map(0, 0, 1, 1, .01);
               break; // only abduct a single dino
             }
           }
@@ -249,11 +255,10 @@ class UFO extends Entity {
 
     // ABDUCTION
     if (state == SNATCHING) {
+      println(abductedGuy.globalPos());
       pushStyle();
       noFill();
-      //stroke(0, 0, 100, 1);
       stroke(abducteeColor);
-      //tint(abducteeColor);
       abductedGuy.simpleRenderImageVector();
       popStyle();
     }
@@ -291,6 +296,8 @@ class UFORespawn extends Entity {
   float lastFlicker;
 
   boolean returningDinoDisplay = false;
+  int whichDino;
+  color colour;
 
   UFORespawn (PShape model) {
     modelVector = model;
@@ -301,10 +308,16 @@ class UFORespawn extends Entity {
     enabled = true;
     stateStart = millis();
     state = APPROACHING;
+    whichDino = dino.getID();
+    colour = dino.getTint();
     float angle = random(0, 360);
     x = earth.x + cos(angle) * UFO.initialDist;
     y = earth.y + sin(angle) * UFO.initialDist;
     returningDino.modelVector = dino.getModel();
+  }
+  
+  boolean inTheProcessOfReturningPlayer () {
+    return enabled && state!=LEAVING;
   }
 
   Entity update(float clock, float dt, PVector earth, boolean anykey) {
@@ -364,11 +377,11 @@ class UFORespawn extends Entity {
         y = earth.y + sin(angle) * (dist+UFO.initialSpeed * dt);
       } else {
         state = DONE;
+        enabled = false;
       }
       break;
 
     case DONE:
-      enabled = false;
       break;
 
     default:
@@ -396,7 +409,8 @@ class UFORespawn extends Entity {
       // returning dino
       pushStyle();
       noFill();
-      stroke(0, 0, 100, 1);
+      stroke(colour);
+      //stroke(0, 0, 100, 1);
       if (returningDinoDisplay) returningDino.simpleRenderImageVector();
       popStyle();
     }
@@ -407,5 +421,9 @@ class UFORespawn extends Entity {
     stroke(funkyColor);
     simpleRenderImageVector();
     popStyle();
+  }
+
+  void restart () {
+    enabled = false;
   }
 }

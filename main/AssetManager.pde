@@ -90,7 +90,9 @@ class AssetManager {
     roidStuff.bigone = loadImage("bigone.png");
     roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
     sounds.add(roidStuff.bigoneBlip);
-
+    
+    playerStuff.oviDethSVG = loadShape("ovi-death.svg");
+    playerStuff.oviDethSVG.disableStyle();
     playerStuff.dethSVG = loadShape("bronto-death.svg");
     playerStuff.dethSVG.disableStyle();
     playerStuff.brontoSVG = loadShape("bronto-idle.svg");
@@ -258,6 +260,7 @@ class AssetManager {
 
   class PlayerStuff {
     PShape dethSVG;
+    PShape oviDethSVG;
     PShape brontoSVG;
     PShape oviSVG;
     PImage[] brontoFrames;
