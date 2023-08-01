@@ -88,6 +88,7 @@ class Entity {
     pushTransforms();
     pushStyle();
     strokeWeight(assets.STROKE_WIDTH / scale);
+        //strokeWeight(1 / scale);
     shapeMode(CENTER);
     shape(modelVector, 0, 0);
     popStyle();

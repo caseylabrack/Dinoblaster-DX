@@ -1,12 +1,9 @@
 // TO DO
 // allow reloading settings
 // allow hot reloading settings
-// different gibs for nonslowmo death in 2p
+// 2player death gibs colored
 // scoring in 2p with deaths?
-// 1 and 2 meeple buttons
-// dipswitches pauses
-// on resume from dipswitches, title screen
-// on resume from dipswitches, reload settings
+// ufo in front of earth on approach, otherwise behind earth
 // title screen: 40th anniversary edition (turn on animation? attract mode?)
 // dipswitch option for hide UI
 // try-catch for launching dipswitches notepad
@@ -60,8 +57,8 @@ Oviraptor oviraptor;
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
-  fullScreen(P2D);
+  size(1024, 768, P2D);
+  //fullScreen(P2D);
   smooth(4);
   frameRate(30);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -194,6 +191,7 @@ void setup () {
   rightkey2p = settings.getChar("player2RightKey", 'l');
   //p2arrows = settings.getBoolean("player2GetsArrowKeys", true);
   keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
+      
   triassicSelect = settings.getChar("triassicSelect", '1');
   jurassicSelect = settings.getChar("jurassicSelect", '2');
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
@@ -201,9 +199,11 @@ void setup () {
   twoPlayerSelect = settings.getChar("2playerSelect", 'p');
 
   singlePlayer = new SinglePlayer(settings, assets);
-  singlePlayer.play(SinglePlayer.TRIASSIC);
+  singlePlayer.numPlayers = 2;
+  keys.playingMultiplayer = true;
+  //singlePlayer.play(SinglePlayer.TRIASSIC);
   //singlePlayer.play(SinglePlayer.JURASSIC);
-  //singlePlayer.play(SinglePlayer.CRETACEOUS);
+  singlePlayer.play(SinglePlayer.CRETACEOUS);
 
   oviraptor = new Oviraptor(settings, assets);
 
@@ -338,7 +338,7 @@ void keyReleased() {
     if (key==twoPlayerSelect) {
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
-      singlePlayer.play(SinglePlayer.TRIASSIC);
+      singlePlayer.play(SinglePlayer.CRETACEOUS);
     }
     if (key=='r') {
       rec = false;

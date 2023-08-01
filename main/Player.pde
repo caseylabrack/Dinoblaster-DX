@@ -54,7 +54,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   float bounceForceUp = 20;
   final static float bounceGravity = 4;
   boolean grounded = true;
-  final static float TAR_SINK_RATE = -2;
+  final static float TAR_SINK_RATE = -1;
   final static float TAR_RISE_RATE = 4;
 
   PImage[] frames;
@@ -85,7 +85,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     //targetDist = DIST_FROM_EARTH;
     targetDist = (inTarpit || !grounded) ? dist(0, 0, x, y) : DIST_FROM_EARTH;
 
-    if (inTarpit && !tarpitImmune) vm = TAR_SINK_RATE;
+    if (inTarpit && !tarpitImmune) vm = TAR_SINK_RATE * delta;
 
     // running or not. if running, update target angle
     if (left != right) { 
@@ -111,7 +111,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
       float tarpitFactor = 1;
       if (inTarpit) {
-        vm += TAR_RISE_RATE;
+        vm += TAR_RISE_RATE * delta;
 
         // on tarpit surface, run at a slow factor unless immunity set. 
         // beneath surface, can't run (but can rise)

@@ -72,7 +72,7 @@ class UFO extends Entity {
   }
 
   void startCountDown () {
-    spawnCountDown = 2e3;//random(5, 90) * 1000;
+    spawnCountDown = random(5, 90) * 1000;
     enabled = true;
   }
 
@@ -255,7 +255,6 @@ class UFO extends Entity {
 
     // ABDUCTION
     if (state == SNATCHING) {
-      println(abductedGuy.globalPos());
       pushStyle();
       noFill();
       stroke(abducteeColor);

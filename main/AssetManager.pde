@@ -342,7 +342,6 @@ class SoundM implements SoundPlayable {
 
     out = minim.getLineOut(Minim.MONO, 1024, 44100, 16);
     out.setGain(-negativeGain);
-    //println("gain? " + out.hasControl(Controller.GAIN));
 
     filePlayer.patch(rateControl).patch(out);
   }

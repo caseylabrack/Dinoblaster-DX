@@ -44,7 +44,7 @@ class Oviraptor extends Scene {
     playerDeathAnimation = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
 
     time.hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
-    time.setTimeScale(settings.getFloat("defaultTimeScale", 1));
+    time.timeScale = settings.getFloat("defaultTimeScale", 1);
 
     starsSystem.spawnSomeStars();
 
@@ -133,7 +133,7 @@ class Oviraptor extends Scene {
     roidManager.updateExplosions(time.getClock());
 
     if (trex.isStomping) earth.shake(8, 300, time.getClock());
-    trex.update(time.getTimeScale(), time.getScaledElapsed(), player);
+    //trex.update(time.getTimeScale(), time.getScaledElapsed(), players[0], players[1]);
     // is trex touching player
     if (player.enabled && trex.isDeadly()) {
       if (utils.unsignedAngleDiff(player.r, trex.r) < Player.BOUNDING_ARC/2 + Trex.BOUNDING_ARC/2) {

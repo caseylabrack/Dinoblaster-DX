@@ -261,10 +261,10 @@ class Time {
     }
   }
 
-  void setTimeScale(float n) {
-    defaultTimeScale = n;
-    timeScale = n;
-  }
+  //void setTimeScale(float n) {
+  //  //defaultTimeScale = n;
+  //  timeScale = n;
+  //}
 
   void setHyperspace (boolean h) {
     isHyperSpace = h;
@@ -295,6 +295,7 @@ class Time {
 
   public void restart () {
     isDying = false;
+    isHyperSpace = false;
     state = NORM;
     timeScale = defaultTimeScale;
   }

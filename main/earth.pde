@@ -193,6 +193,8 @@ class Earth extends Entity {
     tarpitEnabled = false;
     shakeContinuous = false;
     shakeMomentary = false;
+    steadyXPosition = 0;
+    steadyYPosition = 0;
     dx = 0;
     dy = 0;
     x = 0;

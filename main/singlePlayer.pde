@@ -24,11 +24,9 @@ class SinglePlayer extends Scene {
   UFORespawn ufoRespawn;
   Camera camera = new Camera();
   Hypercube hypercube;
-  //Player player;
   Player[] players = new Player[2];
   PlayerRespawn[] playerRespawns = new PlayerRespawn[2];
   PlayerIntro[] playerIntros = new PlayerIntro[2];
-  //PlayerIntro playerIntro = new PlayerIntro();
   GameOver gameOver = new GameOver();
   EggHatch egg;
   EggRescue[] rescueEggs = new EggRescue[2];
@@ -109,7 +107,6 @@ class SinglePlayer extends Scene {
       playerRespawns[i] = new PlayerRespawn(i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
       playerRespawns[i].colour = twoPColors[i];
     }
-    //playerRespawn = new PlayerRespawn(assets.playerStuff.brontoFrames[0]);
 
     roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
@@ -147,13 +144,13 @@ class SinglePlayer extends Scene {
     ui.enabled = settings.getBoolean("showSidePanels", true);
 
     time.hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
-    time.setTimeScale(settings.getFloat("defaultTimeScale", 1));
+    time.timeScale = settings.getFloat("defaultTimeScale", 1);
 
     gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD, settings.getStrings("tips", assets.DEFAULT_TIPS));
 
     currentColor = new ColorDecider(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
 
-    finale = new SPFinale(assets.roidStuff.bigone, assets.roidStuff.explosionFrames, new PShape[]{assets.ufostuff.ufoFinalSingle, assets.ufostuff.ufoFinalDuo, assets.ufostuff.ufoFinalDuoZoom}, assets.playerStuff.brontoSVG);
+    finale = new SPFinale(assets.roidStuff.bigone, new PShape[]{assets.ufostuff.ufoFinalSingle, assets.ufostuff.ufoFinalDuo, assets.ufostuff.ufoFinalDuoZoom}, assets.playerStuff.brontoSVG);
 
     music = assets.musicStuff.lvl1a;
 
@@ -176,8 +173,9 @@ class SinglePlayer extends Scene {
   void play (int lvl) {
     println("level: " + lvl);
 
+    //lvl = CRETACEOUS;
+
     // restart stuff
-    //player.restart();
     for (Player p : players) {
       p.restart();
       p.usecolor = numPlayers == 2;
@@ -201,8 +199,9 @@ class SinglePlayer extends Scene {
     earth.restart();
     earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
     hypercube.restart();
-    time.setTimeScale(time.defaultTimeScale);
-    time.setHyperspace(false);
+    time.restart();
+    //time.timeScale = time.defaultTimeScale;
+    //time.setHyperspace(false);
     starsSystem.setHyperspace(false);
     gameText.restart();
     finale.restart();
@@ -254,6 +253,8 @@ class SinglePlayer extends Scene {
       music = assets.musicStuff.lvl3;
     }
 
+    //score = 295;
+
     lastScoreTick = time.getClock();
     //earth.addChild(camera);
   }
@@ -280,45 +281,10 @@ class SinglePlayer extends Scene {
         players[i].ppos.set(players[i].localPos());
       }
 
-      //for (Player player : players) {
-      //  player.enabled = true;
-      //  player.y = playerIntro.y;
-      //  earth.addChild(player);
-      //}
-      //player.enabled = true;
-      //player.y = playerIntro.y;
-      //earth.addChild(player);
       scoring = true;
       lastScoreTick = time.getClock();
       music.play(true);
     }
-    //playerIntro.update();
-    //if (playerIntro.state == PlayerIntro.SPAWNING) {
-    //  playerIntro.state = PlayerIntro.DONE;
-
-    //  for (Player player : players) {
-    //    player.enabled = true;
-    //    player.y = playerIntro.y;
-    //    earth.addChild(player);
-    //  }
-    //  //player.enabled = true;
-    //  //player.y = playerIntro.y;
-    //  //earth.addChild(player);
-    //  scoring = true;
-    //  lastScoreTick = time.getClock();
-    //  music.play(true);
-    //}
-
-    //boolean canSpawn = playerRespawn.update(time.getClock());
-    //if (keys.anykey && canSpawn) {
-    //  playerRespawn.enabled = false;
-    //  player.enabled = true;
-    //  player.y = playerIntro.y;
-    //  earth.addChild(player);
-    //  ufo.resumeCountDown();
-    //  scoring = true;
-    //  lastScoreTick = time.getClock();
-    //}
 
     //if (frameCount == 90) {
     //  playerKilled(1);
@@ -336,6 +302,7 @@ class SinglePlayer extends Scene {
 
     // is player in tarpit
     for (Player p : players) {
+      p.inTarpit = false;
       if (!earth.tarpitEnabled) continue;
       if (!p.grounded) continue;
       p.inTarpit = utils.unsignedAngleDiff(utils.angleOfOrigin(p.localPos()), earth.tarpitAngle) < Earth.TARPIT_ARC / 2;
@@ -445,8 +412,6 @@ class SinglePlayer extends Scene {
           p.x = cos(radians(fixedAngle)) * p.getRadius();
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
-          float updatedAngle = utils.angleOfOrigin(p.localPos());
-          float updateddiff = utils.signedAngleDiff(updatedAngle, obR);
         }
       }
     }
@@ -480,8 +445,6 @@ class SinglePlayer extends Scene {
           p.x = cos(radians(fixedAngle)) * p.getRadius();
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
-          float updatedAngle = utils.angleOfOrigin(p.localPos());
-          float updateddiff = utils.signedAngleDiff(updatedAngle, obR);
           e.bounce(time.getClock());
           p.bounceStart(utils.sign(diff) * -1);
         }
@@ -503,13 +466,15 @@ class SinglePlayer extends Scene {
     }
 
     // player drowned in tarpit
-    //if (player.getAtTarpitBottom()) {
-
-    //  playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 0, .75, .5);
-    //  earth.addChild(playerDeathAnimation);
-    //  println("died in tarpit");
-    //  playerKilled();
-    //}
+    for (Player p : players) {
+      if (!p.enabled) continue;
+      if (p.localPos().mag() < Player.TARPIT_BOTTOM_DIST) {
+        playerDeathAnimations[p.id].fire(time.getClock(), p, p.globalPos(), 0, .75, .5);
+        earth.addChild(playerDeathAnimations[p.id]);
+        println("died in tarpit");
+        playerKilled(p.id);
+      }
+    }
 
     // player abducted by UFO?
     int abducted = ufo.update(time.getClock(), time.getTimeScale(), earth.globalPos(), players);
@@ -518,7 +483,6 @@ class SinglePlayer extends Scene {
       players[abducted].restart();
       //scoring = false;
       playerRespawns[abducted].respawn();
-      //paused = true;
       println("abducted");
     }
 
@@ -545,8 +509,6 @@ class SinglePlayer extends Scene {
     if (ufoRespawned != null) {
       players[ufoRespawn.whichDino].enabled = true;
       players[ufoRespawn.whichDino].parent = null;
-      //player.enabled = true;
-      //player.parent = null;
       players[ufoRespawn.whichDino].setPosition(ufoRespawned.globalPos());
       players[ufoRespawn.whichDino].r = ufoRespawned.r;
       earth.addChild(players[ufoRespawn.whichDino]);
@@ -602,14 +564,16 @@ class SinglePlayer extends Scene {
     }
 
     // player touching a hypercube?
-    //if (hypercube.state == Hypercube.NORM && hypercube.enabled) {
-    //  if (PVector.dist(player.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
-    //    hypercube.goHyperspace();
-    //    time.setHyperspace(true);
-    //    starsSystem.setHyperspace(true);
-    //    music.rate(time.hyperspaceTimeScale);
-    //  }
-    //}
+    if (hypercube.state == Hypercube.NORM && hypercube.enabled) {
+      for (Player p : players) {
+        if (PVector.dist(p.globalPos(), hypercube.globalPos()) < Player.BOUNDING_CIRCLE_RADIUS + Hypercube.BOUNDING_CIRCLE_RADIUS) {
+          hypercube.goHyperspace();
+          time.setHyperspace(true);
+          starsSystem.setHyperspace(true);
+          music.rate(time.hyperspaceTimeScale);
+        }
+      }
+    }
 
     // hyperspace finished?
     if (hypercube.state == Hypercube.HYPERSPACE_DONE) {
@@ -634,19 +598,21 @@ class SinglePlayer extends Scene {
     }
 
     earth.setStuckInTarpit(trex);
-    //trex.update(time.getTimeScale(), time.getScaledElapsed(), player);
+    trex.update(time.getTimeScale(), time.getScaledElapsed(), players[0], players[1]);
     if (trex.isStomping) earth.shake(8, 300, time.getClock());
 
     // is trex touching player
-    //if (player.enabled && trex.isDeadly()) {
-    //  if (utils.unsignedAngleDiff(player.r, trex.r) < Player.BOUNDING_ARC/2 + Trex.BOUNDING_ARC/2) {
+    for (Player p : players) {
+      if (p.enabled && trex.isDeadly()) {
+        if (utils.unsignedAngleDiff(p.r, trex.r) < Player.BOUNDING_ARC/2 + Trex.BOUNDING_ARC/2) {
 
-    //    playerDeathAnimation.fire(time.getClock(), player, trex.globalPos(), 10, .99, .999);
-    //    println("died from trex");
+          playerDeathAnimations[p.id].fire(time.getClock(), p, trex.globalPos(), 10, .99, .999);
+          println("died from trex");
 
-    //    playerKilled();
-    //  }
-    //}
+          playerKilled(p.id);
+        }
+      }
+    }
 
     for (GibsSystem p : playerDeathAnimations) p.update(time.getTimeScale(), time.getClock());
     trexDeathAnimation.update(time.getTimeScale(), time.getClock());
@@ -709,40 +675,46 @@ class SinglePlayer extends Scene {
     }
 
     // do the finale
-    //finale.update(earth, trex, player, time);
-    //if (finale.died && player.enabled) {
-    //  float angle = utils.angleOfRadians(earth.globalPos(), player.globalPos());
-    //  playerDeathAnimation.fire(time.getClock(), player, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 15, .98, .98); 
-    //  player.extraLives = 0;
-    //  playerKilled();
-    //}
-    //if (finale.won && player.enabled) {
-    //  player.restart();
-    //}
-    //if (finale.state == SPFinale.PULLING_AWAY) {
-    //  earth.dy *= .99;
-    //}
-    //if (finale.state == SPFinale.ZOOMING && !starsSystem.isZooming) {
-    //  starsSystem.startZooming();
-    //} 
-    //if (finale.state == SPFinale.PULLING_AWAY && finale.lastState != SPFinale.PULLING_AWAY) {
-    //  time.timeScale = 1;
-    //  earth.dx = -2;
-    //  earth.dy = -2;
-    //  earth.shake(0);
-    //  earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    //}
-    //if (finale.state == SPFinale.DONE && finale.lastState == SPFinale.ABORT) {
-    //  earth.shake(0);
-    //  time.timeScale = 1;
-    //  earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
-    //}
-    //if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
-    //  music.play(true);
-    //  float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
-    //  if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
-    //  trex.vanish();
-    //}
+    finale.update(earth, trex, players, time);
+    if (finale.p1Died && players[0].enabled) {
+      float angle = utils.angleOfRadians(earth.globalPos(), players[0].globalPos());
+      playerDeathAnimations[0].fire(time.getClock(), players[0], new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 15, .98, .98);
+      playerKilledFinale(0);
+    }
+    if (finale.p2Died && players[1].enabled) {
+      float angle = utils.angleOfRadians(earth.globalPos(), players[1].globalPos());
+      playerDeathAnimations[1].fire(time.getClock(), players[1], new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 15, .98, .98);
+      playerKilledFinale(1);
+    }
+    if (finale.won && (players[0].enabled || players[1].enabled)) {
+      players[0].restart();
+      players[1].restart();
+    }
+    
+    if (finale.state == SPFinale.PULLING_AWAY) {
+      earth.dy *= .99;
+    }
+    if (finale.state == SPFinale.ZOOMING && !starsSystem.isZooming) {
+      starsSystem.startZooming();
+    } 
+    if (finale.state == SPFinale.PULLING_AWAY && finale.lastState != SPFinale.PULLING_AWAY) {
+      time.timeScale = 1;
+      earth.dx = -2;
+      earth.dy = -2;
+      earth.shake(0);
+      earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
+    }
+    if (finale.state == SPFinale.DONE && finale.lastState == SPFinale.ABORT) {
+      earth.shake(0);
+      time.timeScale = 1;
+      earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
+    }
+    if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
+      music.play(true);
+      float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
+      if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
+      trex.vanish();
+    }
 
     //if (!options) {
     //  for (updateable u : updaters) u.update();
@@ -780,11 +752,10 @@ class SinglePlayer extends Scene {
     ufoRespawn.render(currentColor.getColor());
     volcanoSystem.render(currentColor.getColor());
     finale.render(earth); // behind earth
+    for (Player player : players) player.render();
     earth.render(time.getClock());
     for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
-    for (Player player : players) player.render();
     for (EggRescue r : rescueEggs) r.render();
-    //player.render();
     roidManager.renderRoids();
     roidManager.renderSplodes();
     starsSystem.render(currentColor.getColor());
@@ -875,6 +846,18 @@ class SinglePlayer extends Scene {
     time.deathStart();
   }
 
+  void playerKilledFinale (int id) {
+    players[id].enabled = false;
+    players[id].restart();
+
+    if (!players[0].enabled && !players[1].enabled && !finale.won) {
+      gameOver.callGameover();
+      gameText.goExtinct();
+      assets.playerStuff.extinct.play(false);
+      music.stop_();
+    }
+  }
+
   void mouseUp() {
 
     PVector m = screenspaceToWorldspace(mouseX, mouseY);
@@ -911,202 +894,6 @@ class SinglePlayer extends Scene {
   //  return SINGLEPLAYER;
   //}
 }
-
-//class Oviraptor extends Scene {
-
-//  Earth earth;
-//  EventManager eventManager;
-//  StarManager starManager;
-//  RoidManager roids;
-//  ColorDecider currentColor;
-//  UIStory ui;
-//  UFOManager ufoManager;
-//  PlayerManager playerManager;
-//  Time time;
-//  Camera camera;
-//  TrexManager trexManager;
-//  GameScreenMessages gameText;
-
-//  ArrayList<updateable> updaters = new ArrayList<updateable>();
-//  ArrayList<renderableScreen> screenRenderers = new ArrayList<renderableScreen>();
-//  ArrayList<renderable> renderers =  new ArrayList<renderable>();
-
-//  Oviraptor(int lvl) {
-//    sceneID = OVIRAPTOR;
-
-//    eventManager = new EventManager();
-//    time = new Time(eventManager);
-//    earth = new Earth(time, eventManager, lvl);
-//    camera = new Camera();
-//    roids = new RoidManager(earth, eventManager, time);
-//    currentColor = new ColorDecider();
-//    starManager = new StarManager(currentColor, time, eventManager, lvl);
-//    gameText = new GameScreenMessages(eventManager, currentColor);
-//    playerManager = new PlayerManager(eventManager, earth, time, null, starManager, camera);
-//    trexManager = new TrexManager(eventManager, time, earth, playerManager, currentColor, lvl);
-//    ui = new UIStory(eventManager, time, currentColor, lvl);
-
-//    updaters.add(time);
-//    updaters.add(ui);
-//    updaters.add(earth);
-//    updaters.add(roids);
-//    updaters.add(camera);
-//    updaters.add(currentColor);
-//    updaters.add(starManager);
-//    updaters.add(playerManager);
-//    updaters.add(trexManager);
-
-//    renderers.add(playerManager);
-//    renderers.add(trexManager);
-//    renderers.add(earth);
-//    renderers.add(roids);
-//    renderers.add(starManager);
-
-//    screenRenderers.add(gameText);
-//    screenRenderers.add(ui);
-
-//    status = RUNNING;
-
-//    //trexManager.spawnTrex();
-//  }
-
-//  void update () {
-
-//    for (updateable u : updaters) u.update();
-//  }
-
-//  void render () {
-
-//    pushMatrix(); // world-space
-//    translate(camera.x, camera.y);
-//    scale(SCALE);
-//    for (renderable r : renderers) r.render();
-//    popMatrix(); 
-
-//    pushMatrix(); // screen-space (UI)
-//    translate(width/2, height/2);
-//    scale(SCALE);
-//    gameText.render();
-//    assets.applyGlowiness();
-//    ui.render();
-//    popMatrix();
-
-//    pushMatrix(); // pillarboxing (for high aspect ratios)
-//    pushStyle();
-//    translate(0, 0);
-//    float w = 2678 / 2 * SCALE;
-//    fill(0, 0, 0, 1);
-//    rect(0, 0, (width-w)/2, height);
-//    rect((width-w)/2 + w, 0, (width-w)/2, height);
-//    popStyle();
-//    popMatrix();
-//  }
-
-//  void mouseUp() {
-//    println("somebody clicked");
-//  }
-
-//  void cleanup() {
-//    assets.stopAllMusic();
-//    assets.stopAllSfx();
-//  }
-
-//  //int nextScene () {
-//  //  return SINGLEPLAYER;
-//  //}
-//}
-
-//class testScene extends Scene {
-
-//  Earth earth;
-//  EventManager eventManager;
-//  ColorDecider currentColor;
-//  StarManager starManager;  
-//  UIStory ui;
-//  RoidManager roids;
-//  //UFOManager ufoManager;
-//  PlayerManager playerManager;
-//  Time time;
-//  Camera camera;
-//  VolcanoManager volcanoManager;
-
-//  ArrayList<updateable> updaters = new ArrayList<updateable>();
-//  ArrayList<renderableScreen> screeenRenderers = new ArrayList<renderableScreen>();
-//  ArrayList<renderable> renderers =  new ArrayList<renderable>();
-
-//  testScene (int lvl) {
-//    sceneID = TRIASSIC;
-
-//    eventManager = new EventManager();
-//    time = new Time(eventManager);
-//    earth = new Earth(time, eventManager, lvl);
-//    //earth.dr = 0;
-
-//    camera = new Camera();
-//    roids = new RoidManager(earth, eventManager, time);
-//    currentColor = new ColorDecider();
-//    starManager = new StarManager(currentColor, time, eventManager, lvl);
-//    //starManager = new StarManager(currentColor, time);
-
-//    //soundManager = new SoundManager(main, eventManager);
-//    volcanoManager = new VolcanoManager(eventManager, time, currentColor, earth, lvl);
-//    playerManager = new PlayerManager(eventManager, earth, time, volcanoManager, starManager, camera);
-//    playerManager.spawningDuration = 10;
-//    ui = new UIStory(eventManager, time, currentColor, lvl);
-//    ui.score = 90;
-//    //ufoManager = new UFOManager (currentColor, earth, playerManager, eventManager);
-
-//    updaters.add(time);
-//    //updaters.add(ui);
-//    updaters.add(earth);
-//    updaters.add(roids);
-//    updaters.add(camera);
-//    updaters.add(currentColor);
-//    //updaters.add(starManager);
-//    //updaters.add(ufoManager);
-//    updaters.add(playerManager);
-//    //updaters.add(volcanoManager);
-
-//    //renderers.add(ufoManager);
-//    renderers.add(playerManager);
-//    //renderers.add(volcanoManager);
-
-//    renderers.add(earth);
-//    renderers.add(roids);
-//    //renderers.add(starManager);
-
-//    //screeenRenderers.add(ui);
-//  }
-
-//  void update () {
-
-//    //if (time.getTick()==20) ufoManager.spawnUFOAbducting();
-
-//    for (updateable u : updaters) u.update();
-//  }
-
-//  void render () {
-//    //pushMatrix(); // world-space
-//    //translate(camera.x, camera.y);
-//    //for (renderable r : renderers) r.render();
-
-//    //popMatrix(); // screen-space
-//    //for (renderableScreen rs : screeenRenderers) rs.render(); // UI
-//  }
-
-//  void mouseUp() {
-//    println("somebody clicked");
-//  }
-
-//  void cleanup() {
-//    assets.stopAllMusic();
-//    assets.stopAllSfx();
-//  }
-
-//  //int nextScene () {
-//  //  return SINGLEPLAYER;
-//  //}
-//}
 
 interface updateable {
   void update();

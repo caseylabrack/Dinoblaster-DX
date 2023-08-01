@@ -371,13 +371,18 @@ class Trex extends Entity implements tarpitSinkable {
     return enabled && state==WALKING;
   }
 
-  void update(float dt, float scaledElapsed, targetable target) {
+  void update(float dt, float scaledElapsed, targetable target1, targetable target2) {
     if (!enabled) return;
 
     switch(state) {
 
     case WALKING:
       isStomping = false;
+
+      float myang = utils.angleOfOrigin(localPos());
+      float ang1 = target1.isTargettable() ? utils.unsignedAngleDiff(myang,utils.angleOfOrigin(target1.position())) : 361;
+      float ang2 = target2.isTargettable() ? utils.unsignedAngleDiff(myang,utils.angleOfOrigin(target2.position())) : 361;
+      targetable target = ang1 < ang2 ? target1 : target2;
 
       if (target.isTargettable()) {
         float targetAngle = utils.angleOf(utils.ZERO_VECTOR, target.position());

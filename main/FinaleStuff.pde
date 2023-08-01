@@ -44,18 +44,22 @@ class SPFinale {
   float killAngle;
   final float EXPLOSIONS_DURATION = 10e3;
 
-  boolean died = false;
+  boolean p1Died = false;
+  boolean p2Died = false;
   boolean won = false;
 
   FinalUFO finalUFO;
-  Entity dummyBronto;
-  PVector dummyBrontoStartPos;  
+  Entity dummyBronto1;
+  PVector dummyBrontoStartPos1;  
+
+  Entity dummyBronto2;
+  PVector dummyBrontoStartPos2;  
 
   final float FADING_DURATION = 6e3;
   PVector fadingStartPos;
 
 
-  SPFinale (PImage bigOneModel, PImage[] frames, PShape[] finaleUFOFrames, PShape abducteeModel) {
+  SPFinale (PImage bigOneModel, PShape[] finaleUFOFrames, PShape abducteeModel) {
 
     incomingAngle = utils.angleOf(utils.ZERO_VECTOR, new PVector(-HEIGHT_REF_HALF, -HEIGHT_REF_HALF));
 
@@ -69,8 +73,11 @@ class SPFinale {
     finalUFO.modelVector = finaleUFOFrames[0];
     finalUFO.frames = finaleUFOFrames;
 
-    dummyBronto = new Entity();
-    dummyBronto.modelVector = abducteeModel;
+    dummyBronto1 = new Entity();
+    dummyBronto1.modelVector = abducteeModel;
+
+    dummyBronto2 = new Entity();
+    dummyBronto2.modelVector = abducteeModel;
 
     fromEarthToRoid = utils.angleOfRadians(utils.ZERO_VECTOR, bigOne.globalPos());
     float impactX = cos(fromEarthToRoid) * Earth.EARTH_RADIUS;
@@ -102,7 +109,6 @@ class SPFinale {
     //float endAngle = bigOneAngle + 180 - 11;
     //float diff = utils.signedAngleDiff(startAngle,endAngle);
     //float a;
-    //println(startAngle, endAngle, diff);
     //for(int i = 0; i < NUM_EXPLOSIONS; i++) {
     //  ring1[i] = new Explosion();
     //  ring1[i].model = frames[0];
@@ -116,12 +122,13 @@ class SPFinale {
     //}
   }
 
-  void update(Earth earth, Trex trex, Player player, Time time) {
+  void update(Earth earth, Trex trex, Player[] ps, Time time) {
     //if (state == NOT_FINALE) return; 
 
     lastState = state;
 
     float progress;
+
 
     switch(state) {
     case NOT_FINALE:
@@ -152,7 +159,8 @@ class SPFinale {
       progress = (millis() - stateStart) / ALIGNING_DURATION;
       if (progress < 1) {
         earth.r = earthStartAlignR + (earthEndAlignR - earthStartAlignR) * progress;
-        time.setTimeScale(constrain(1-progress, .1, 1));
+        //time.setTimeScale(constrain(1-progress, .1, 1));
+        time.timeScale = constrain(1-progress, .1, 1);
       } else {
         state = INCOMING;
         stateStart = millis();
@@ -184,29 +192,45 @@ class SPFinale {
       if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) displayBigOne = !displayBigOne;
       progress = (millis() - stateStart) / EXPLOSIONS_DURATION;
       if (progress <1) {
-        killAngle = bigOneAngle + IMPACT_HIT_ANGLE + (explosionTrailAngle * progress - ((explosionTrailAngle * progress) % explosionSlice)) + explosionSlice/2;
-        float playerAngle = utils.angleOf(utils.ZERO_VECTOR, player.globalPos());
-        if (utils.unsignedAngleDiff(bigOneAngle + 180, killAngle) > 22) {
-          if (utils.unsignedAngleDiff(bigOneAngle + 180, killAngle) < utils.unsignedAngleDiff(bigOneAngle + 180, playerAngle)) {
-            died = true; // player died in the finale
+        for (Player player : ps) {
+          killAngle = bigOneAngle + IMPACT_HIT_ANGLE + (explosionTrailAngle * progress - ((explosionTrailAngle * progress) % explosionSlice)) + explosionSlice/2;
+          float playerAngle = utils.angleOf(utils.ZERO_VECTOR, player.globalPos());
+          if (utils.unsignedAngleDiff(bigOneAngle + 180, killAngle) > 22) {
+            if (utils.unsignedAngleDiff(bigOneAngle + 180, killAngle) < utils.unsignedAngleDiff(bigOneAngle + 180, playerAngle)) {
+              //died = true; // player died in the finale
+              if (player.id == 0) {
+                p1Died = true;
+              } else {
+                p2Died = true;
+              }
+            }
           }
-        }
-        if (progress > .5 && progress < .9) {
-          float p = map(progress, .5, .9, 0, 1);
-          p = utils.easeOutQuad(p, 0, 1-0, 1);
-          float fromEarthToUFO = utils.angleOfRadians(utils.ZERO_VECTOR, new PVector(HEIGHT_REF_HALF, HEIGHT_REF_HALF));
-          finalUFO.setPosition(HEIGHT_REF_HALF + 50 + cos(fromEarthToUFO + PI) * p * finalUFO.TRAVEL_DIST, HEIGHT_REF_HALF + 50 + sin(fromEarthToUFO + PI) * p * finalUFO.TRAVEL_DIST);
+          if (progress > .5 && progress < .9) {
+            float p = map(progress, .5, .9, 0, 1);
+            p = utils.easeOutQuad(p, 0, 1-0, 1);
+            float fromEarthToUFO = utils.angleOfRadians(utils.ZERO_VECTOR, new PVector(HEIGHT_REF_HALF, HEIGHT_REF_HALF));
+            finalUFO.setPosition(HEIGHT_REF_HALF + 50 + cos(fromEarthToUFO + PI) * p * finalUFO.TRAVEL_DIST, HEIGHT_REF_HALF + 50 + sin(fromEarthToUFO + PI) * p * finalUFO.TRAVEL_DIST);
+          }
         }
       } else {
         displayBigOne = true;
-        if (!died) { 
+        //if (!died) { 
+        if (p1Died==false || p2Died==false) {
           won = true; // player won
           state = RESCUING;
           stateStart = millis();
-          dummyBronto.setPosition(player.globalPos());
-          dummyBronto.r = player.globalRote();
-          dummyBrontoStartPos = player.globalPos();
-          dummyBronto.facing = player.facing;
+          if (p1Died==false) {
+            dummyBronto1.setPosition(ps[0].globalPos());
+            dummyBronto1.r = ps[0].globalRote();
+            dummyBrontoStartPos1 = ps[0].globalPos();
+            dummyBronto1.facing = ps[0].facing;
+          }
+          if (p2Died==false) {
+            dummyBronto2.setPosition(ps[1].globalPos());
+            dummyBronto2.r = ps[1].globalRote();
+            dummyBrontoStartPos2 = ps[1].globalPos();
+            dummyBronto2.facing = ps[1].facing;
+          }
         } else {
           state = ABORT;
           stateStart = millis();
@@ -228,8 +252,14 @@ class SPFinale {
     case RESCUING:
       progress = (millis() - stateStart) / 5e3;
       if (progress < 1) {
-        dummyBronto.setPosition(PVector.lerp(dummyBrontoStartPos, finalUFO.globalPos(), progress));
-        dummyBronto.scale = map(progress, 0, 1, 1, .1);
+        if (!p1Died) {
+          dummyBronto1.setPosition(PVector.lerp(dummyBrontoStartPos1, finalUFO.globalPos(), progress));
+          dummyBronto1.scale = map(progress, 0, 1, 1, .1);
+        }
+        if (!p2Died) {
+          dummyBronto2.setPosition(PVector.lerp(dummyBrontoStartPos2, finalUFO.globalPos(), progress));
+          dummyBronto2.scale = map(progress, 0, 1, 1, .1);
+        }
       } else {
         state = PULLING_AWAY;
         stateStart = millis();
@@ -286,7 +316,7 @@ class SPFinale {
   }
 
   void renderBigOne () {
-    if(state == NOT_FINALE) return;
+    if (state == NOT_FINALE) return;
     if (displayBigOne) bigOne.simpleRenderImage();
   }
 
@@ -352,13 +382,24 @@ class SPFinale {
       popStyle();
 
       // DINO ABDUCTING
-      pushMatrix();
-      pushStyle();
-      noFill();
-      stroke(0, 0, 100, 1);
-      dummyBronto.simpleRenderImageVector();
-      popStyle();
-      popMatrix();
+      if (!p1Died) {
+        pushMatrix();
+        pushStyle();
+        noFill();
+        stroke(0, 0, 100, 1);
+        dummyBronto1.simpleRenderImageVector();
+        popStyle();
+        popMatrix();
+      }
+      if (!p2Died) {
+        pushMatrix();
+        pushStyle();
+        noFill();
+        stroke(0, 0, 100, 1);
+        dummyBronto2.simpleRenderImageVector();
+        popStyle();
+        popMatrix();
+      }
       break;
     }
 
@@ -374,8 +415,12 @@ class SPFinale {
   void restart() {
     state = NOT_FINALE;
     bigOne.setPosition(-HEIGHT_REF_HALF, -HEIGHT_REF_HALF);
-    died = false;
+    //died = false;
+    p1Died = false;
+    p2Died = false;
     won = false;
+    finalUFO.setPosition(HEIGHT_REF_HALF + 50, HEIGHT_REF_HALF + 50);
+    finalUFO.scale = finalUFO.START_SCALE;
     finalUFO.modelVector = finalUFO.frames[0];
     bigOne.parent = null;
   }
