@@ -56,8 +56,7 @@ class EggRescue extends Entity {
 
   PImage playerModel;
 
-  EggRescue (color c, PImage[] eggFrames, int player, PImage playerModel) {
-    pcolor = c;
+  EggRescue (PImage[] eggFrames, int player, PImage playerModel) {
     this.eggFrames = eggFrames;
     model = eggFrames[0];
     this.player = player;
@@ -76,7 +75,7 @@ class EggRescue extends Entity {
     switch (state) {
 
     case RISING:
-      float progress = (millis() - stateStart) / EggHatch.RISING_DURATION;
+      float progress = (clock - stateStart) / EggHatch.RISING_DURATION;
       if (progress < 1) {
         //float dist = utils.easeLinear(progress,startY,endY-startY,1);
         float t = utils.easeOutBounce(progress);
@@ -143,11 +142,11 @@ class EggRescue extends Entity {
     }
   }
 
-  void startAnimation (float angle) {
+  void startAnimation (float angle, float clock) {
     enabled = true;
     state = RISING;
     hits = 0;
-    stateStart = millis();
+    stateStart = clock;
     this.angle = angle;
     r = angle + 90;
     uprightR = r;
@@ -236,13 +235,12 @@ class EggHatch extends Entity {
     this.trex = trex;
   }
 
-  void startAnimation (float angle) {
+  void startAnimation (float angle, float clock) {
     enabled = true;
     model = modelCracked;
-    startTime = millis();
+    startTime = clock;
     state = RISING;
     this.angle = angle;
-    //angle = utils.angleOf(utils.ZERO_VECTOR, localPos());
     r = angle + 90;
     uprightR = r;
     wiggleCount = 0;
@@ -256,7 +254,7 @@ class EggHatch extends Entity {
     switch(state) {
 
     case RISING:
-      progress = (millis() - startTime) / RISING_DURATION;
+      progress = (clock - startTime) / RISING_DURATION;
       if (progress < 1) {
         //float dist = utils.easeLinear(progress,startY,endY-startY,1);
         float t = utils.easeOutBounce(progress);
@@ -322,6 +320,7 @@ class EggHatch extends Entity {
 
   void reset () {
     enabled = false;
+    state = RISING;
   }
 }
 
@@ -369,6 +368,11 @@ class Trex extends Entity implements tarpitSinkable {
 
   boolean isDeadly () {
     return enabled && state==WALKING;
+  }
+  
+  void handleUnpaused () {
+    if(!enabled || state!=WALKING) return;
+    if(chasing) stompSound.play(true);
   }
 
   void update(float dt, float scaledElapsed, targetable target1, targetable target2) {

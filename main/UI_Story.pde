@@ -18,12 +18,16 @@ class InGameText {
   PFont tipFont;
   StringList tips = new StringList();
 
-  InGameText (PFont extinctFont, PFont tipFont, String[] tips) {
+  InGameText (PFont extinctFont, PFont tipFont) {
     this.extinctFont = extinctFont;
     this.tipFont = tipFont;
+  }
 
+  void setTips (String[] tips) {
+    this.tips.clear();
     for (int i = 0; i < tips.length; i++) this.tips.append(tips[i]);
     this.tips.shuffle();
+    tipIndex = 0;
   }
 
   void goExtinct() {
@@ -126,15 +130,19 @@ class UIStory {
   boolean enabled = true;
   PImage letterbox;
   PImage screenShine;
+  PImage buttons;
+  boolean hideAll = false;
+  boolean hideButtons = false;
 
-  UIStory (PImage letterbox, PImage screenShine) {
+  UIStory (PImage letterbox, PImage screenShine, PImage buttons) {
     this.letterbox = letterbox;
     this.screenShine = screenShine;
+    this.buttons = buttons;
   }
 
   void render(int extralives, int score) {
-    if(!enabled) return;
-    
+    if (!enabled || hideAll) return;
+
     push();
     imageMode(CORNER);
     image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
@@ -159,6 +167,7 @@ class UIStory {
 
     image(screenShine, 0, 0);
     image(letterbox, 0, 0);
+    if (!hideButtons) image(buttons, 0, 0);
   }
 }
 

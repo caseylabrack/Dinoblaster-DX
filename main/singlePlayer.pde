@@ -1,4 +1,4 @@
-abstract class Scene { //<>//
+abstract class Scene { 
 
   abstract void update();
   abstract void render();
@@ -35,7 +35,6 @@ class SinglePlayer extends Scene {
   GibsSystem[] playerDeathAnimations = new GibsSystem[2];
   GibsSystem trexDeathAnimation;
   InGameText gameText;
-  color[] twoPColors = new color[]{#FF00FF, #F08080};
   int numPlayers = 1;
 
   int extraLives, startingExtraLives;
@@ -46,73 +45,40 @@ class SinglePlayer extends Scene {
   float lastScoreTick;
   boolean scoring = false;
 
+  boolean wantToPause = false;
+
   SoundPlayable music;
 
-  //boolean options = false;
-  Rectangle dipswitchesButton;
-  //Rectangle optionsButton;
-  //Rectangle soundButton;
-  //Rectangle restartButton;
-  //Rectangle musicButton;
-  //Rectangle launchFinderButton;
-  //float directoryTextYPos = 0;//32 + 10 + 32 + 10 + 32 + 10 + 10;
-  //float yoffset = -5; // optically vertically center align text within rectangle buttons
-  //IntList validLvls = new IntList();
+  Rectangle settingsButtonHitbox;
 
   SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
-    //this.numPlayers = numPlayers;
-    //players = 
+    earth = new Earth(assets.earthStuff.mask);
 
-    startingExtraLives = settings.getInt("extraLives", 0);
-
-    PImage earthmodel;
-    if (settings.getBoolean("earthIsPangea", false)) {
-      if (settings.getBoolean("earthIsWest", true)) {
-        earthmodel = assets.earthStuff.earthPangea1;
-      } else {
-        earthmodel = assets.earthStuff.earthPangea2;
-      }
-    } else {
-      if (settings.getBoolean("earthIsWest", true)) {
-        earthmodel = assets.earthStuff.earth;
-      } else {
-        earthmodel = assets.earthStuff.earth2;
-      }
-    }
-    earth = new Earth(earthmodel, assets.earthStuff.mask);
-
-    earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
     for (int i = 0; i <=1; i++) {
       playerIntros[i] = new PlayerIntro();
       playerIntros[i].model = i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0];
       playerIntros[i].y = Player.DIST_FROM_EARTH * (i==0 ? -1 : 1);
       playerIntros[i].r = i == 0 ? 0 : 180;
-      playerIntros[i].colour = twoPColors[i];
     }
 
     for (int i = 0; i < 2; i++) {   
-      players[i] = new Player((i==0 ? assets.playerStuff.brontoSVG : assets.playerStuff.oviSVG), (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep, twoPColors[i]);
-      players[i].runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
+      players[i] = new Player((i==0 ? assets.playerStuff.brontoSVG : assets.playerStuff.oviSVG), (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep);
       players[i].id = i;
     }
 
     for (int i = 0; i <= 1; i++) {
-      rescueEggs[i] = new EggRescue(twoPColors[i], assets.playerStuff.eggFrames, i, i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
+      rescueEggs[i] = new EggRescue(assets.playerStuff.eggFrames, i, i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
       //rescueEggs[i].enabled = true;
       earth.addChild(rescueEggs[i]);
     }
 
     for (int i = 0; i < 2; i++) {
       playerRespawns[i] = new PlayerRespawn(i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0]);
-      playerRespawns[i].colour = twoPColors[i];
     }
 
-    roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
-    roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.initRoidPool(assets.roidStuff.roidFrames);
     roidManager.initSplodePool(assets.roidStuff.explosionFrames);
-    roidManager.enabled = settings.getBoolean("roidsEnabled", true);
 
     starsSystem.spawnSomeStars();
 
@@ -123,14 +89,11 @@ class SinglePlayer extends Scene {
     volcanoSystem.addVolcanos(earth);
 
     hypercube = new Hypercube();
-    hypercube.hyperspaceDuration = settings.getFloat("hyperspaceDuration", Hypercube.DEFAULT_HYPERSPACE_DURATION) * 1e3;
 
     egg = new EggHatch(assets.trexStuff.eggCracked, assets.trexStuff.eggBurst, assets.trexStuff.trexIdle);
     earth.addChild(egg);
 
     trex = new Trex(assets.trexStuff.trexIdle, assets.trexStuff.trexHead, assets.trexStuff.trexRun1, assets.trexStuff.trexRun2, assets.trexStuff.stomp, assets.trexStuff.rawr);
-    trex.runSpeed = settings.getFloat("trexSpeed", Trex.DEFAULT_RUNSPEED);
-    trex.attackAngle = settings.getFloat("trexAttackAngle", Trex.DEFAULT_ATTACK_ANGLE);
     earth.addChild(trex);
 
     for (int i=0; i<2; i++) {
@@ -140,34 +103,83 @@ class SinglePlayer extends Scene {
     trexDeathAnimation = new GibsSystem(assets.trexStuff.deth, new PVector(52, 41));
     if (!settings.getBoolean("trexEnabled", true)) trexDeathAnimation.enabled = false;
 
-    ui = new UIStory(assets.uiStuff.letterbox, assets.uiStuff.screenShine);
-    ui.enabled = settings.getBoolean("showSidePanels", true);
+    ui = new UIStory(assets.uiStuff.letterbox, assets.uiStuff.screenShine, assets.uiStuff.buttons);
 
     time.hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME);
-    time.timeScale = settings.getFloat("defaultTimeScale", 1);
 
-    gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD, settings.getStrings("tips", assets.DEFAULT_TIPS));
+    gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD);
 
-    currentColor = new ColorDecider(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+    currentColor = new ColorDecider();
 
     finale = new SPFinale(assets.roidStuff.bigone, new PShape[]{assets.ufostuff.ufoFinalSingle, assets.ufostuff.ufoFinalDuo, assets.ufostuff.ufoFinalDuoZoom}, assets.playerStuff.brontoSVG);
 
     music = assets.musicStuff.lvl1a;
 
-    float dipwidth =  assets.uiStuff.DIPswitchesBtn.width;
-    float dipheight = assets.uiStuff.DIPswitchesBtn.height;
-    dipswitchesButton = new Rectangle(HEIGHT_REF_HALF + (WIDTH_REF_HALF - HEIGHT_REF_HALF) / 2 - dipwidth/2, HEIGHT_REF_HALF - dipheight, dipwidth, dipheight);
-    //optionsButton = new Rectangle(WIDTH_REF_HALF - 100, HEIGHT_REF_HALF - 125, 100, 100);
-    //float y = -HEIGHT_REF_HALF + 125; // 125 pixels from top of screen
-    //float optionsDY = 75;
-    //float buttonWidth = HEIGHT_REFERENCE - 150;
-    //soundButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
-    //y += optionsDY;
-    //musicButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
-    //y+= optionsDY;
-    //restartButton = new Rectangle(-buttonWidth/2, y, buttonWidth, 50);
-    //y+= optionsDY;
-    //launchFinderButton = new Rectangle(-HEIGHT_REF_HALF + 10, directoryTextYPos, HEIGHT_REFERENCE - 20, HEIGHT_REF_HALF - directoryTextYPos - 20);
+    settingsButtonHitbox = new Rectangle(WIDTH_REF_HALF - 80, HEIGHT_REF_HALF - 80, 80, 80);
+  }
+
+  void loadSettings (SimpleTXTParser settings) {
+    if (settings.getBoolean("earthIsPangea", false)) {
+      if (settings.getBoolean("earthIsWest", true)) {
+        earth.model = assets.earthStuff.earthPangea1;
+      } else {
+        earth.model = assets.earthStuff.earthPangea2;
+      }
+    } else {
+      if (settings.getBoolean("earthIsWest", true)) {
+        earth.model = assets.earthStuff.earth;
+      } else {
+        earth.model = assets.earthStuff.earth2;
+      }
+    }
+    earth.targetRotationRate = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
+    earth.dr = earth.targetRotationRate;
+
+    players[0].runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
+    players[1].runSpeed = players[0].runSpeed;
+
+    color p1tryColor = currentColor.parseColorString(settings.getString("player1Color", Player.P1_DEFAULT_COLOR));
+    color p1color = p1tryColor == -1 ? currentColor.parseColorString(Player.P1_DEFAULT_COLOR) : p1tryColor; // check for failure to parse
+    players[0].c = p1color;
+    playerIntros[0].colour = p1color;
+    playerRespawns[0].colour = p1color;
+    rescueEggs[0].pcolor = p1color;
+
+    color p2tryColor = currentColor.parseColorString(settings.getString("player2Color", Player.P2_DEFAULT_COLOR));
+    color p2color = p2tryColor == -1 ? currentColor.parseColorString(Player.P2_DEFAULT_COLOR) : p2tryColor; // check for failure to parse
+    players[1].c = p2color;
+    playerIntros[1].colour = p2color;
+    playerRespawns[1].colour = p2color;
+    rescueEggs[1].pcolor = p2color;
+
+    startingExtraLives = settings.getInt("extraLives", 0);
+
+    roidManager.enabled = settings.getBoolean("roidsEnabled", true);
+    roidManager.fireRate = 1 / settings.getFloat("roidsPerSecond", RoidManager.DEFAULT_SPAWN_RATE);
+
+    trex.runSpeed = settings.getFloat("trexSpeed", Trex.DEFAULT_RUNSPEED);
+    trex.attackAngle = settings.getFloat("trexAttackAngle", Trex.DEFAULT_ATTACK_ANGLE); 
+    boolean t = settings.getBoolean("trexEnabled", true);
+    if (!t) trex.enabled = false;
+
+    hypercube.hyperspaceDuration = settings.getFloat("hyperspaceDurationInSeconds", Hypercube.DEFAULT_HYPERSPACE_DURATION) * 1e3;
+    boolean h = settings.getBoolean("hypercubesEnabled", true);
+    if (!h) hypercube.enabled = false;
+
+    boolean z = settings.getBoolean("volcanosEnabled", true);
+    if (!z) for (Volcano v : volcanoSystem.volcanos) v.enabled = false;
+
+    boolean u = settings.getBoolean("ufosEnabled", true);
+    if (!u) ufo.enabled = false;
+
+    time.setDefaultTimeScale(settings.getFloat("defaultTimeScale", 1));
+
+    ui.hideButtons = settings.getBoolean("hideButtons", false);
+    ui.hideAll = settings.getBoolean("hideSidePanels", false);
+
+    gameText.setTips(settings.getStrings("tips", assets.DEFAULT_TIPS));
+
+    currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   }
 
   void play (int lvl) {
@@ -197,11 +209,8 @@ class SinglePlayer extends Scene {
     egg.reset();
     trex.restart();
     earth.restart();
-    earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
     hypercube.restart();
     time.restart();
-    //time.timeScale = time.defaultTimeScale;
-    //time.setHyperspace(false);
     starsSystem.setHyperspace(false);
     gameText.restart();
     finale.restart();
@@ -218,7 +227,7 @@ class SinglePlayer extends Scene {
     }
     assets.playerStuff.spawn.play();
 
-    ufo.startCountDown();
+    if (settings.getBoolean("ufosEnabled", true)) ufo.startCountDown();
 
     stage = lvl;
 
@@ -247,7 +256,7 @@ class SinglePlayer extends Scene {
       }
 
       if (settings.getBoolean("trexEnabled", true)) {
-        egg.startAnimation(angle);
+        egg.startAnimation(angle, time.getClock());
       }
       score = 200;
       music = assets.musicStuff.lvl3;
@@ -387,7 +396,7 @@ class SinglePlayer extends Scene {
     for (Player p : players) {
       for (Volcano v : volcanoSystem.volcanos) {
 
-        if (!v.enabled || v.isPassable()) continue;
+        if (!v.enabled || v.isPassable() || !p.enabled) continue;
 
         boolean colliding = false;
         float lastR = utils.angleOfOrigin(p.ppos);
@@ -657,7 +666,7 @@ class SinglePlayer extends Scene {
       }
 
       if (settings.getBoolean("trexEnabled", true)) {
-        egg.startAnimation(angle);
+        egg.startAnimation(angle, time.getClock());
       }
       music.stop_();
       music = assets.musicStuff.lvl3;
@@ -690,7 +699,7 @@ class SinglePlayer extends Scene {
       players[0].restart();
       players[1].restart();
     }
-    
+
     if (finale.state == SPFinale.PULLING_AWAY) {
       earth.dy *= .99;
     }
@@ -715,13 +724,6 @@ class SinglePlayer extends Scene {
       if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
       trex.vanish();
     }
-
-    //if (!options) {
-    //  for (updateable u : updaters) u.update();
-    //} else {
-    //  starManager.update();
-    //  currentColor.update();
-    //}
 
     //if (ui.gameDone) {
     //  status = DONE;
@@ -752,13 +754,13 @@ class SinglePlayer extends Scene {
     ufoRespawn.render(currentColor.getColor());
     volcanoSystem.render(currentColor.getColor());
     finale.render(earth); // behind earth
-    for (Player player : players) player.render();
     earth.render(time.getClock());
+    for (Player player : players) player.render();
     for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
     for (EggRescue r : rescueEggs) r.render();
     roidManager.renderRoids();
     roidManager.renderSplodes();
-    starsSystem.render(currentColor.getColor());
+    //starsSystem.render(currentColor.getColor());
     hypercube.render(time.getTimeScale(), currentColor.getColor());
     egg.render(currentColor.getColor());
     trex.render();
@@ -767,8 +769,6 @@ class SinglePlayer extends Scene {
     gameText.render(currentColor.getColor());
     finale.renderBigOne(); // in front of earth
     popMatrix(); 
-
-    assets.applyGlowiness();
 
     // matte (screen space)
     pushMatrix(); 
@@ -780,23 +780,24 @@ class SinglePlayer extends Scene {
     popStyle();
     popMatrix();
 
+    pushMatrix(); 
+    translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
+    scale(SCALE);
+    rotate(radians(-camera.globalRote()));
+    ufo.renderFront(currentColor.getColor());
+    starsSystem.render(currentColor.getColor());
+    popMatrix(); 
+
+    assets.applyGlowiness();
+
     // UI
     pushMatrix();
     translate(width/2, height/2);
     scale(SCALE);
     imageMode(CENTER);
     ui.render(extraLives, score);
-    popMatrix();
-
-    pushMatrix(); // screen-space (UI)
-    pushStyle();
-    translate(width/2, height/2);
-    scale(SCALE);
-    imageMode(CORNER);
-    rectMode(CORNER);
-    //if (!settings.getBoolean("hideDIPSwitchesButton", false)) image(assets.uiStuff.DIPswitchesBtn, dipswitchesButton.x, dipswitchesButton.y, dipswitchesButton.w, dipswitchesButton.h);
-
-    popStyle();
+    //if(!panelsHide) ui.render(extraLives, score);
+    //if(!buttonsHide) image();
     popMatrix();
   }
 
@@ -837,7 +838,7 @@ class SinglePlayer extends Scene {
       } else {
         // otherwise spawn an egg
         float a = utils.angleOfOrigin(players[id].localPos());
-        rescueEggs[id].startAnimation(a);
+        rescueEggs[id].startAnimation(a, time.getClock());
       }
     }
 
@@ -862,18 +863,8 @@ class SinglePlayer extends Scene {
 
     PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
-    if (dipswitchesButton.inside(m)) {
-      //println("you clicked dipswitch"); 
-      //Desktop desktop = Desktop.getDesktop();
-      //File dirToOpen = null;
-      //try {
-      //  dirToOpen = new File(sketchPath());
-      //  desktop.open(dirToOpen);
-      //} 
-      //catch (Exception e) {
-      //  System.out.println("File Not Found");
-      //}
-      paused = true;
+    if (settingsButtonHitbox.inside(m)) {
+      wantToPause = true;
       launch(sketchPath() + "\\DIP-switches.txt");
     }
 
@@ -884,6 +875,21 @@ class SinglePlayer extends Scene {
   void cleanup() {
     assets.stopAllMusic();
     assets.stopAllSfx();
+  }
+
+  boolean requestsPause () {
+    return wantToPause;
+  }
+
+  void handlePause () {
+    wantToPause = false;
+    assets.stopAllSfx();
+  }
+
+  void handleUnpause () {
+    wantToPause = false;
+    time.rebaseTime();
+    trex.handleUnpaused();
   }
 
   //PVector screenToScaled (float x, float y) {

@@ -262,7 +262,8 @@ class SimpleTXTParser {
     String result = _default;
     //String[] m = match(txt, _key + ":\\s*(\\w+)");
     //String[] m = match(txt, _key + ":\\s*([\\w+\\"])");
-    String[] m = match(txt, _key + ":\\s*([^\"])");
+    //String[] m = match(txt, _key + ":\\s*([^\"])");
+    String[] m = match(txt, _key + ":\\s*\"([^\"]+)\"");
     if (m != null) {
       try {
         result = m[1];

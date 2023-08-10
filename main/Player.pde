@@ -19,6 +19,9 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   final static float BOUNDING_CIRCLE_RADIUS = 30;
   final static float BOUNDING_ARC = 15;
   final static float BOUNDING_ARC_TARPIT_NUDGE = 6;
+  
+  final static String P1_DEFAULT_COLOR = "#00ffff";
+  final static String P2_DEFAULT_COLOR = "#ff57ff";
 
   final int IDLE = 0;
   final int RUNNING = 1;
@@ -62,13 +65,12 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   SoundPlayable step;
   SoundPlayable tarStep;
 
-  Player(PShape abductModel, PImage[] frames, SoundPlayable step, SoundPlayable tarStep, color c) {
+  Player(PShape abductModel, PImage[] frames, SoundPlayable step, SoundPlayable tarStep) {
     this.abductModel = abductModel;
     this.frames = frames;
     this.step = step;
     this.tarStep = tarStep;
     model = frames[0];
-    this.c = c;
   }
 
   void bounceStart (int dir) {

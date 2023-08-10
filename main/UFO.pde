@@ -72,7 +72,7 @@ class UFO extends Entity {
   }
 
   void startCountDown () {
-    spawnCountDown = random(5, 90) * 1000;
+    spawnCountDown = 2e3;//random(5, 90) * 1000;
     enabled = true;
   }
 
@@ -92,7 +92,7 @@ class UFO extends Entity {
     countingDown = true;
   }
 
-  // return the ID of a player abducted this tick, or zero
+  // return the ID of a player abducted this tick, or -1
   int update (float clock, float dt, PVector earth, abductable[] as) {
     if (!enabled) return -1;
 
@@ -238,6 +238,22 @@ class UFO extends Entity {
     return snatched;
   }
 
+  // foreground the ufo during approach
+  void renderFront (color funkyColor) {
+
+    if (!enabled) return;
+    if (state==IDLE) return;
+
+    // UFO itself
+    if (state <= APPROACHING) {
+      pushStyle();
+      noFill();
+      stroke(funkyColor);
+      simpleRenderImageVector();
+      popStyle();
+    }
+  }
+
   void render (color funkyColor) {
     if (!enabled) return;
     if (state==IDLE) return;
@@ -263,11 +279,13 @@ class UFO extends Entity {
     }
 
     // UFO itself
-    pushStyle();
-    fill(0, 0, 0, 1);
-    stroke(funkyColor);
-    simpleRenderImageVector();
-    popStyle();
+    if (state > APPROACHING) {
+      pushStyle();
+      stroke(funkyColor);
+      fill(0, 0, 0, 1);
+      simpleRenderImageVector();
+      popStyle();
+    }
   }
 }
 
@@ -314,7 +332,7 @@ class UFORespawn extends Entity {
     y = earth.y + sin(angle) * UFO.initialDist;
     returningDino.modelVector = dino.getModel();
   }
-  
+
   boolean inTheProcessOfReturningPlayer () {
     return enabled && state!=LEAVING;
   }

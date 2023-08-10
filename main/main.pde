@@ -1,15 +1,23 @@
 // TO DO
 // allow reloading settings
 // allow hot reloading settings
-// 2player death gibs colored
+// test ways to avoid tessalation slowness
 // scoring in 2p with deaths?
-// ufo in front of earth on approach, otherwise behind earth
+// stop playing sfx loops on pause and resume loops on unpause
+// better respawn flicker
+// better respawn animation rate (difference between looking ready and being ready)
+// 2player death animation
+// 2player death gibs colored
+// scale vectors with pshape.scale
+// cursor active over buttons
+// pulse colors?
 // title screen: 40th anniversary edition (turn on animation? attract mode?)
-// dipswitch option for hide UI
 // try-catch for launching dipswitches notepad
+// player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
 // dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // nongaussian blur glow
+// settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
 // oviraptor mode (make its own release maybe)
 
@@ -44,7 +52,7 @@ SimpleTXTParser settings;
 JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked;
-char leftkey1p, rightkey1p, leftkey2p, rightkey2p, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect;
+char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -75,89 +83,9 @@ void setup () {
 
   minim = new Minim(this);
 
-  try {
-    settings = new SimpleTXTParser("DIP-switches.txt", true);
-  }
-  catch(Exception e) {
-    println("problem load game settings");
-    PrintWriter output;
-    output = createWriter("DIP-switches.txt");
-    String spacer = "     ";
-    String settingsString = String.join("\n", 
-      "--Edit this text file to change your controls, set preferences, and even cheat.", 
-      "--(Restart DinoBlaster for changes to take effect.)", 
-      "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
-      "", 
-      "", 
-      "----CONTROLS----", 
-      "player1LeftKey: a", 
-      "player1RightKey: d", 
-      "", 
-      "player2LeftKey: k", 
-      "player2RightKey: l", 
-      "", 
-      "player2GetsArrowKeys: true" + spacer + "-- in 2p mode, arrow keys move p2", 
-      "", 
-      "triassicSelect: 1", 
-      "jurassicSelect: 2", 
-      "cretaceousSelect: 3", 
-      "", 
-      "1playerSelect: o", 
-      "2playerSelect: p", 
-      "", 
-      "sfxVolume: 100", 
-      "musicVolume: 100", 
-      "", 
-      "startAtLevel: 4", 
-      "hideDIPSwitchesButton: false", 
-      "glowiness: " + assets.DEFAULT_GLOWINESS, 
-      "", 
-      "", 
-      "----GAMEPLAY----", 
-      "roidsEnabled: " + true, 
-      "trexEnabled: " + true, 
-      "volcanosEnabled: " + true, 
-      "ufosEnabled: " + true, 
-      "tarpitsEnabled: " + true, 
-      "", 
-      "hypercubesEnabled: " + true, 
-      "hyperspaceDuration: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3) + spacer + "-- in seconds", 
-      "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
-      "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
-      "", 
-      "playerSpeed: " + Player.DEFAULT_RUNSPEED, 
-      "extraLives: " + 0, 
-      "", 
-      "earthRotationSpeed: " + Earth.DEFAULT_EARTH_ROTATION, 
-      "earthIsPangea: " + false, 
-      "earthIsWest: " + true, 
-      "", 
-      "roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
-      "roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
-      "", 
-      "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
-      "trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE + spacer + "-- how far the trex \"sees\", in degrees", 
-      "", 
-      "JurassicUnlocked: " + false, 
-      "CretaceousUnlocked: " + false, 
-      "", 
-      "----MISC----", 
-      "showSidePanels: " + true, 
-      "", 
-      "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
-      "-- put tips inside double quotes, don't linebreak", 
-      "", 
-      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
-      "-- put colors inside double quotes, don't linebreak", 
-      "-- colors can be hexadecimal, like \"#FF69B4\"", 
-      "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
-      "-- you can have any number of colors. make a list with only fuschia, or one that creates a gradient, or one where the colors get brighter and darker, etc"
-      );
-    output.println(settingsString);
-    output.flush();
-    output.close();
-    settings = new SimpleTXTParser(settingsString, true);
-  }
+  assets.load(this, picadeSettings);
+
+  loadSettingsFromTXT();
 
   try {
     picadeSettings = loadJSONObject("picade.txt");
@@ -167,43 +95,11 @@ void setup () {
   catch(Exception e) {
   }
 
-  assets.load(this, picadeSettings);
-
-  assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
-  int vsfx = settings.getInt("sfxVolume", 100);
-  if (vsfx == 0) {
-    assets.muteSFX(true);
-  } else {
-    assets.volumeSFX(float(vsfx) / 100);
-  }
-  int vmusic = settings.getInt("musicVolume", 100);
-  if (vmusic == 0) {
-    assets.muteMusic(true);
-  } else {
-    assets.volumeMusic(float(vmusic) / 100);
-  }
-
-  jurassicUnlocked = settings.getBoolean("JurassicUnlocked", false);
-  cretaceousUnlocked = settings.getBoolean("CretaceousUnlocked", false);
-  leftkey1p = settings.getChar("player1LeftKey", 'a');
-  rightkey1p = settings.getChar("player1RightKey", 'd');
-  leftkey2p = settings.getChar("player2LeftKey", 'k');
-  rightkey2p = settings.getChar("player2RightKey", 'l');
-  //p2arrows = settings.getBoolean("player2GetsArrowKeys", true);
-  keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
-      
-  triassicSelect = settings.getChar("triassicSelect", '1');
-  jurassicSelect = settings.getChar("jurassicSelect", '2');
-  cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
-  onePlayerSelect = settings.getChar("1playerSelect", 'o');
-  twoPlayerSelect = settings.getChar("2playerSelect", 'p');
-
   singlePlayer = new SinglePlayer(settings, assets);
-  singlePlayer.numPlayers = 2;
-  keys.playingMultiplayer = true;
-  //singlePlayer.play(SinglePlayer.TRIASSIC);
-  //singlePlayer.play(SinglePlayer.JURASSIC);
-  singlePlayer.play(SinglePlayer.CRETACEOUS);
+  singlePlayer.numPlayers = 1;
+  keys.playingMultiplayer = false;
+  singlePlayer.loadSettings(settings);
+  singlePlayer.play(SinglePlayer.TRIASSIC);
 
   oviraptor = new Oviraptor(settings, assets);
 
@@ -221,17 +117,12 @@ void mousePressed () {
 
 void mouseReleased () {
   currentScene.mouseUp();
-  paused = false;
+  //paused = false;
   //frameRate(60);
   //rec = true;
 }
 
 void draw () {
-
-  //if (frameCount==1) {
-  //  currentScene = new SinglePlayer(chooseNextLevel()); 
-  //  return;
-  //}
 
   //if(touches.length==0) {
   //  keys.setKey(Keys.LEFT, false);
@@ -245,6 +136,8 @@ void draw () {
 
   //assets.glow.set("blurSize", b);
   //assets.glow.set("sigma", s);
+
+  if (singlePlayer.requestsPause()) paused = true;
 
   if (!paused) {
     background(0, 0, 0, 1);
@@ -306,9 +199,9 @@ void keyPressed() {
     if (keyCode==LEFT) keys.arrowleft = true;
     if (keyCode==RIGHT) keys.arrowright = true;
   } else {
-    if (key=='1' || key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
-    if ((key=='2' || key==jurassicSelect) && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
-    if ((key=='3' || key==cretaceousSelect) && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
+    if (key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
+    if (key==jurassicSelect && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
+    if (key==cretaceousSelect && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
     if (key==leftkey1p) keys.leftp1 = true;
     if (key==rightkey1p) keys.rightp1 = true;
     if (key==leftkey2p) keys.leftp2 = true;
@@ -343,6 +236,22 @@ void keyReleased() {
     if (key=='r') {
       rec = false;
       println("stopped recording");
+    }
+    if (key==dipSwitches) {
+      paused = true;
+      singlePlayer.handlePause();
+      launch(sketchPath() + "\\DIP-switches.txt");
+    }
+    if (key==pauseKey || key==' ') {
+      println("pause pls");
+      if (paused) {
+        loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
+        singlePlayer.handleUnpause();
+      } else {
+        singlePlayer.handlePause();
+      }
+      paused = !paused;
     }
   }
 }
@@ -398,4 +307,133 @@ class Keys {
 
 PVector screenspaceToWorldspace (float x, float y) {
   return new PVector((x - width/2) / SCALE, (y - height/2) / SCALE);
+}
+
+void loadSettingsFromTXT () {
+  try {
+    settings = new SimpleTXTParser("DIP-switches.txt", true);
+  }
+  catch(Exception e) {
+    println("problem load game settings");
+    PrintWriter output;
+    output = createWriter("DIP-switches.txt");
+    String spacer = "     ";
+    String settingsString = String.join("\n", 
+      "--Edit this text file to change your controls, set preferences, and even cheat.", 
+      "--(Restart DinoBlaster for changes to take effect.)", 
+      "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
+      "", 
+      "", 
+      "----CONTROLS----", 
+      "player1LeftKey: a", 
+      "player1RightKey: d", 
+      "", 
+      "player2LeftKey: k", 
+      "player2RightKey: l", 
+      pss("player2GetsArrowKeys: true") + "--in 2p mode, arrow keys move p2", 
+      "", 
+      pss("pauseKey: g") + "--or space bar", 
+      pss("openSettings: t") + "--open this file from in game", 
+      "", 
+      "triassicSelect: 1", 
+      "jurassicSelect: 2", 
+      "cretaceousSelect: 3", 
+      "", 
+      "1playerSelect: o", 
+      "2playerSelect: p", 
+      "", 
+      "sfxVolume: 100", 
+      "musicVolume: 100", 
+      "", 
+      "hideButtons: false", 
+      "hideSidePanels: false", 
+      "glowiness: " + assets.DEFAULT_GLOWINESS, 
+      "", 
+      "", 
+      "----GAMEPLAY----", 
+      "roidsEnabled: " + true, 
+      "trexEnabled: " + true, 
+      "volcanosEnabled: " + true, 
+      "ufosEnabled: " + true, 
+      "tarpitsEnabled: " + true, 
+      "", 
+      "hypercubesEnabled: " + true, 
+      "hyperspaceDurationInSeconds: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3), 
+      "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
+      "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
+      "", 
+      "playerSpeed: " + Player.DEFAULT_RUNSPEED, 
+      "extraLives: " + 0, 
+      "", 
+      "earthRotationSpeed: " + Earth.DEFAULT_EARTH_ROTATION, 
+      "earthIsPangea: " + false, 
+      "earthIsWest: " + true, 
+      "", 
+      "roidsPerSecond: " + 3, 
+      //"roidFrequency: " + RoidManager.DEFAULT_SPAWN_RATE, 
+      //"roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
+      //"roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
+      "", 
+      "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
+      pss("trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE) + "-- how far the trex \"sees\", in degrees", 
+      "", 
+      "JurassicUnlockedCheat: " + false, 
+      "CretaceousUnlockedCheat: " + false, 
+      "", 
+      "----MISC----", 
+      "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
+      "-- put tips inside double quotes, seperate with comma, don't linebreak", 
+      "", 
+      "player1Color: \"teal\"", 
+      "player2Color: \"hot pink\"", 
+      "", 
+      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
+      "-- put colors inside double quotes, seperate with comma, don't linebreak", 
+      "-- colors can be hexadecimal, like \"#FF69B4\"", 
+      "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
+      "-- you can have any number of colors. make a list with only fuschia, or one that creates a gradient, or one where the colors get brighter and darker, etc"
+      );
+    output.println(settingsString);
+    output.flush();
+    output.close();
+    settings = new SimpleTXTParser(settingsString, true);
+  }
+
+  jurassicUnlocked = settings.getBoolean("JurassicUnlockedCheat", false);
+  cretaceousUnlocked = settings.getBoolean("CretaceousUnlockedCheat", false);
+  leftkey1p = settings.getChar("player1LeftKey", 'a');
+  rightkey1p = settings.getChar("player1RightKey", 'd');
+  leftkey2p = settings.getChar("player2LeftKey", 'k');
+  rightkey2p = settings.getChar("player2RightKey", 'l');
+  pauseKey = settings.getChar("pauseKey", 'g');
+  dipSwitches = settings.getChar("openSettings", 't');
+  keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
+
+  triassicSelect = settings.getChar("triassicSelect", '1');
+  jurassicSelect = settings.getChar("jurassicSelect", '2');
+  cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
+  onePlayerSelect = settings.getChar("1playerSelect", 'o');
+  twoPlayerSelect = settings.getChar("2playerSelect", 'p');
+  assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
+  int vsfx = settings.getInt("sfxVolume", 100);
+  if (vsfx == 0) {
+    assets.muteSFX(true);
+  } else {
+    assets.volumeSFX(float(vsfx) / 100);
+  }
+  int vmusic = settings.getInt("musicVolume", 100);
+  if (vmusic == 0) {
+    assets.muteMusic(true);
+  } else {
+    assets.volumeMusic(float(vmusic) / 100);
+  }
+}
+
+// padded settings string
+String pss (String str) {
+  char[] cs = new char[30];
+  for (int i = 0; i < 30; i++) {
+    cs[i] = i < str.length() ? str.charAt(i) : ' ';
+  }
+  return new String(cs);
 }

@@ -1,11 +1,12 @@
 class RoidManager {
-  final static float DEFAULT_SPAWN_RATE = 300;
-  final static float DEFAULT_SPAWN_DEVIATION = 100;
+  final static float DEFAULT_SPAWN_RATE = 3;
+  //final static float DEFAULT_SPAWN_RATE = 300;
   final int ROID_POOL_SIZE = 100;
   final int SPLODES_POOL_SIZE = 25;
   final float SPAWN_DIST = 720;
   float minSpawnInterval; 
   float maxSpawnInterval; 
+  float fireRate;
   float lastFire;
   float spawnInterval = DEFAULT_SPAWN_RATE;
 
@@ -14,9 +15,9 @@ class RoidManager {
 
   Explosion[] splodes = new Explosion[SPLODES_POOL_SIZE];
   int splodeindex = 0;
-  
+
   boolean enabled = true;
-  
+
   Explosion killer = null;
 
   private ArrayList<Roid> hits = new ArrayList<Roid>();
@@ -39,10 +40,10 @@ class RoidManager {
   }
 
   void fireRoids (float clock, PVector target) {
-    if(!enabled) return;
+    if (!enabled) return;
     if (clock - lastFire > spawnInterval) {
       lastFire = clock;
-      spawnInterval = random(minSpawnInterval, maxSpawnInterval);
+      spawnInterval = fireRate * 1e3;//DEFAULT_SPAWN_RATE * 1e3;//random(minSpawnInterval, maxSpawnInterval);
 
       Roid r = roids[roidindex++ % roids.length]; // increment roid index and wrap to length of pool
       r.enabled = true;
@@ -55,6 +56,7 @@ class RoidManager {
   }
 
   void updateRoids (float delta) {
+    if (!enabled) return;
     for (Roid r : roids) {
       if (!r.enabled) continue;
       r.x += r.dx * delta;
@@ -101,6 +103,7 @@ class RoidManager {
   }
 
   void renderRoids () {
+    if (!enabled) return;
     for (Roid r : roids) {
       if (!r.enabled) continue;
       pushMatrix();

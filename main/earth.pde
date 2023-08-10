@@ -2,6 +2,8 @@ class Earth extends Entity {
   final static float DEFAULT_EARTH_ROTATION = 2.3;
   final static float EARTH_RADIUS = 167;
 
+  float targetRotationRate = DEFAULT_EARTH_ROTATION;
+
   final static int NORM = 0;
   final static int SHAKING = 1;
   int state = NORM;
@@ -26,8 +28,7 @@ class Earth extends Entity {
   float steadyXPosition = 0;
   float steadyYPosition = 0;
 
-  Earth (PImage model, PShader pixelMask) {
-    this.model = model;
+  Earth (PShader pixelMask) {
     this.pixelMask = pixelMask;
 
     int side = assets.earthStuff.earth.width; // square asset
@@ -199,5 +200,6 @@ class Earth extends Entity {
     dy = 0;
     x = 0;
     y = 0;
+    dr = targetRotationRate;
   }
 }

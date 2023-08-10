@@ -31,13 +31,13 @@ class Oviraptor extends Scene {
         earthmodel = assets.earthStuff.earth2;
       }
     }
-    earth = new Earth(earthmodel, assets.earthStuff.mask);
+    earth = new Earth(assets.earthStuff.mask);
     earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
 
     playerIntro.model = assets.playerStuff.oviFrames[0];
     playerIntro.y = -Player.DIST_FROM_EARTH;
 
-    player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.oviFrames, assets.playerStuff.step, assets.playerStuff.tarStep, #F08080);
+    player = new Player(assets.playerStuff.brontoSVG, assets.playerStuff.oviFrames, assets.playerStuff.step, assets.playerStuff.tarStep);
     //player.extraLives = settings.getInt("extraLives", 0);
     player.runSpeed = settings.getFloat("playerSpeed", Player.DEFAULT_RUNSPEED);
 
@@ -48,10 +48,10 @@ class Oviraptor extends Scene {
 
     starsSystem.spawnSomeStars();
 
-    currentColor = new ColorDecider(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+    currentColor = new ColorDecider();
 
-    roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
-    roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
+    //roidManager.minSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) - settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
+    //roidManager.maxSpawnInterval = settings.getFloat("roidImpactRateInMilliseconds", RoidManager.DEFAULT_SPAWN_RATE) + settings.getFloat("roidImpactRateVariation", RoidManager.DEFAULT_SPAWN_DEVIATION)/2;
     roidManager.initRoidPool(assets.roidStuff.roidFrames);
     roidManager.initSplodePool(assets.roidStuff.explosionFrames);
     roidManager.enabled = settings.getBoolean("roidsEnabled", true);

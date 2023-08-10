@@ -11,9 +11,6 @@ class AssetManager {
   PShader glow;
   boolean glowing = true;
 
-  StringList motds;
-  int motdsIndex;
-
   UFOstuff ufostuff = new UFOstuff();
   UIStuff uiStuff = new UIStuff();
   VolcanoStuff volcanoStuff = new VolcanoStuff();
@@ -38,15 +35,6 @@ class AssetManager {
     }
 
     glow = loadShader("glowiness.glsl");
-
-    motds = new StringList();
-    motds.append("Real Winners Say No to Drugs");
-    motds.append("This is Fine");
-    motds.append("Life Finds a Way");
-    motds.append("Tough Out There for Sauropods"); 
-    motds.append("rawr");
-    motds.append("hold on to your butts");
-    motds.shuffle();
 
     ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
     ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
@@ -73,8 +61,7 @@ class AssetManager {
     uiStuff.tick = loadImage("progress-tick.png");
     uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
-    uiStuff.optionsBtn = loadImage("button-final.png");
-    uiStuff.DIPswitchesBtn = loadImage("dipswitches-btn.png");
+    uiStuff.buttons = loadImage("ui-buttons.png");
 
     volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
     volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
@@ -163,8 +150,6 @@ class AssetManager {
     if (glowiness != 0) {
       assets.glow.set("blurSize", glowiness);
       assets.glow.set("sigma", (float)glowiness/2);
-      //      assets.glow.set("blurSize", 25);
-      //assets.glow.set("sigma", 20.0);
       glowing = true;
     } else {
       glowing = false;
@@ -206,19 +191,6 @@ class AssetManager {
     for (SoundPlayable s : sounds) s.stop_();
   }
 
-  String getMOTD () {
-
-    String m = motds.get(motdsIndex);
-
-    motdsIndex++;
-    if (motdsIndex > motds.size() - 1) {
-      motds.shuffle();
-      motdsIndex = 0;
-    }
-
-    return m;
-  }
-
   class UFOstuff {
     PImage[] ufoFrames;  
     PImage[] brontoAbductionFrames;
@@ -239,9 +211,10 @@ class AssetManager {
     PImage tick;
     PImage extraDinoActive;
     PImage extraDinoInactive;
-    PImage optionsBtn;
+    PImage buttons;
+    //PImage optionsBtn;
     PFont extinctType;
-    PImage DIPswitchesBtn;
+    //PImage DIPswitchesBtn;
   }
 
   class VolcanoStuff {

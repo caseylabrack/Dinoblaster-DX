@@ -46,7 +46,7 @@ class ColorDecider implements updateable {
 
   HashMap<String, String> hm = new HashMap<String, String>();
 
-  ColorDecider(String[] userColors, String[] defaulthues) {
+  ColorDecider() {
     hm.put("aliceblue", "#F0F8FF");
     hm.put("antiquewhite", "#FAEBD7");
     hm.put("aqua", "#00FFFF");
@@ -194,6 +194,11 @@ class ColorDecider implements updateable {
     hm.put("whitesmoke", "#F5F5F5");
     hm.put("yellow", "#FFFF00");
     hm.put("yellowgreen", "#9ACD32");
+  }
+
+  void parseUserColors(String[] userColors, String[] defaulthues) {
+
+    cs.clear();
 
     for (String s : userColors) {
       s = s.toLowerCase();
@@ -207,6 +212,18 @@ class ColorDecider implements updateable {
     if (cs.size()==0) {
       for (String h : defaulthues) cs.append(unhex("ff"+h.replace("#", "")));
     }
+  }
+
+  // input: string that is either color name or hex value
+  // output: color value or -1 (for null)
+  color parseColorString (String c) {
+    color thecolor = -1;
+    c = c.toLowerCase();
+    if (hm.containsKey(c)) c = hm.get(c);
+    c = c.replace("#", "");
+    if (c.length()==6) c = "ff" + c;
+    if (match(c, "[a-fA-F0-9]{8}") != null) thecolor = unhex(c); // is it actually a color hex
+    return thecolor;
   }
 
   void update () {
@@ -261,10 +278,10 @@ class Time {
     }
   }
 
-  //void setTimeScale(float n) {
-  //  //defaultTimeScale = n;
-  //  timeScale = n;
-  //}
+  void setDefaultTimeScale(float n) {
+    defaultTimeScale = n;
+    if (!isHyperSpace || !isDying) timeScale = defaultTimeScale;
+  }
 
   void setHyperspace (boolean h) {
     isHyperSpace = h;
@@ -299,225 +316,9 @@ class Time {
     state = NORM;
     timeScale = defaultTimeScale;
   }
+
+  public void rebaseTime () {
+    lastmillis = millis();
+    println("rebase time");
+  }
 }
-
-//class Time implements updateable, playerDiedEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
-
-//  private float clock;
-//  private float lastmillis;
-//  private float timeScale = 1;
-//  private long lastNanos;
-//  private float delta;
-//  private int tick;
-//  private float elapsed;
-
-//  private boolean dying = false;
-//  private float dyingStartTime;
-//  final float dyingDuration = 3e3;
-
-//  private boolean hyperspace = false;
-//  final static float HYPERSPACE_DEFAULT_TIME = 1.75;
-//  final static float DEFAULT_DEFAULT_TIME_SCALE = 1;
-//  float defaultTimeScale;
-//  float hyperspaceTimeScale;
-
-//  boolean isFinale = false;
-//  private float finaleStart;
-//  final static float FINALE_SLOWDOWN_TRANSITION = 3e3;
-//  final float FINALE_SLOWDOWN_START_VALUE = .25;
-//  final float FINALE_SLOWDOWN_END_VALUE = .05;
-
-//  EventManager eventManager;
-
-//  Time (EventManager ev) {
-//    eventManager = ev;
-
-//    eventManager.playerDiedSubscribers.add(this);
-//    eventManager.gameOverSubscribers.add(this);
-//    eventManager.nebulaStartSubscribers.add(this);
-//    eventManager.gameFinaleSubscribers.add(this);
-
-//    lastmillis = millis();
-//    //clock = millis();
-//    clock = 0;
-
-//    hyperspaceTimeScale = settings.getFloat("hyperspaceTimeScale", HYPERSPACE_DEFAULT_TIME);
-//    hyperspaceTimeScale = constrain(hyperspaceTimeScale, .1, 10.0);
-//    defaultTimeScale = settings.getFloat("defaultTimeScale", DEFAULT_DEFAULT_TIME_SCALE);
-//    defaultTimeScale = constrain(defaultTimeScale, .1, 5.0);
-//    timeScale = defaultTimeScale;
-//  }
-
-//  void update () {
-
-//    tick++;
-
-//    elapsed = millis() - lastmillis;
-//    clock += elapsed * timeScale;
-//    //clock += (millis() - lastmillis) * timeScale;
-//    lastmillis = millis();
-
-//    delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
-//    //println("delta: " + delta);
-//    lastNanos = frameRateLastNanos;
-//    eventManager.playerDiedSubscribers.add(this);
-
-//    if (dying) {
-//      float progress = (millis() - dyingStartTime) / dyingDuration;
-//      float targetTimeScale = hyperspace ? hyperspaceTimeScale: defaultTimeScale;
-//      if (progress < 1) {
-//        timeScale = utils.easeInOutExpo(progress, .1, targetTimeScale - .1, targetTimeScale);
-//      } else {
-//        dying = false;
-//        timeScale = targetTimeScale;
-//      }
-//    }
-
-//    if (isFinale) {
-//      float progress = (millis() - finaleStart) / FINALE_SLOWDOWN_TRANSITION;
-//      if (progress < 1) {
-//        timeScale = utils.easeOutQuad(progress, FINALE_SLOWDOWN_START_VALUE, FINALE_SLOWDOWN_END_VALUE - FINALE_SLOWDOWN_START_VALUE, 1);
-//      }
-//    }
-//  }
-
-//  void finaleHandle () {
-//    isFinale = true;
-//  }
-
-//  void finaleTrexHandled (PVector _) {
-//    finaleStart = millis();
-//  }
-
-//  void finaleClose () {}
-
-//  void finaleImpact() {}
-
-//  void nebulaStartHandle() {
-
-//    if (!hyperspace) {
-//      timeScale = settings.getFloat("hyperspaceTimeScale", HYPERSPACE_DEFAULT_TIME);
-//      hyperspace = true;
-//    }
-//  }
-
-//  void nebulaStopHandle() {
-
-//    hyperspace = false;
-//    if (!dying) { 
-//      timeScale = defaultTimeScale;
-//    }
-//  }
-
-//  void gameOverHandle() {
-//    dying = true;
-//    dyingStartTime = millis();
-//  }
-
-//  void playerDiedHandle(PVector position) {
-//    dying = true;
-//    dyingStartTime = millis();
-//  }
-
-//  public float getTimeScale () {
-//    //return timeScale; 
-//    return timeScale * delta;
-//  }
-//  public float getClock() {
-//    return clock;
-//  }
-//  public float getTick() {
-//    return tick;
-//  }
-
-//  public float getElapsed () {
-//    return elapsed;
-//  }
-
-//  public float getScaledElapsed () {
-//    return elapsed * timeScale;
-//  }
-//}
-
-//class MusicManager implements updateable, levelChangeEvent, gameOverEvent, nebulaEvents, gameFinaleEvent {
-
-//  final float START_DELAY = 2e3;
-//  float start;
-//  boolean playing = false;
-//  int lvl;
-//  SoundPlayable currentMusic;
-
-//  MusicManager (EventManager events, int lvl) {
-//    this.lvl = lvl;
-
-//    //assets.stopAllMusic();
-
-//    events.gameOverSubscribers.add(this);
-//    events.levelChangeSubscribers.add(this);
-//    events.nebulaStartSubscribers.add(this);
-//    events.gameFinaleSubscribers.add(this);
-
-//    start = millis();
-//  }
-
-//  void update() {
-//    if (playing) return;
-//    if (millis() - start > START_DELAY) {
-//      playing = true;
-//      chooseTrack();
-//    }
-//  }
-
-//  void chooseTrack () {
-//    switch(lvl) {
-//    case UIStory.TRIASSIC: 
-//      if (random(0, 1) < .5) {
-//        currentMusic = assets.musicStuff.lvl1a;
-//      } else {
-//        currentMusic = assets.musicStuff.lvl1b;
-//      }
-//      break;
-
-//    case UIStory.JURASSIC: 
-//      if (random(0, 1) < .5) {
-//        currentMusic = assets.musicStuff.lvl2a;
-//      } else {
-//        currentMusic = assets.musicStuff.lvl2b;
-//      }
-//      break;
-
-//    case UIStory.CRETACEOUS: 
-//      currentMusic = assets.musicStuff.lvl3;
-//      break;
-//    }
-//    currentMusic.play(true);
-//  }
-
-//  void finaleHandle() {
-//    currentMusic.stop_();
-//  }
-//  void finaleTrexHandled(PVector p) {}
-//  void finaleImpact() {
-//    currentMusic.play();
-//  }
-//  void finaleClose() {}
-
-//  void nebulaStartHandle () {
-//    currentMusic.rate(settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME));
-//  }
-
-//  void nebulaStopHandle() {
-//    currentMusic.rate(1);
-//  }
-
-//  void levelChangeHandle(int stage) {
-//    println("changed level");
-//    lvl = stage;
-//    currentMusic.stop_();
-//    chooseTrack();
-//  }
-
-//  void gameOverHandle() {
-//    assets.stopAllMusic();
-//  }
-//}
