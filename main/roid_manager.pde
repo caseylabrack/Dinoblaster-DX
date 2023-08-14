@@ -1,6 +1,5 @@
 class RoidManager {
   final static float DEFAULT_SPAWN_RATE = 3;
-  //final static float DEFAULT_SPAWN_RATE = 300;
   final int ROID_POOL_SIZE = 100;
   final int SPLODES_POOL_SIZE = 25;
   final float SPAWN_DIST = 720;

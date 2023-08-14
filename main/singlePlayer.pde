@@ -1,7 +1,8 @@
 abstract class Scene { 
 
   abstract void update();
-  abstract void render();
+  abstract void renderPreGlow();
+  abstract void renderPostGlow();
   abstract void mouseUp();
 }
 
@@ -18,7 +19,7 @@ class SinglePlayer extends Scene {
   StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
   VolcanoSystem volcanoSystem;
-  ColorDecider currentColor;
+  ColorDecider currentColor = new ColorDecider();
   UIStory ui;
   UFO ufo;
   UFORespawn ufoRespawn;
@@ -41,7 +42,7 @@ class SinglePlayer extends Scene {
 
   boolean showingUI;
 
-  int score;
+  int score, highscore;
   float lastScoreTick;
   boolean scoring = false;
 
@@ -49,9 +50,9 @@ class SinglePlayer extends Scene {
 
   SoundPlayable music;
 
-  Rectangle settingsButtonHitbox;
-
   SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
+
+    highscore = loadHighScore(SAVE_FILENAME);
 
     earth = new Earth(assets.earthStuff.mask);
 
@@ -96,10 +97,9 @@ class SinglePlayer extends Scene {
     trex = new Trex(assets.trexStuff.trexIdle, assets.trexStuff.trexHead, assets.trexStuff.trexRun1, assets.trexStuff.trexRun2, assets.trexStuff.stomp, assets.trexStuff.rawr);
     earth.addChild(trex);
 
-    for (int i=0; i<2; i++) {
-      //playerDeathAnimations[i] = new GibsSystem(i==0 ? assets.playerStuff.dethSVG : assets.playerStuff.oviDethSVG, new PVector(28, 45));
-      playerDeathAnimations[i] = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
-    }
+    playerDeathAnimations[0] = new GibsSystem(assets.playerStuff.dethSVG, new PVector(28, 45));
+    playerDeathAnimations[1] = new GibsSystem(assets.playerStuff.oviDethSVG, new PVector(28, 45));
+
     trexDeathAnimation = new GibsSystem(assets.trexStuff.deth, new PVector(52, 41));
     if (!settings.getBoolean("trexEnabled", true)) trexDeathAnimation.enabled = false;
 
@@ -109,13 +109,9 @@ class SinglePlayer extends Scene {
 
     gameText = new InGameText(assets.uiStuff.extinctType, assets.uiStuff.MOTD);
 
-    currentColor = new ColorDecider();
-
     finale = new SPFinale(assets.roidStuff.bigone, new PShape[]{assets.ufostuff.ufoFinalSingle, assets.ufostuff.ufoFinalDuo, assets.ufostuff.ufoFinalDuoZoom}, assets.playerStuff.brontoSVG);
 
     music = assets.musicStuff.lvl1a;
-
-    settingsButtonHitbox = new Rectangle(WIDTH_REF_HALF - 80, HEIGHT_REF_HALF - 80, 80, 80);
   }
 
   void loadSettings (SimpleTXTParser settings) {
@@ -144,6 +140,7 @@ class SinglePlayer extends Scene {
     playerIntros[0].colour = p1color;
     playerRespawns[0].colour = p1color;
     rescueEggs[0].pcolor = p1color;
+    playerDeathAnimations[0].c = p1color;
 
     color p2tryColor = currentColor.parseColorString(settings.getString("player2Color", Player.P2_DEFAULT_COLOR));
     color p2color = p2tryColor == -1 ? currentColor.parseColorString(Player.P2_DEFAULT_COLOR) : p2tryColor; // check for failure to parse
@@ -151,6 +148,7 @@ class SinglePlayer extends Scene {
     playerIntros[1].colour = p2color;
     playerRespawns[1].colour = p2color;
     rescueEggs[1].pcolor = p2color;
+    playerDeathAnimations[1].c = p2color;
 
     startingExtraLives = settings.getInt("extraLives", 0);
 
@@ -182,10 +180,25 @@ class SinglePlayer extends Scene {
     currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   }
 
-  void play (int lvl) {
-    println("level: " + lvl);
+  boolean canPlayLevel (int lvl) {
+    boolean canPlay = true;
+    switch(lvl) {
+    case TRIASSIC:
+      break;
 
-    //lvl = CRETACEOUS;
+    case JURASSIC:
+      if (highscore < 100 && !jurassicUnlocked) canPlay = false;
+      break;
+
+    case CRETACEOUS:
+      if (highscore < 200 && !cretaceousUnlocked) canPlay = false;
+      break;
+    }
+    return canPlay;
+  }
+
+  void play (int lvl) {
+    println("level: " + lvl + "  highscore: " + highscore);
 
     // restart stuff
     for (Player p : players) {
@@ -199,6 +212,7 @@ class SinglePlayer extends Scene {
       p.restart();
       p.usecolor = numPlayers == 2;
     }
+    for (GibsSystem g : playerDeathAnimations) g.useColor = numPlayers == 2;
     for (EggRescue r : rescueEggs) r.reset();
     extraLives = startingExtraLives;
     gameOver.restart();
@@ -219,6 +233,8 @@ class SinglePlayer extends Scene {
     starsSystem.restart();
 
     gameText.showRandomTip();
+
+    time.update(); // to initialize the clock if this is first time this method is invoked
 
     for (int i = 0; i < numPlayers; i++) {
       playerIntros[i].startIntro();
@@ -257,6 +273,7 @@ class SinglePlayer extends Scene {
 
       if (settings.getBoolean("trexEnabled", true)) {
         egg.startAnimation(angle, time.getClock());
+        println("init clock: " + time.getClock());
       }
       score = 200;
       music = assets.musicStuff.lvl3;
@@ -273,8 +290,9 @@ class SinglePlayer extends Scene {
     time.update();
     starsSystem.update(time.getTimeScale());
     currentColor.update();
-
     gameText.update();
+
+    scoring = numPlayers == 2 ? (players[0].enabled && players[1].enabled) : players[0].enabled;
 
     // check if it's time to go from intro -> player control
     for (PlayerIntro playerIntro : playerIntros) playerIntro.update();
@@ -290,7 +308,7 @@ class SinglePlayer extends Scene {
         players[i].ppos.set(players[i].localPos());
       }
 
-      scoring = true;
+      //scoring = true;
       lastScoreTick = time.getClock();
       music.play(true);
     }
@@ -508,7 +526,7 @@ class SinglePlayer extends Scene {
 
         //paused = true;
         ufo.resumeCountDown();
-        scoring = true;
+        //scoring = true;
         lastScoreTick = time.getClock();
       }
     }
@@ -740,7 +758,7 @@ class SinglePlayer extends Scene {
     }
   }
 
-  void render () {
+  void renderPreGlow () {
 
     // world-space
     pushMatrix(); 
@@ -780,15 +798,17 @@ class SinglePlayer extends Scene {
     popStyle();
     popMatrix();
 
+    // world space again
     pushMatrix(); 
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
     scale(SCALE);
     rotate(radians(-camera.globalRote()));
     ufo.renderFront(currentColor.getColor());
     starsSystem.render(currentColor.getColor());
-    popMatrix(); 
+    popMatrix();
+  }
 
-    assets.applyGlowiness();
+  void renderPostGlow () {
 
     // UI
     pushMatrix();
@@ -796,20 +816,21 @@ class SinglePlayer extends Scene {
     scale(SCALE);
     imageMode(CENTER);
     ui.render(extraLives, score);
-    //if(!panelsHide) ui.render(extraLives, score);
-    //if(!buttonsHide) image();
     popMatrix();
   }
 
   void playerKilled(int id) {
 
     if (numPlayers==1) {
-      scoring = false;
       if (extraLives <= 0) {
         gameOver.callGameover();
         gameText.goExtinct();
         assets.playerStuff.extinct.play(false);
         music.stop_();
+        if (score > highscore) {
+          highscore = score;
+          saveHighScore(score, SAVE_FILENAME);
+        }
       } else {
         extraLives--;
         ufo.pauseCountDown();
@@ -817,17 +838,19 @@ class SinglePlayer extends Scene {
         assets.playerStuff.littleDeath.play(false);
       }
     } else {
-
       // if other player is dead, gameover
       // other player isn't really dead if they're in the process of respawning through: rising animation, ufo, or egg
       if (!players[id==1 ? 0 : 1].enabled && !ufoRespawn.inTheProcessOfReturningPlayer() && !playerRespawns[id==1 ? 0 : 1].enabled && rescueEggs[id==1 ? 0 : 1].state!=EggRescue.BURST) {
         if (extraLives <= 0) {
           //gameover
-          scoring = false;
           gameOver.callGameover();
           gameText.goExtinct();
           assets.playerStuff.extinct.play(false);
           music.stop_();
+          if (score > highscore) {
+            highscore = score;
+            saveHighScore(score, SAVE_FILENAME);
+          }
         } else {
           //rescue UFO
           extraLives--;
@@ -861,12 +884,12 @@ class SinglePlayer extends Scene {
 
   void mouseUp() {
 
-    PVector m = screenspaceToWorldspace(mouseX, mouseY);
+    //PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
-    if (settingsButtonHitbox.inside(m)) {
-      wantToPause = true;
-      launch(sketchPath() + "\\DIP-switches.txt");
-    }
+    //if (settingsButtonHitbox.inside(m)) {
+    //  wantToPause = true;
+    //  launch(sketchPath() + "\\DIP-switches.txt");
+    //}
 
     //playerKilled(1);
     //players[0].bounceStart(time.getClock(), -1);

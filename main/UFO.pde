@@ -105,20 +105,20 @@ class UFO extends Entity {
       if (countingDown) spawnCountDown -= (1e3/60) * dt;
       if (spawnCountDown < 0) {
         angle = random(0, 360);
-        x = earth.x + cos(angle) * initialDist;
-        y = earth.y + sin(angle) * initialDist;
+        x = cos(angle) * initialDist;
+        y = sin(angle) * initialDist;
         scale = startScale;
         state = INTO_VIEW;
       }
       break;
 
     case INTO_VIEW:
-      dist = dist(x, y, earth.x, earth.y);
+      dist = dist(x, y, 0, 0);
       if (dist > startDist) {
-        angle = (float)Math.atan2(y - earth.y, x - earth.x);
-        x = earth.x + cos(angle) * (dist - initialSpeed * dt);
-        y = earth.y + sin(angle) * (dist - initialSpeed * dt);
-        setPosition(utils.rotateAroundPoint(globalPos(), earth, initialRotate * -1 * dt));
+        angle = (float)Math.atan2(y, x);
+        x = cos(angle) * (dist - initialSpeed * dt);
+        y = sin(angle) * (dist - initialSpeed * dt);
+        setPosition(utils.rotateAroundPoint(globalPos(), utils.ZERO_VECTOR, initialRotate * -1 * dt));
       } else {
         state = APPROACHING;
         startState = clock;
@@ -130,10 +130,10 @@ class UFO extends Entity {
       if (progress < 1) {
         scale = utils.easeInOutExpo(progress * 100, startScale, endScale - startScale, 100);
         setPosition(utils.rotateAroundPoint(globalPos(), earth, (progress * circlingMaxSpeed + initialRotate) * -1 * dt));
-        angle = (float)Math.atan2(y - earth.y, x - earth.x);
+        angle = (float)Math.atan2(y, x);
         dist = utils.easeOutQuad(progress, startDist, -(startDist - finalDist), 1);
-        x = earth.x + cos(angle) * dist;
-        y = earth.y + sin(angle) * dist;
+        x = cos(angle) * dist;
+        y = sin(angle) * dist;
       } else {
         state = CIRCLING;
         startState = clock;
@@ -158,7 +158,7 @@ class UFO extends Entity {
         // warming up tractor beam
         if (scantime > scanningStartDelay && scantime < scanningStartDelay + scanningTransitioning) {
           beamWidth = utils.easeInExpo((scantime - scanningStartDelay)/scanningTransitioning, 0, maxBeamWidth, 1);
-          beamAngle = degrees(atan2(earth.y - y, earth.x - x));
+          beamAngle = degrees(atan2(0 - y, 0 - x));
           beamEnabled = true;
         }
 
@@ -215,11 +215,11 @@ class UFO extends Entity {
       break;
 
     case LEAVING:
-      dist = dist(x, y, earth.x, earth.y);
+      dist = dist(x, y, 0, 0);
       if (dist < 2000) {
-        angle = (float)Math.atan2(y - earth.y, x - earth.x);
-        x = earth.x + cos(angle) * (dist + (initialSpeed * dt));
-        y = earth.y + sin(angle) * (dist + (initialSpeed * dt));
+        angle = (float)Math.atan2(y, x);
+        x = cos(angle) * (dist + (initialSpeed * dt));
+        y = sin(angle) * (dist + (initialSpeed * dt));
         if (x < -HEIGHT_REF_HALF || x > HEIGHT_REF_HALF || y < -HEIGHT_REF_HALF || y > HEIGHT_REF_HALF) assets.ufostuff.ufoSound.stop_(); // it's offscreen
       } else {
         state = IDLE;
@@ -328,8 +328,8 @@ class UFORespawn extends Entity {
     whichDino = dino.getID();
     colour = dino.getTint();
     float angle = random(0, 360);
-    x = earth.x + cos(angle) * UFO.initialDist;
-    y = earth.y + sin(angle) * UFO.initialDist;
+    x = cos(angle) * UFO.initialDist;
+    y = sin(angle) * UFO.initialDist;
     returningDino.modelVector = dino.getModel();
   }
 
@@ -346,18 +346,18 @@ class UFORespawn extends Entity {
     switch(state) {
 
     case APPROACHING:
-      dist = dist(x, y, earth.x, earth.y);
+      dist = dist(x, y, 0, 0);
       if (dist > UFO.finalDist) {
-        angle = atan2(y - earth.y, x - earth.x);
-        x = earth.x + cos(angle) * (dist-UFO.initialSpeed * dt);
-        y = earth.y + sin(angle) * (dist-UFO.initialSpeed * dt);
-        setPosition(utils.rotateAroundPoint(globalPos(), earth, UFO.initialRotate * -1 * dt));
+        angle = atan2(y, x);
+        x = cos(angle) * (dist-UFO.initialSpeed * dt);
+        y = sin(angle) * (dist-UFO.initialSpeed * dt);
+        setPosition(utils.rotateAroundPoint(globalPos(), utils.ZERO_VECTOR, UFO.initialRotate * -1 * dt));
       } else {
         state = ANTISNATCHING;
         stateStart = clock;
-        beamAngle = degrees(atan2(earth.y - y, earth.x - x));
-        targetPosition = new PVector(earth.x + cos(radians(beamAngle + 180)) * (Earth.EARTH_RADIUS + 30), earth.y + sin(radians(beamAngle + 180)) * (Earth.EARTH_RADIUS + 30));
-        returningDino.r = degrees(atan2(earth.y - targetPosition.y, earth.x - targetPosition.x) + radians(-90));
+        beamAngle = degrees(atan2(0 - y, 0 - x));
+        targetPosition = new PVector(cos(radians(beamAngle + 180)) * (Earth.EARTH_RADIUS + 30), sin(radians(beamAngle + 180)) * (Earth.EARTH_RADIUS + 30));
+        returningDino.r = degrees(atan2(0 - targetPosition.y, 0 - targetPosition.x) + radians(-90));
         returningDino.setPosition(globalPos());
         returningDino.scale = .01;
         returningDinoDisplay = true;
@@ -387,11 +387,11 @@ class UFORespawn extends Entity {
       break;
 
     case LEAVING:
-      dist = dist(x, y, earth.x, earth.y);
+      dist = dist(x, y, 0, 0);
       if (dist < 2000) {
-        angle = (float)Math.atan2(y - earth.y, x - earth.x);
-        x = earth.x + cos(angle) * (dist+UFO.initialSpeed * dt);
-        y = earth.y + sin(angle) * (dist+UFO.initialSpeed * dt);
+        angle = (float)Math.atan2(y, x);
+        x = cos(angle) * (dist+UFO.initialSpeed * dt);
+        y = sin(angle) * (dist+UFO.initialSpeed * dt);
       } else {
         state = DONE;
         enabled = false;

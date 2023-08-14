@@ -1,25 +1,24 @@
 // TO DO
-// allow reloading settings
-// allow hot reloading settings
-// test ways to avoid tessalation slowness
-// scoring in 2p with deaths?
-// stop playing sfx loops on pause and resume loops on unpause
 // better respawn flicker
 // better respawn animation rate (difference between looking ready and being ready)
-// 2player death animation
-// 2player death gibs colored
 // scale vectors with pshape.scale
-// cursor active over buttons
 // pulse colors?
-// title screen: 40th anniversary edition (turn on animation? attract mode?)
+// Ptutorial
+// setting: no flash 
+// setting: fake ghosting
+// test ways to avoid tessalation slowness
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
+// design the custom console for picade; order console; assemble
+// custom artwork for the picade
 // dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // nongaussian blur glow
+// probably put picade settings in dipswitches
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
 // oviraptor mode (make its own release maybe)
+// blogposts: fan art; differences from last edition; in-depth on the dipswitches; spotlight on the picade
 
 import java.util.Collections;
 
@@ -38,6 +37,9 @@ import processing.sound.*;
 
 Minim minim;
 
+final static String SAVE_FILENAME = "dino.dat";
+final static String SETTINGS_FILENAME = "settings.txt";
+
 boolean paused = false;
 Scene currentScene;
 
@@ -51,7 +53,7 @@ AssetManager assets = new AssetManager();
 SimpleTXTParser settings;
 JSONObject picadeSettings;
 
-boolean jurassicUnlocked, cretaceousUnlocked;
+boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide;
 char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect;
 
 float SCALE;
@@ -62,6 +64,11 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 
 SinglePlayer singlePlayer;
 Oviraptor oviraptor;
+Titlescreen title;
+
+Rectangle spButton; // single player button
+Rectangle mpButton; // multiplayer button
+Rectangle settingsButtonHitbox;
 
 void setup () {
   //size(500, 500, P2D);
@@ -76,7 +83,7 @@ void setup () {
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
-  surface.setTitle("DinoBlaster DX");
+  surface.setTitle("DinoBlaster: 40th Anniversary Edition");
 
   colorMode(HSB, 360, 100, 100, 1);
   imageMode(CENTER);
@@ -95,31 +102,25 @@ void setup () {
   catch(Exception e) {
   }
 
+  spButton = new Rectangle(416, 162, 60, 60);
+  mpButton = new Rectangle(416, 230, 60, 60);
+  settingsButtonHitbox = new Rectangle(WIDTH_REF_HALF - 80, HEIGHT_REF_HALF - 80, 80, 80);
+
   singlePlayer = new SinglePlayer(settings, assets);
   singlePlayer.numPlayers = 1;
   keys.playingMultiplayer = false;
   singlePlayer.loadSettings(settings);
-  singlePlayer.play(SinglePlayer.TRIASSIC);
 
   oviraptor = new Oviraptor(settings, assets);
 
-  currentScene = singlePlayer;
+  title = new Titlescreen();
+
+  currentScene = title;
   //currentScene = oviraptor;
 }
 
 void touchStarted() {
   //println("touch started");
-}
-
-void mousePressed () {
-  //  frameRate(5);
-}
-
-void mouseReleased () {
-  currentScene.mouseUp();
-  //paused = false;
-  //frameRate(60);
-  //rec = true;
 }
 
 void draw () {
@@ -141,14 +142,30 @@ void draw () {
 
   if (!paused) {
     background(0, 0, 0, 1);
-    //fill(0,0,0,.2);
+    //fill(0,0,0,.1);
     //rect(0,0,width,height);
     //if (currentScene.status==Scene.DONE) {
     //  currentScene.cleanup();
     //  currentScene = new SinglePlayer(chooseNextLevel());
     //}
     currentScene.update();
-    currentScene.render();
+    currentScene.renderPreGlow();
+    //assets.applyGlowiness();
+    currentScene.renderPostGlow();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    imageMode(CENTER);
+    if (!panelsHide) {
+      imageMode(CORNER);
+      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+      imageMode(CENTER);
+      image(assets.uiStuff.letterbox, 0, 0);
+    }
+    if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
+
+    popMatrix();
   }
 
   if (rec) {
@@ -166,30 +183,6 @@ void draw () {
   }
 }
 
-int loadHighScore (String filename) {
-  // load four bytes into one 32-bit integer by ORing bytes together
-  int highscore = 0;
-  byte[] scoreData = loadBytes(filename);
-  if (scoreData != null ) {
-    highscore = (((scoreData[3]       ) << 24) |
-      ((scoreData[2] & 0xff) << 16) |
-      ((scoreData[1] & 0xff) <<  8) |
-      ((scoreData[0] & 0xff)      ));
-  }
-  return highscore;
-}
-
-void saveHighScore (int score, String filename) {
-  // split score (32-bit integer in java) into four bytes, bitwise. save as byte array
-  byte[] nums = new byte[4];
-  nums[0] = (byte) (score & 0xff);
-  nums[1] = (byte) ((score >>> 8) & 0xff);
-  nums[2] = (byte) ((score >>> 16) & 0xff);
-  nums[3] = (byte) ((score >>> 24) & 0xff);
-
-  saveBytes(filename, nums);
-}
-
 void keyPressed() {
 
   //println(key, keyCode);
@@ -199,9 +192,22 @@ void keyPressed() {
     if (keyCode==LEFT) keys.arrowleft = true;
     if (keyCode==RIGHT) keys.arrowright = true;
   } else {
-    if (key==triassicSelect) singlePlayer.play(SinglePlayer.TRIASSIC);
-    if (key==jurassicSelect && jurassicUnlocked) singlePlayer.play(SinglePlayer.JURASSIC);
-    if (key==cretaceousSelect && cretaceousUnlocked) singlePlayer.play(SinglePlayer.CRETACEOUS);
+    if (key==triassicSelect) {
+      currentScene = singlePlayer;
+      singlePlayer.play(SinglePlayer.TRIASSIC);
+    }
+    if (key==jurassicSelect) {
+      if (singlePlayer.canPlayLevel(SinglePlayer.JURASSIC)) {
+        currentScene = singlePlayer;
+        singlePlayer.play(SinglePlayer.JURASSIC);
+      }
+    }
+    if (key==cretaceousSelect) {
+      if (singlePlayer.canPlayLevel(SinglePlayer.CRETACEOUS)) {
+        currentScene = singlePlayer;
+        singlePlayer.play(SinglePlayer.CRETACEOUS);
+      }
+    }
     if (key==leftkey1p) keys.leftp1 = true;
     if (key==rightkey1p) keys.rightp1 = true;
     if (key==leftkey2p) keys.leftp2 = true;
@@ -224,14 +230,18 @@ void keyReleased() {
     if (key==leftkey2p) keys.leftp2 = false; 
     if (key==rightkey2p) keys.rightp2 = false; 
     if (key==onePlayerSelect) {
+      currentScene = singlePlayer;
       singlePlayer.numPlayers = 1;
       keys.playingMultiplayer = false;
       singlePlayer.play(SinglePlayer.TRIASSIC);
+      paused = false;
     }
     if (key==twoPlayerSelect) {
+      currentScene = singlePlayer;
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
-      singlePlayer.play(SinglePlayer.CRETACEOUS);
+      singlePlayer.play(SinglePlayer.TRIASSIC);
+      paused = false;
     }
     if (key=='r') {
       rec = false;
@@ -240,7 +250,7 @@ void keyReleased() {
     if (key==dipSwitches) {
       paused = true;
       singlePlayer.handlePause();
-      launch(sketchPath() + "\\DIP-switches.txt");
+      launch(sketchPath() + "\\" + SETTINGS_FILENAME);
     }
     if (key==pauseKey || key==' ') {
       println("pause pls");
@@ -253,6 +263,41 @@ void keyReleased() {
       }
       paused = !paused;
     }
+  }
+}
+
+void mouseMoved() {
+  PVector m = screenspaceToWorldspace(mouseX, mouseY);
+
+  if (settingsButtonHitbox.inside(m) || spButton.inside(m) || mpButton.inside(m)) {
+    cursor(HAND);
+  } else {
+    cursor(ARROW);
+  }
+}
+
+void mouseReleased () {
+  currentScene.mouseUp();
+
+  PVector m = screenspaceToWorldspace(mouseX, mouseY);
+
+  if (settingsButtonHitbox.inside(m)) {
+    paused = true;
+    launch(sketchPath() + "\\" + SETTINGS_FILENAME);
+  }
+
+  if (spButton.inside(m)) {
+    currentScene = singlePlayer;
+    singlePlayer.numPlayers = 1;
+    keys.playingMultiplayer = false;
+    singlePlayer.play(SinglePlayer.TRIASSIC);
+  }
+
+  if (mpButton.inside(m)) {
+    currentScene = singlePlayer;
+    singlePlayer.numPlayers = 2;
+    keys.playingMultiplayer = true;
+    singlePlayer.play(SinglePlayer.TRIASSIC);
   }
 }
 
@@ -311,12 +356,12 @@ PVector screenspaceToWorldspace (float x, float y) {
 
 void loadSettingsFromTXT () {
   try {
-    settings = new SimpleTXTParser("DIP-switches.txt", true);
+    settings = new SimpleTXTParser(SETTINGS_FILENAME, true);
   }
   catch(Exception e) {
     println("problem load game settings");
     PrintWriter output;
-    output = createWriter("DIP-switches.txt");
+    output = createWriter(SETTINGS_FILENAME);
     String spacer = "     ";
     String settingsString = String.join("\n", 
       "--Edit this text file to change your controls, set preferences, and even cheat.", 
@@ -335,9 +380,9 @@ void loadSettingsFromTXT () {
       pss("pauseKey: g") + "--or space bar", 
       pss("openSettings: t") + "--open this file from in game", 
       "", 
-      "triassicSelect: 1", 
-      "jurassicSelect: 2", 
-      "cretaceousSelect: 3", 
+      pss("triassicSelect: 1"), 
+      pss("jurassicSelect: 2") + "--beat Triassic to unlock (or cheat)", 
+      pss("cretaceousSelect: 3") + "--beat Jurassic to unlock (or cheat)", 
       "", 
       "1playerSelect: o", 
       "2playerSelect: p", 
@@ -347,7 +392,7 @@ void loadSettingsFromTXT () {
       "", 
       "hideButtons: false", 
       "hideSidePanels: false", 
-      "glowiness: " + assets.DEFAULT_GLOWINESS, 
+      pss("glowiness: " + assets.DEFAULT_GLOWINESS) + "--requires GPU power. 0 to disable", 
       "", 
       "", 
       "----GAMEPLAY----", 
@@ -370,9 +415,6 @@ void loadSettingsFromTXT () {
       "earthIsWest: " + true, 
       "", 
       "roidsPerSecond: " + 3, 
-      //"roidFrequency: " + RoidManager.DEFAULT_SPAWN_RATE, 
-      //"roidImpactRateInMilliseconds: " + RoidManager.DEFAULT_SPAWN_RATE, 
-      //"roidImpactRateVariation: " + RoidManager.DEFAULT_SPAWN_DEVIATION, 
       "", 
       "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
       pss("trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE) + "-- how far the trex \"sees\", in degrees", 
@@ -384,8 +426,8 @@ void loadSettingsFromTXT () {
       "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
       "-- put tips inside double quotes, seperate with comma, don't linebreak", 
       "", 
-      "player1Color: \"teal\"", 
-      "player2Color: \"hot pink\"", 
+      "player1Color: \"#00ffff\"", 
+      "player2Color: \"#ff57ff\"", 
       "", 
       "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
       "-- put colors inside double quotes, seperate with comma, don't linebreak", 
@@ -401,6 +443,8 @@ void loadSettingsFromTXT () {
 
   jurassicUnlocked = settings.getBoolean("JurassicUnlockedCheat", false);
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlockedCheat", false);
+  buttonsHide = settings.getBoolean("hideButtons", false); 
+  panelsHide = settings.getBoolean("hideSidePanels", false);
   leftkey1p = settings.getChar("player1LeftKey", 'a');
   rightkey1p = settings.getChar("player1RightKey", 'd');
   leftkey2p = settings.getChar("player2LeftKey", 'k');
@@ -436,4 +480,28 @@ String pss (String str) {
     cs[i] = i < str.length() ? str.charAt(i) : ' ';
   }
   return new String(cs);
+}
+
+int loadHighScore (String filename) {
+  // load four bytes into one 32-bit integer by ORing bytes together
+  int highscore = 0;
+  byte[] scoreData = loadBytes(filename);
+  if (scoreData != null ) {
+    highscore = (((scoreData[3]       ) << 24) |
+      ((scoreData[2] & 0xff) << 16) |
+      ((scoreData[1] & 0xff) <<  8) |
+      ((scoreData[0] & 0xff)      ));
+  }
+  return highscore;
+}
+
+void saveHighScore (int score, String filename) {
+  // split score (32-bit integer in java) into four bytes, bitwise. save as byte array
+  byte[] nums = new byte[4];
+  nums[0] = (byte) (score & 0xff);
+  nums[1] = (byte) ((score >>> 8) & 0xff);
+  nums[2] = (byte) ((score >>> 16) & 0xff);
+  nums[3] = (byte) ((score >>> 24) & 0xff);
+
+  saveBytes(filename, nums);
 }

@@ -52,8 +52,7 @@ class AssetManager {
 
     uiStuff.extinctType = createFont("Hyperspace.otf", 150);
     //uiStuff.extinctSign = loadImage("gameover-lettering.png");
-    //uiStuff.letterbox = loadImage("letterboxes2.png");
-    uiStuff.letterbox = loadImage("letterboxes2.png");
+    uiStuff.letterbox = loadImage("letterboxes.png");
     uiStuff.screenShine = loadImage("screenShine.png");
     uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
     uiStuff.progressBG = loadImage("progress-bg.png");
@@ -62,6 +61,8 @@ class AssetManager {
     uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
     uiStuff.buttons = loadImage("ui-buttons.png");
+    uiStuff.titlescreenImage = loadImage("title.png");
+    uiStuff.title40 = loadImage("title_fortieth.png");
 
     volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
     volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
@@ -88,7 +89,6 @@ class AssetManager {
     playerStuff.oviSVG = loadShape("ovi-idle.svg");
     playerStuff.oviSVG.disableStyle();
     playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
-    //playerStuff.oviFrames = utils.sheetToSprites(loadImage("oviraptor-frames.png"), 2, 2, 1);
     playerStuff.eggWhole = loadImage("egg-whole.png");
     for(int i=0; i<5; i++) {
       playerStuff.eggFrames[i] = loadImage("eggs_egg-crack" + i + ".png");
@@ -215,6 +215,8 @@ class AssetManager {
     //PImage optionsBtn;
     PFont extinctType;
     //PImage DIPswitchesBtn;
+    PImage titlescreenImage;
+    PImage title40;
   }
 
   class VolcanoStuff {

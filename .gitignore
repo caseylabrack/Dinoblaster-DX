@@ -4,8 +4,11 @@ main/application.*
 main/build
 main/data/_music
 main/data/_music/*
+main/data/_old
 highscore.dat
 picade.txt
 video/
 DIP-switches.txt
 *.apk
+main/dino.dat
+main/settings.txt

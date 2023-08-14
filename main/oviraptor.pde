@@ -1,3 +1,47 @@
+//abstract class Scene { 
+
+//  abstract void update();
+//  abstract void renderPreGlow();
+//  abstract void renderPostGlow();
+//  abstract void mouseUp();
+//}
+
+class Titlescreen extends Scene {
+
+  StarsSystem starsSystem = new StarsSystem();
+  ColorDecider currentColor = new ColorDecider();
+
+  Titlescreen () {
+    starsSystem.spawnSomeStars();
+    currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+  }
+
+  void update () {
+    starsSystem.update(2);
+    currentColor.update();
+  }
+
+  void renderPreGlow () {
+    pushMatrix();
+    translate(width / 2, height / 2);
+    scale(SCALE);
+    imageMode(CENTER);
+    image(assets.uiStuff.titlescreenImage, 0, 0);
+    pushStyle();
+    tint(currentColor.getColor());
+    image(assets.uiStuff.title40, 0, 0);
+    popStyle();
+    starsSystem.render(#FFFFFF);
+    popMatrix();
+  }
+
+  void mouseUp () {
+  }
+
+  void renderPostGlow() {
+  }
+}
+
 class Oviraptor extends Scene {
 
   Earth earth;
@@ -73,16 +117,16 @@ class Oviraptor extends Scene {
     egg.x = cos(radians(ang)) * EggHatch.EARTH_DIST_FINAL;
     egg.y = sin(radians(ang)) * EggHatch.EARTH_DIST_FINAL;
     egg.r = ang + 90;
-    
+
     starttime = time.getClock();
   }
 
   void update() {
-    
-    if(isGameover) return;
-    
+
+    if (isGameover) return;
+
     time.update();
-    
+
     countdown = 60 - (time.getClock() - starttime) / 1e3;
 
     playerIntro.update();
@@ -157,11 +201,11 @@ class Oviraptor extends Scene {
       egg.y = sin(radians(ang)) * EggHatch.EARTH_DIST_FINAL;
       egg.r = ang + 90;
     }
-    
+
     egg.update();
   }
 
-  void render() {
+  void renderPreGlow() {
     //world-space
     pushMatrix(); 
     translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
@@ -189,6 +233,9 @@ class Oviraptor extends Scene {
     text(floor(countdown), HEIGHT_REF_HALF, -HEIGHT_REF_HALF + 50);
 
     popMatrix();
+  }
+
+  void renderPostGlow() {
   }
   void mouseUp() {
   }

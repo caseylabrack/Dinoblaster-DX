@@ -363,6 +363,8 @@ class GibsSystem extends Entity {
   float defaultForce = 250;
   PVector opticalCenterPoint;
   float defaultSpreadForce = 4;
+  color c;
+  boolean useColor = false;
 
   GibsSystem (PShape model, PVector opticalCenterPoint) {
     this.model = model;
@@ -454,6 +456,7 @@ class GibsSystem extends Entity {
     pushTransforms();
     pushStyle();
     stroke(0, 0, 100);
+    if(useColor) stroke(c);
     strokeWeight(assets.STROKE_WIDTH);
 
     for (Gib g : gibs) {

@@ -84,6 +84,8 @@ class EggRescue extends Entity {
         x = cos(radians(angle)) * dist;
         y = sin(radians(angle)) * dist;
       } else {
+        x = cos(radians(angle)) * Player.DIST_FROM_EARTH;
+        y = sin(radians(angle)) * Player.DIST_FROM_EARTH;
         state = IDLE;
         stateStart = clock;
       }
@@ -263,6 +265,8 @@ class EggHatch extends Entity {
         x = cos(radians(angle)) * dist;
         y = sin(radians(angle)) * dist;
       } else {
+        x = cos(radians(angle)) * EARTH_DIST_FINAL;
+        y = sin(radians(angle)) * EARTH_DIST_FINAL;
         state = IDLE;
         startTime = clock;
       }
@@ -369,10 +373,10 @@ class Trex extends Entity implements tarpitSinkable {
   boolean isDeadly () {
     return enabled && state==WALKING;
   }
-  
+
   void handleUnpaused () {
-    if(!enabled || state!=WALKING) return;
-    if(chasing) stompSound.play(true);
+    if (!enabled || state!=WALKING) return;
+    if (chasing) stompSound.play(true);
   }
 
   void update(float dt, float scaledElapsed, targetable target1, targetable target2) {
@@ -384,8 +388,8 @@ class Trex extends Entity implements tarpitSinkable {
       isStomping = false;
 
       float myang = utils.angleOfOrigin(localPos());
-      float ang1 = target1.isTargettable() ? utils.unsignedAngleDiff(myang,utils.angleOfOrigin(target1.position())) : 361;
-      float ang2 = target2.isTargettable() ? utils.unsignedAngleDiff(myang,utils.angleOfOrigin(target2.position())) : 361;
+      float ang1 = target1.isTargettable() ? utils.unsignedAngleDiff(myang, utils.angleOfOrigin(target1.position())) : 361;
+      float ang2 = target2.isTargettable() ? utils.unsignedAngleDiff(myang, utils.angleOfOrigin(target2.position())) : 361;
       targetable target = ang1 < ang2 ? target1 : target2;
 
       if (target.isTargettable()) {
