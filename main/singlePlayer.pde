@@ -19,7 +19,7 @@ class SinglePlayer extends Scene {
   StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
   VolcanoSystem volcanoSystem;
-  ColorDecider currentColor = new ColorDecider();
+  //ColorDecider currentColor = new ColorDecider();
   UIStory ui;
   UFO ufo;
   UFORespawn ufoRespawn;
@@ -28,7 +28,6 @@ class SinglePlayer extends Scene {
   Player[] players = new Player[2];
   PlayerRespawn[] playerRespawns = new PlayerRespawn[2];
   PlayerIntro[] playerIntros = new PlayerIntro[2];
-  GameOver gameOver = new GameOver();
   EggHatch egg;
   EggRescue[] rescueEggs = new EggRescue[2];
   Trex trex;
@@ -149,6 +148,10 @@ class SinglePlayer extends Scene {
     playerRespawns[1].colour = p2color;
     rescueEggs[1].pcolor = p2color;
     playerDeathAnimations[1].c = p2color;
+    
+    for(PlayerIntro p : playerIntros) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
+    for(EggRescue e: rescueEggs) e.dontFlicker = settings.getBoolean("reduceFlashing", false);
+    for(PlayerRespawn p: playerRespawns) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
 
     startingExtraLives = settings.getInt("extraLives", 0);
 
@@ -169,15 +172,16 @@ class SinglePlayer extends Scene {
 
     boolean u = settings.getBoolean("ufosEnabled", true);
     if (!u) ufo.enabled = false;
+    ufo.spawnTimeLow = settings.getFloat("ufoSpawnRateLow", UFO.DEFAULT_SPAWNRATE_LOW);
+    ufo.spawnTimeHigh = settings.getFloat("ufoSpawnRateHigh", UFO.DEFAULT_SPAWNRATE_HIGH);
 
     time.setDefaultTimeScale(settings.getFloat("defaultTimeScale", 1));
 
     ui.hideButtons = settings.getBoolean("hideButtons", false);
     ui.hideAll = settings.getBoolean("hideSidePanels", false);
-
+    
     gameText.setTips(settings.getStrings("tips", assets.DEFAULT_TIPS));
-
-    currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+    gameText.dontFlicker = settings.getBoolean("reduceFlashing", false);
   }
 
   boolean canPlayLevel (int lvl) {
@@ -215,7 +219,6 @@ class SinglePlayer extends Scene {
     for (GibsSystem g : playerDeathAnimations) g.useColor = numPlayers == 2;
     for (EggRescue r : rescueEggs) r.reset();
     extraLives = startingExtraLives;
-    gameOver.restart();
     roidManager.restart();
     ufo.restart();
     ufoRespawn.restart();
@@ -508,9 +511,9 @@ class SinglePlayer extends Scene {
     if (abducted !=-1) {
       extraLives++;
       players[abducted].restart();
-      //scoring = false;
       playerRespawns[abducted].respawn();
       println("abducted");
+      //paused = true;
     }
 
     // respawn following getting extra life
@@ -526,8 +529,8 @@ class SinglePlayer extends Scene {
 
         //paused = true;
         ufo.resumeCountDown();
-        //scoring = true;
         lastScoreTick = time.getClock();
+        assets.playerStuff.respawnRise.stop_();
       }
     }
 
@@ -539,7 +542,7 @@ class SinglePlayer extends Scene {
       players[ufoRespawn.whichDino].setPosition(ufoRespawned.globalPos());
       players[ufoRespawn.whichDino].r = ufoRespawned.r;
       earth.addChild(players[ufoRespawn.whichDino]);
-      //scoring = true;
+      ufo.resumeCountDown();
       lastScoreTick = time.getClock();
     }
 
@@ -644,11 +647,10 @@ class SinglePlayer extends Scene {
     for (GibsSystem p : playerDeathAnimations) p.update(time.getTimeScale(), time.getClock());
     trexDeathAnimation.update(time.getTimeScale(), time.getClock());
 
-    gameText.update();
 
     // restart
-    gameOver.update();
-    if (gameOver.readyToRestart && keys.anyKey()) {
+    gameText.update();
+    if (gameText.doneFlashExtinct() && keys.anyKey()) {
       play(stage);
     }
 
@@ -767,18 +769,17 @@ class SinglePlayer extends Scene {
     //scale(2);
     //rotate(radians(-player.globalRote()));
     rotate(radians(-camera.globalRote()));
-    for (PlayerRespawn p : playerRespawns) p.render();
     ufo.render(currentColor.getColor());
     ufoRespawn.render(currentColor.getColor());
     volcanoSystem.render(currentColor.getColor());
     finale.render(earth); // behind earth
+    for (PlayerRespawn p : playerRespawns) p.render();
     earth.render(time.getClock());
     for (Player player : players) player.render();
     for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
     for (EggRescue r : rescueEggs) r.render();
     roidManager.renderRoids();
     roidManager.renderSplodes();
-    //starsSystem.render(currentColor.getColor());
     hypercube.render(time.getTimeScale(), currentColor.getColor());
     egg.render(currentColor.getColor());
     trex.render();
@@ -823,7 +824,6 @@ class SinglePlayer extends Scene {
 
     if (numPlayers==1) {
       if (extraLives <= 0) {
-        gameOver.callGameover();
         gameText.goExtinct();
         assets.playerStuff.extinct.play(false);
         music.stop_();
@@ -843,7 +843,6 @@ class SinglePlayer extends Scene {
       if (!players[id==1 ? 0 : 1].enabled && !ufoRespawn.inTheProcessOfReturningPlayer() && !playerRespawns[id==1 ? 0 : 1].enabled && rescueEggs[id==1 ? 0 : 1].state!=EggRescue.BURST) {
         if (extraLives <= 0) {
           //gameover
-          gameOver.callGameover();
           gameText.goExtinct();
           assets.playerStuff.extinct.play(false);
           music.stop_();
@@ -854,7 +853,6 @@ class SinglePlayer extends Scene {
         } else {
           //rescue UFO
           extraLives--;
-          ufo.pauseCountDown();
           ufoRespawn.dispatch(players[id], earth.globalPos());
           assets.playerStuff.littleDeath.play(false);
         }
@@ -875,7 +873,6 @@ class SinglePlayer extends Scene {
     players[id].restart();
 
     if (!players[0].enabled && !players[1].enabled && !finale.won) {
-      gameOver.callGameover();
       gameText.goExtinct();
       assets.playerStuff.extinct.play(false);
       music.stop_();

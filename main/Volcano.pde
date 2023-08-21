@@ -195,7 +195,7 @@ class Volcano extends Entity implements obstacle {
     case DELAYING:
       state = ERUPTING;
       stateStart = clock;
-      //assets.volcanoStuff.rumble.play(true);
+      assets.volcanoStuff.rumble.play(true);
       break;
 
     case ERUPTING: 

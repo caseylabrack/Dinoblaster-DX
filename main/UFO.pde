@@ -60,6 +60,12 @@ class UFO extends Entity {
 
   boolean enabled = false;
 
+  final static float DEFAULT_SPAWNRATE_LOW = 30;
+  final static float DEFAULT_SPAWNRATE_HIGH = 90;
+  float spawnTimeLow = DEFAULT_SPAWNRATE_LOW;
+  float spawnTimeHigh = DEFAULT_SPAWNRATE_HIGH;
+
+
   UFO (PShape model) {
     modelVector = model;
   }
@@ -68,11 +74,11 @@ class UFO extends Entity {
     enabled = false;
     state = IDLE;
     beamEnabled = false;
-    abductedGuy.identity();
+    //abductedGuy.identity();
   }
 
   void startCountDown () {
-    spawnCountDown = 2e3;//random(5, 90) * 1000;
+    spawnCountDown = random(0, spawnTimeHigh) * 1000;
     enabled = true;
   }
 
@@ -109,6 +115,7 @@ class UFO extends Entity {
         y = sin(angle) * initialDist;
         scale = startScale;
         state = INTO_VIEW;
+        assets.ufostuff.ufoSound.play(true);
       }
       break;
 
@@ -172,7 +179,7 @@ class UFO extends Entity {
             PVector abducteePosition = a.getPosition();
             if (utils.unsignedAngleDiff(utils.angleOf(earth, abducteePosition), utils.angleOf(earth, globalPos())) < snatchMargin) {
               startState = clock;
-              snatchStartPos = abducteePosition;
+              snatchStartPos = abducteePosition.copy();
               abductedGuy.setPosition(abducteePosition);
               abductedGuy.facing = a.getFacing();
               abductedGuy.r = a.getRote();
@@ -184,6 +191,8 @@ class UFO extends Entity {
               snatched = a.getID();
               abductedGuy.setPosition(PVector.lerp(snatchStartPos, globalPos(), 0));
               abductedGuy.scale = map(0, 0, 1, 1, .01);
+              countingDown = false;
+              //println("snatch frame: " + frameCount);
               break; // only abduct a single dino
             }
           }
@@ -206,6 +215,7 @@ class UFO extends Entity {
     case SNATCHING:
       progress = (clock - startState)  / snatchDuration;
       if (progress <= 1) {
+        //println("snatchING frame: " + frameCount);
         abductedGuy.setPosition(PVector.lerp(snatchStartPos, globalPos(), progress));
         abductedGuy.scale = map(progress, 0, 1, 1, .01);
       } else {
@@ -223,7 +233,7 @@ class UFO extends Entity {
         if (x < -HEIGHT_REF_HALF || x > HEIGHT_REF_HALF || y < -HEIGHT_REF_HALF || y > HEIGHT_REF_HALF) assets.ufostuff.ufoSound.stop_(); // it's offscreen
       } else {
         state = IDLE;
-        spawnCountDown = 3e3;//random(5, 90) * 1000;
+        spawnCountDown = random(spawnTimeLow, spawnTimeHigh) * 1000;
       }
       break;
 
@@ -262,7 +272,7 @@ class UFO extends Entity {
     if (beamEnabled) {
       pushStyle();
       //strokeWeight(assets.STROKE_WIDTH);
-      strokeWeight(2);      
+      strokeWeight(1);      
       stroke(funkyColor);
       line(x, y, x + cos(radians(beamAngle + beamWidth)) * 250, y + sin(radians(beamAngle + beamWidth)) * 250);
       line(x, y, x + cos(radians(beamAngle - beamWidth)) * 250, y + sin(radians(beamAngle - beamWidth)) * 250);

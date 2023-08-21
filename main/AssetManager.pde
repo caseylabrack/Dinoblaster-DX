@@ -58,6 +58,7 @@ class AssetManager {
     uiStuff.progressBG = loadImage("progress-bg.png");
     uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
     uiStuff.tick = loadImage("progress-tick.png");
+    uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
     uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
     uiStuff.buttons = loadImage("ui-buttons.png");
@@ -102,7 +103,9 @@ class AssetManager {
     playerStuff.tarStep = raspi ? new SoundM("_audio/player/walking-in-tar.wav", ngainSFX) : new SoundP("_audio/player/walking-in-tar.wav", context);
     sounds.add(playerStuff.tarStep);
     playerStuff.littleDeath = raspi ? new SoundM("_audio/player/dino little death.wav", ngainSFX) : new SoundP("_audio/player/dino little death.wav", context);
-    sounds.add(playerStuff.littleDeath);    
+    sounds.add(playerStuff.littleDeath); 
+    playerStuff.respawnRise = raspi ? new SoundM("_audio/player/revup2-loop-vol-adjusted.wav", ngainSFX) : new SoundP("_audio/player/revup2-loop-vol-adjusted.wav", context);
+    sounds.add(playerStuff.respawnRise); 
 
     trexStuff.trexIdle = loadImage("trex-idle.png");
     trexStuff.trexRun1 = loadImage("trex-run1.png");
@@ -209,6 +212,7 @@ class AssetManager {
     PImage progressBG;
     PImage extraDinosBG;
     PImage tick;
+    PImage tickInActive;
     PImage extraDinoActive;
     PImage extraDinoInactive;
     PImage buttons;
@@ -247,6 +251,7 @@ class AssetManager {
     SoundPlayable step;
     SoundPlayable tarStep;
     SoundPlayable littleDeath;
+    SoundPlayable respawnRise;
   }
 
   class TrexStuff {

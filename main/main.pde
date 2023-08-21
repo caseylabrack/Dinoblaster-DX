@@ -1,10 +1,14 @@
 // TO DO
-// better respawn flicker
-// better respawn animation rate (difference between looking ready and being ready)
+// title screen animation (ripple distortion on titlescreen)
+// title screen sound or music
+// start getting some trailer shots
+// more sound loop unpausing
+// find the processing sd card in the basement
+// should settings load every time you play()?
 // scale vectors with pshape.scale
 // pulse colors?
 // Ptutorial
-// setting: no flash 
+// nongaussian blur glow
 // setting: fake ghosting
 // test ways to avoid tessalation slowness
 // try-catch for launching dipswitches notepad
@@ -13,7 +17,6 @@
 // design the custom console for picade; order console; assemble
 // custom artwork for the picade
 // dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
-// nongaussian blur glow
 // probably put picade settings in dipswitches
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
@@ -40,6 +43,9 @@ Minim minim;
 final static String SAVE_FILENAME = "dino.dat";
 final static String SETTINGS_FILENAME = "settings.txt";
 
+final String VERSION_NUM = "v.155";
+final char versionchar = '`';
+
 boolean paused = false;
 Scene currentScene;
 
@@ -65,6 +71,8 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 SinglePlayer singlePlayer;
 Oviraptor oviraptor;
 Titlescreen title;
+
+ColorDecider currentColor = new ColorDecider();
 
 Rectangle spButton; // single player button
 Rectangle mpButton; // multiplayer button
@@ -150,22 +158,54 @@ void draw () {
     //}
     currentScene.update();
     currentScene.renderPreGlow();
-    //assets.applyGlowiness();
+    assets.applyGlowiness();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    if (!panelsHide) {
+      imageMode(CORNER);
+      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+      imageMode(CENTER);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+      push();
+      //imageMode(CENTER);
+      //float totalpixels = HEIGHT_REFERENCE - 80;
+      //float tickheight = 10;//assets.uiStuff.tick.height;
+      //for (int i = 0; i < totalpixels; i+=tickheight) {
+      //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+      //}
+      pop();
+    }
+    popMatrix();
     currentScene.renderPostGlow();
     pushMatrix();
     translate(width/2, height/2);
     scale(SCALE);
     imageMode(CENTER);
     if (!panelsHide) {
+      image(assets.uiStuff.screenShine, 0, 0);
       imageMode(CORNER);
-      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+      //image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+      //image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
       imageMode(CENTER);
       image(assets.uiStuff.letterbox, 0, 0);
     }
     if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
 
     popMatrix();
+  }
+
+  if (key==versionchar) {
+    pushStyle();
+    fill(0, 70, 90, 1);
+    textSize(20);
+    textAlign(LEFT, TOP);
+    text(VERSION_NUM, 0, 0);
+    println("print please");
+    popStyle();
   }
 
   if (rec) {
@@ -193,18 +233,27 @@ void keyPressed() {
     if (keyCode==RIGHT) keys.arrowright = true;
   } else {
     if (key==triassicSelect) {
+      paused = false;
       currentScene = singlePlayer;
+              loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
     }
     if (key==jurassicSelect) {
       if (singlePlayer.canPlayLevel(SinglePlayer.JURASSIC)) {
+        paused = false;
         currentScene = singlePlayer;
+                loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
         singlePlayer.play(SinglePlayer.JURASSIC);
       }
     }
     if (key==cretaceousSelect) {
       if (singlePlayer.canPlayLevel(SinglePlayer.CRETACEOUS)) {
+        paused = false;
         currentScene = singlePlayer;
+                loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
         singlePlayer.play(SinglePlayer.CRETACEOUS);
       }
     }
@@ -233,6 +282,8 @@ void keyReleased() {
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 1;
       keys.playingMultiplayer = false;
+              loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
       paused = false;
     }
@@ -240,6 +291,8 @@ void keyReleased() {
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
+              loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
       paused = false;
     }
@@ -384,12 +437,13 @@ void loadSettingsFromTXT () {
       pss("jurassicSelect: 2") + "--beat Triassic to unlock (or cheat)", 
       pss("cretaceousSelect: 3") + "--beat Jurassic to unlock (or cheat)", 
       "", 
-      "1playerSelect: o", 
-      "2playerSelect: p", 
+      "singleplayerMode: o", 
+      "multiplayerMode: p", 
       "", 
       "sfxVolume: 100", 
       "musicVolume: 100", 
       "", 
+      pss("reduceFlashing: false") + "--turn down flickering and palette swapping, for photosensitive people", 
       "hideButtons: false", 
       "hideSidePanels: false", 
       pss("glowiness: " + assets.DEFAULT_GLOWINESS) + "--requires GPU power. 0 to disable", 
@@ -415,6 +469,9 @@ void loadSettingsFromTXT () {
       "earthIsWest: " + true, 
       "", 
       "roidsPerSecond: " + 3, 
+      "", 
+      pss("ufoSpawnRateLow: " + 30) + "--spawn a UFO at least this often (seconds)", 
+      pss("ufoSpawnRateHigh: " + 90) + "--spawn a UFO no more than this often (seconds)", 
       "", 
       "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
       pss("trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE) + "-- how far the trex \"sees\", in degrees", 
@@ -453,11 +510,14 @@ void loadSettingsFromTXT () {
   dipSwitches = settings.getChar("openSettings", 't');
   keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
 
+  currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+  currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
+
   triassicSelect = settings.getChar("triassicSelect", '1');
   jurassicSelect = settings.getChar("jurassicSelect", '2');
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
-  onePlayerSelect = settings.getChar("1playerSelect", 'o');
-  twoPlayerSelect = settings.getChar("2playerSelect", 'p');
+  onePlayerSelect = settings.getChar("singleplayerMode", 'o');
+  twoPlayerSelect = settings.getChar("multiplayerMode", 'p');
   assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
   int vsfx = settings.getInt("sfxVolume", 100);
   if (vsfx == 0) {

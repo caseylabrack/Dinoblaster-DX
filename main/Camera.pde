@@ -45,6 +45,8 @@ class ColorDecider implements updateable {
   IntList cs = new IntList();
 
   HashMap<String, String> hm = new HashMap<String, String>();
+  boolean dontPaletteSwap = false;
+  color white = #FFFFFF;
 
   ColorDecider() {
     hm.put("aliceblue", "#F0F8FF");
@@ -231,7 +233,7 @@ class ColorDecider implements updateable {
   }
 
   color getColor () {
-    return currentHue;
+    return dontPaletteSwap ? white : currentHue;
   }
 }
 

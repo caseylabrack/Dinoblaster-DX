@@ -9,7 +9,7 @@
 class Titlescreen extends Scene {
 
   StarsSystem starsSystem = new StarsSystem();
-  ColorDecider currentColor = new ColorDecider();
+  //ColorDecider currentColor = new ColorDecider();
 
   Titlescreen () {
     starsSystem.spawnSomeStars();

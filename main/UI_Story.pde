@@ -13,10 +13,13 @@ class InGameText {
   float extinctFlickeringStart;
   float extinctLastFlicker;
   boolean extinctDisplay = false;
+  boolean dontFlicker = false;
 
   PFont extinctFont;
   PFont tipFont;
   StringList tips = new StringList();
+
+  boolean extinctAnimationDone = false;
 
   InGameText (PFont extinctFont, PFont tipFont) {
     this.extinctFont = extinctFont;
@@ -50,6 +53,10 @@ class InGameText {
     }
   }
 
+  boolean doneFlashExtinct () {
+    return extinctAnimationDone;
+  }
+
   void update() {
     if (!extinct && !showingTip) return;
 
@@ -61,6 +68,7 @@ class InGameText {
         }
       } else {
         extinctDisplay = true;
+        extinctAnimationDone = true;
       }
     }
 
@@ -78,7 +86,11 @@ class InGameText {
       textFont(extinctFont);
       textAlign(CENTER, CENTER);
 
-      if (extinctDisplay) text("EXTINCT", 15, -15);
+      if (dontFlicker) {
+        text("EXTINCT", 15, -15);
+      } else {
+        if (extinctDisplay) text("EXTINCT", 15, -15);
+      }
       popStyle();
     }
 
@@ -94,32 +106,7 @@ class InGameText {
   void restart () {
     extinct = false;
     showingTip = false;
-  }
-}
-
-class GameOver {
-  float start;
-  final static float DURATION = 5e3;
-  boolean enabled = false;
-  boolean readyToRestart = false;
-
-  void restart () {
-    enabled = false;
-    readyToRestart = false;
-  }
-
-  void callGameover () {
-    enabled = true;
-    start = millis();
-  }
-
-  void update() {
-    if (!enabled) return;
-    if (millis() - start > DURATION) readyToRestart = true;
-  }
-
-  void render() {
-    if (!enabled) return;
+    extinctAnimationDone = false;
   }
 }
 
@@ -149,21 +136,40 @@ class UIStory {
     //image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
     //pop();
 
-    image(extralives>=1 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
-    image(extralives>=2 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
-    image(extralives>=3 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+    if (extralives >= 1) image(assets.uiStuff.extraDinoActive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    if (extralives >= 2) image(assets.uiStuff.extraDinoActive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    if (extralives >= 3) image(assets.uiStuff.extraDinoActive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+    //image(extralives>=1 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    //image(extralives>=2 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    //image(extralives>=3 ? assets.uiStuff.extraDinoActive : assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
 
     push();
     //tint(0,60,99,1);
     imageMode(CENTER);
     float p = ((float)score)/300.0;
     float totalpixels = HEIGHT_REFERENCE - 80;
-    float fillupto = p * totalpixels;
     float tickheight = 10;//assets.uiStuff.tick.height;
+    //for (int i = 0; i < totalpixels; i+=tickheight) {
+    //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+    //}
+    float fillupto = p * totalpixels;
     for (int i = 0; i < fillupto; i+=tickheight) {
       image(assets.uiStuff.tick, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
     }
+
     pop();
+
+    //push();
+    ////tint(0,60,99,1);
+    //imageMode(CENTER);
+    //p = ((float)score)/300.0;
+    //totalpixels = HEIGHT_REFERENCE - 80;
+    //fillupto = p * totalpixels;
+    //tickheight = 10;//assets.uiStuff.tick.height;
+    //for (int i = 0; i < fillupto; i+=tickheight) {
+    //  image(assets.uiStuff.tick, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+    //}
+    //pop();
 
     //image(screenShine, 0, 0);
     //image(letterbox, 0, 0);

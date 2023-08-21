@@ -6,7 +6,7 @@ static class utils {
 
     return degrees(atan2(to.y - from.y, to.x - from.x));
   }
-  
+
   static float angleOfOrigin(PVector a) {
     return degrees(atan2(a.y - 0, a.x - 0));
   }
@@ -74,7 +74,7 @@ static class utils {
 
     return true;
   }
-  
+
   static int sign (float x) {
     return x == 0 ? 0 : x > 0 ? 1 : -1;
   }
@@ -118,6 +118,10 @@ static class utils {
 
   static float easeInQuad (float t, float b, float c, float d) {
     return c*(t/=d)*t + b;
+  }
+
+  static float easeInQuad(float x) {
+    return x * x;
   }
 
   static float easeOutBounce(float x) {

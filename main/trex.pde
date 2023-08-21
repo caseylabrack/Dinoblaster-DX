@@ -56,6 +56,10 @@ class EggRescue extends Entity {
 
   PImage playerModel;
 
+  boolean display = true;
+  float flickerStart;
+  boolean dontFlicker = false;
+
   EggRescue (PImage[] eggFrames, int player, PImage playerModel) {
     this.eggFrames = eggFrames;
     model = eggFrames[0];
@@ -117,6 +121,10 @@ class EggRescue extends Entity {
       //if (clock - stateStart > TIMEOUT_DUR) {
       //  reset();
       //}
+      if (millis() - flickerStart > PlayerRespawn.FLICKER_RATE_FINAL) {
+        display = !display;
+        flickerStart = millis();
+      }
       break;
 
     case DONE:
@@ -127,7 +135,8 @@ class EggRescue extends Entity {
   void render () {
     if (!enabled) return;
     if (state == BURST) {
-      if (frameCount % 4 > 4 / 2) {
+      //if (frameCount % 4 > 4 / 2) {
+      if (dontFlicker) {
         pushStyle();
         tint(pcolor);
         pushTransforms();
@@ -135,13 +144,22 @@ class EggRescue extends Entity {
         image(model, 0, 0);
         popMatrix();
         popStyle();
+      } else {
+        if (display) {
+          pushStyle();
+          tint(pcolor);
+          pushTransforms();
+          image(playerModel, 0, 0);
+          image(model, 0, 0);
+          popMatrix();
+          popStyle();
+        }
       }
-    } else {
-      pushStyle();
-      tint(pcolor);
-      simpleRenderImage();
-      popStyle();
-    }
+    } 
+    pushStyle();
+    tint(pcolor);
+    simpleRenderImage();
+    popStyle();
   }
 
   void startAnimation (float angle, float clock) {
@@ -152,6 +170,7 @@ class EggRescue extends Entity {
     this.angle = angle;
     r = angle + 90;
     uprightR = r;
+    flickerStart = clock;
   }
 
   boolean isPassable () {

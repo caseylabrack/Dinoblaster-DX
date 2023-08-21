@@ -19,7 +19,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   final static float BOUNDING_CIRCLE_RADIUS = 30;
   final static float BOUNDING_ARC = 15;
   final static float BOUNDING_ARC_TARPIT_NUDGE = 6;
-  
+
   final static String P1_DEFAULT_COLOR = "#00ffff";
   final static String P2_DEFAULT_COLOR = "#ff57ff";
 
@@ -258,6 +258,7 @@ class PlayerIntro extends Entity {
   int state = DONE;
   color colour;
   boolean usecolor = false;
+  boolean dontFlicker = false;
 
   final static float FLICKER_RATE = 16;
 
@@ -277,11 +278,18 @@ class PlayerIntro extends Entity {
 
   public void render () {
     if (state==DONE) return;
-    if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) {
+    if (dontFlicker) {
       pushStyle();
       if (usecolor) tint(colour);
       simpleRenderImage();
       popStyle();
+    } else {
+      if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) {
+        pushStyle();
+        if (usecolor) tint(colour);
+        simpleRenderImage();
+        popStyle();
+      }
     }
   }
 }
@@ -290,7 +298,7 @@ class PlayerRespawn extends Entity {
   float spawningStart;
   final float spawningDuration = 1e3;
   boolean display = true;
-  float startY = -100;
+  float startY = -125;
   float endY = -Player.DIST_FROM_EARTH;
   final float RISING_DURATION = 5e3;
   final float FLICKER_RATE_START = 400;
@@ -301,6 +309,7 @@ class PlayerRespawn extends Entity {
   boolean canSpawn = false;
   color colour;
   boolean usecolor = false;
+  boolean dontFlicker = false;
 
   PlayerRespawn (PImage model) {
     this.model = model;
@@ -312,6 +321,7 @@ class PlayerRespawn extends Entity {
     spawningStart = millis();
     flickerStart = millis();
     display = true;
+    assets.playerStuff.respawnRise.play(true);
   }
 
   boolean update (float clock) {
@@ -320,7 +330,8 @@ class PlayerRespawn extends Entity {
 
     float progress = (millis() - spawningStart) / RISING_DURATION;
     if (progress < 1) {
-      float t = utils.easeOutCubicT(progress);
+      //float t = utils.easeOutCubicT(progress);
+      float t = utils.easeInQuad(progress);
       flickerRate = map(t, 0, 1, FLICKER_RATE_START, FLICKER_RATE_FINAL);
       y = map(t, 0, 1, startY, endY);
     } else {
@@ -338,11 +349,18 @@ class PlayerRespawn extends Entity {
 
   void render() {
     if (!enabled) return;
-    if (display) { 
+    if (dontFlicker) {
       pushStyle();
       if (usecolor) tint(colour);
       simpleRenderImage();
       popStyle();
+    } else {
+      if (display) { 
+        pushStyle();
+        if (usecolor) tint(colour);
+        simpleRenderImage();
+        popStyle();
+      }
     }
   }
 
@@ -456,7 +474,7 @@ class GibsSystem extends Entity {
     pushTransforms();
     pushStyle();
     stroke(0, 0, 100);
-    if(useColor) stroke(c);
+    if (useColor) stroke(c);
     strokeWeight(assets.STROKE_WIDTH);
 
     for (Gib g : gibs) {
