@@ -47,6 +47,10 @@ class ColorDecider implements updateable {
   HashMap<String, String> hm = new HashMap<String, String>();
   boolean dontPaletteSwap = false;
   color white = #FFFFFF;
+  int idx = 0;
+  int mode = 1;
+  final static int DEFAULT_SWAP_FREQUENCY = 15;
+  int swapFrequency = DEFAULT_SWAP_FREQUENCY;
 
   ColorDecider() {
     hm.put("aliceblue", "#F0F8FF");
@@ -201,6 +205,7 @@ class ColorDecider implements updateable {
   void parseUserColors(String[] userColors, String[] defaulthues) {
 
     cs.clear();
+    idx = 0;
 
     for (String s : userColors) {
       s = s.toLowerCase();
@@ -229,10 +234,19 @@ class ColorDecider implements updateable {
   }
 
   void update () {
-    currentHue = cs.get(utils.cycleRangeWithDelay(cs.size(), 10, frameCount));
+    //currentHue = cs.get(utils.cycleRangeWithDelay(cs.size(), 10, frameCount));
+    if (frameCount % swapFrequency == 0) {
+      idx = mode > 0 ? idx + 1 : idx - 1;
+      if (idx > cs.size()-1 || idx < 0) {
+        mode *= -1;      
+        idx = mode > 0 ? idx + 2 : idx - 2;
+      }
+    }
+    currentHue = cs.size() > 1 ? cs.get(idx) : cs.get(0);
   }
 
   color getColor () {
+    //return dontPaletteSwap ? white : currentHue;
     return dontPaletteSwap ? white : currentHue;
   }
 }

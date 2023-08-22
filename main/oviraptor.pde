@@ -13,12 +13,11 @@ class Titlescreen extends Scene {
 
   Titlescreen () {
     starsSystem.spawnSomeStars();
-    currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   }
 
   void update () {
     starsSystem.update(2);
-    currentColor.update();
+    //currentColor.update();
   }
 
   void renderPreGlow () {
@@ -142,7 +141,7 @@ class Oviraptor extends Scene {
 
     starsSystem.update(time.getTimeScale());
     earth.move(time.getTimeScale(), time.getClock());
-    currentColor.update();
+    //currentColor.update();
     roidManager.fireRoids(time.getClock(), earth.globalPos());
     roidManager.updateRoids(time.getTimeScale());
 

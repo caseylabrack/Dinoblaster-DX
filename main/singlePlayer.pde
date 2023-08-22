@@ -292,7 +292,7 @@ class SinglePlayer extends Scene {
 
     time.update();
     starsSystem.update(time.getTimeScale());
-    currentColor.update();
+    //currentColor.update();
     gameText.update();
 
     scoring = numPlayers == 2 ? (players[0].enabled && players[1].enabled) : players[0].enabled;

@@ -1,4 +1,5 @@
 // TO DO
+// singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
 // start getting some trailer shots
@@ -6,10 +7,11 @@
 // find the processing sd card in the basement
 // should settings load every time you play()?
 // scale vectors with pshape.scale
-// pulse colors?
 // Ptutorial
 // nongaussian blur glow
 // setting: fake ghosting
+// replace trex skull in tarpit with a different doodad
+// special note to people with disabilities: warning, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
 // test ways to avoid tessalation slowness
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
@@ -43,7 +45,7 @@ Minim minim;
 final static String SAVE_FILENAME = "dino.dat";
 final static String SETTINGS_FILENAME = "settings.txt";
 
-final String VERSION_NUM = "v.155";
+final String VERSION_NUM = "v.156";
 final char versionchar = '`';
 
 boolean paused = false;
@@ -60,7 +62,7 @@ SimpleTXTParser settings;
 JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide;
-char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect;
+char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect, secretVersionButton;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -99,6 +101,8 @@ void setup () {
   minim = new Minim(this);
 
   assets.load(this, picadeSettings);
+
+  key = 'a';
 
   loadSettingsFromTXT();
 
@@ -147,6 +151,7 @@ void draw () {
   //assets.glow.set("sigma", s);
 
   if (singlePlayer.requestsPause()) paused = true;
+  currentColor.update(); // always cycle colors, even when paused or whatever
 
   if (!paused) {
     background(0, 0, 0, 1);
@@ -198,13 +203,12 @@ void draw () {
     popMatrix();
   }
 
-  if (key==versionchar) {
+  if (key==secretVersionButton) {
     pushStyle();
-    fill(0, 70, 90, 1);
-    textSize(20);
+    fill(0, 0, 0, 1);
+    textSize(16);
     textAlign(LEFT, TOP);
     text(VERSION_NUM, 0, 0);
-    println("print please");
     popStyle();
   }
 
@@ -235,15 +239,15 @@ void keyPressed() {
     if (key==triassicSelect) {
       paused = false;
       currentScene = singlePlayer;
-              loadSettingsFromTXT();
-        singlePlayer.loadSettings(settings);
+      loadSettingsFromTXT();
+      singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
     }
     if (key==jurassicSelect) {
       if (singlePlayer.canPlayLevel(SinglePlayer.JURASSIC)) {
         paused = false;
         currentScene = singlePlayer;
-                loadSettingsFromTXT();
+        loadSettingsFromTXT();
         singlePlayer.loadSettings(settings);
         singlePlayer.play(SinglePlayer.JURASSIC);
       }
@@ -252,7 +256,7 @@ void keyPressed() {
       if (singlePlayer.canPlayLevel(SinglePlayer.CRETACEOUS)) {
         paused = false;
         currentScene = singlePlayer;
-                loadSettingsFromTXT();
+        loadSettingsFromTXT();
         singlePlayer.loadSettings(settings);
         singlePlayer.play(SinglePlayer.CRETACEOUS);
       }
@@ -282,8 +286,8 @@ void keyReleased() {
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 1;
       keys.playingMultiplayer = false;
-              loadSettingsFromTXT();
-        singlePlayer.loadSettings(settings);
+      loadSettingsFromTXT();
+      singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
       paused = false;
     }
@@ -291,8 +295,8 @@ void keyReleased() {
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
-              loadSettingsFromTXT();
-        singlePlayer.loadSettings(settings);
+      loadSettingsFromTXT();
+      singlePlayer.loadSettings(settings);
       singlePlayer.play(SinglePlayer.TRIASSIC);
       paused = false;
     }
@@ -486,7 +490,8 @@ void loadSettingsFromTXT () {
       "player1Color: \"#00ffff\"", 
       "player2Color: \"#ff57ff\"", 
       "", 
-      "colors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
+      pss("superColorsSwapEvery: " + ColorDecider.DEFAULT_SWAP_FREQUENCY) + "--swap palette every x number of frames", 
+      "superColors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
       "-- put colors inside double quotes, seperate with comma, don't linebreak", 
       "-- colors can be hexadecimal, like \"#FF69B4\"", 
       "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
@@ -510,8 +515,11 @@ void loadSettingsFromTXT () {
   dipSwitches = settings.getChar("openSettings", 't');
   keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
 
-  currentColor.parseUserColors(settings.getStrings("colors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
+  currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
+  currentColor.swapFrequency = settings.getInt("superColorsSwapEvery", ColorDecider.DEFAULT_SWAP_FREQUENCY);
+  
+  secretVersionButton = settings.getChar("version", '\0');
 
   triassicSelect = settings.getChar("triassicSelect", '1');
   jurassicSelect = settings.getChar("jurassicSelect", '2');
