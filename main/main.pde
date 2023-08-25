@@ -13,6 +13,7 @@
 // replace trex skull in tarpit with a different doodad
 // special note to people with disabilities: warning, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
 // test ways to avoid tessalation slowness
+// maybe logging
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
@@ -23,6 +24,8 @@
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
 // oviraptor mode (make its own release maybe)
+// bring back near-miss shake? or maybe sweat animation?
+// coding train license add: https://github.com/CodingTrain/Coding-Challenges/blob/main/LICENSE
 // blogposts: fan art; differences from last edition; in-depth on the dipswitches; spotlight on the picade
 
 import java.util.Collections;
@@ -82,7 +85,8 @@ Rectangle settingsButtonHitbox;
 
 void setup () {
   //size(500, 500, P2D);
-  size(1024, 768, P2D);
+  //size(1024, 768, P2D);
+  size(1920, 1080, P2D);
   //fullScreen(P2D);
   smooth(4);
   frameRate(30);
