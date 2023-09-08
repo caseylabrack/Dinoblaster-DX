@@ -85,8 +85,8 @@ Rectangle settingsButtonHitbox;
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
-  size(1920, 1080, P2D);
+  size(1024, 768, P2D);
+  //size(1920, 1080, P2D);
   //fullScreen(P2D);
   smooth(4);
   frameRate(30);
@@ -159,15 +159,36 @@ void draw () {
 
   if (!paused) {
     background(0, 0, 0, 1);
-    //fill(0,0,0,.1);
-    //rect(0,0,width,height);
+    //fill(0, 0, 0, .5);
+    //rect(0, 0, width, height);
     //if (currentScene.status==Scene.DONE) {
     //  currentScene.cleanup();
     //  currentScene = new SinglePlayer(chooseNextLevel());
     //}
     currentScene.update();
+    //int GLOW_SPREAD = 1;
+    //for (int i = -GLOW_SPREAD; i <= GLOW_SPREAD; i++) {
+    //  for (int j = -GLOW_SPREAD; j <= GLOW_SPREAD; j++) {
+    //    pushMatrix();
+    //    pushStyle();
+    //    translate(i, j);
+        currentScene.renderPreGlow();
+    //    popStyle();
+    //    popMatrix();
+    //  }
+    //}
+
+    //assets.applyGlowiness();
+    //if(mousePressed) {
+    for (int i=  0; i < 15; i++) {
+      filter(assets.blur);
+    }
+    //}
+    pushStyle();
+    //blendMode(ADD);
     currentScene.renderPreGlow();
-    assets.applyGlowiness();
+    popStyle();
+
     pushMatrix();
     translate(width/2, height/2);
     scale(SCALE);
@@ -522,7 +543,7 @@ void loadSettingsFromTXT () {
   currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
   currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   currentColor.swapFrequency = settings.getInt("superColorsSwapEvery", ColorDecider.DEFAULT_SWAP_FREQUENCY);
-  
+
   secretVersionButton = settings.getChar("version", '\0');
 
   triassicSelect = settings.getChar("triassicSelect", '1');

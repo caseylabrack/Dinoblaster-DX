@@ -132,7 +132,8 @@ class Earth extends Entity {
     pushStyle();
     strokeWeight(assets.STROKE_WIDTH);
     stroke(0, 0, 100, 1);
-    fill(0, 0, 0, 1);
+    noFill();
+    //fill(0, 0, 0, 1);
     beginShape();
 
     // tarpit surface

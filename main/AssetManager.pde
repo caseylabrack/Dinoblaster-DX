@@ -10,6 +10,8 @@ class AssetManager {
 
   PShader glow;
   boolean glowing = true;
+  
+  PShader blur;
 
   UFOstuff ufostuff = new UFOstuff();
   UIStuff uiStuff = new UIStuff();
@@ -35,6 +37,7 @@ class AssetManager {
     }
 
     glow = loadShader("glowiness.glsl");
+    blur = loadShader("blur.glsl");
 
     ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
     ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
