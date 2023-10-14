@@ -49,6 +49,9 @@ class AssetManager {
 
     ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
     sounds.add(ufostuff.ufoSound);
+    
+    ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
+    sounds.add(ufostuff.ufoSound2);
 
     uiStuff.extinctType = createFont("Hyperspace.otf", 150);
     //uiStuff.extinctSign = loadImage("gameover-lettering.png");
@@ -199,6 +202,7 @@ class AssetManager {
     PImage[] brontoAbductionFrames;
     PShape ufoSVG;
     SoundPlayable ufoSound;
+    SoundPlayable ufoSound2;
     PShape ufoFinalSingle;
     PShape ufoFinalDuo;
     PShape ufoFinalDuoZoom;

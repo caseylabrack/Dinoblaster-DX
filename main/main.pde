@@ -1,13 +1,14 @@
 // TO DO
+// more sound loop unpausing
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
 // start getting some trailer shots
-// more sound loop unpausing
 // find the processing sd card in the basement
 // should settings load every time you play()?
 // scale vectors with pshape.scale
 // Ptutorial
+// star streaks proportional to timescale (so when time slows on death, streaks disappear)
 // nongaussian blur glow
 // setting: fake ghosting
 // replace trex skull in tarpit with a different doodad
@@ -86,8 +87,8 @@ Rectangle settingsButtonHitbox;
 void setup () {
   //size(500, 500, P2D);
   //size(1024, 768, P2D);
-  size(1920, 1080, P2D);
-  //fullScreen(P2D);
+  //size(1920, 1080, P2D);
+  fullScreen(P2D);
   smooth(4);
   frameRate(30);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -157,37 +158,52 @@ void draw () {
   if (singlePlayer.requestsPause()) paused = true;
   currentColor.update(); // always cycle colors, even when paused or whatever
 
+  background(0, 0, 0, 1);
+
   if (!paused) {
-    background(0, 0, 0, 1);
     //fill(0,0,0,.1);
     //rect(0,0,width,height);
-    //if (currentScene.status==Scene.DONE) {
-    //  currentScene.cleanup();
-    //  currentScene = new SinglePlayer(chooseNextLevel());
-    //}
     currentScene.update();
-    currentScene.renderPreGlow();
-    assets.applyGlowiness();
+  } 
+
+  currentScene.renderPreGlow();
+
+  if (paused) { 
+    pushStyle();
     pushMatrix();
     translate(width/2, height/2);
     scale(SCALE);
-    if (!panelsHide) {
-      imageMode(CORNER);
-      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
-      imageMode(CENTER);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
-      push();
-      //imageMode(CENTER);
-      //float totalpixels = HEIGHT_REFERENCE - 80;
-      //float tickheight = 10;//assets.uiStuff.tick.height;
-      //for (int i = 0; i < totalpixels; i+=tickheight) {
-      //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
-      //}
-      pop();
+    if (frameCount % 30 < 20) { 
+      fill(0, 0, 100, 1);
+      textFont(assets.uiStuff.MOTD);
+      textAlign(CENTER, CENTER);
+      text("- paused - ", 0, HEIGHT_REF_HALF - 50);
     }
+    popMatrix();
+    popStyle();
+  }
+
+  assets.applyGlowiness();
+  pushMatrix();
+  translate(width/2, height/2);
+  scale(SCALE);
+  if (!panelsHide) {
+    imageMode(CORNER);
+    image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+    image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+    imageMode(CENTER);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+    push();
+    //imageMode(CENTER);
+    //float totalpixels = HEIGHT_REFERENCE - 80;
+    //float tickheight = 10;//assets.uiStuff.tick.height;
+    //for (int i = 0; i < totalpixels; i+=tickheight) {
+    //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+    //}
+    pop();
+
     popMatrix();
     currentScene.renderPostGlow();
     pushMatrix();
@@ -205,7 +221,7 @@ void draw () {
     if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
 
     popMatrix();
-  }
+  } 
 
   if (key==secretVersionButton) {
     pushStyle();
@@ -349,6 +365,7 @@ void mouseReleased () {
 
   if (spButton.inside(m)) {
     currentScene = singlePlayer;
+    paused = false;
     singlePlayer.numPlayers = 1;
     keys.playingMultiplayer = false;
     singlePlayer.play(SinglePlayer.TRIASSIC);
@@ -356,6 +373,7 @@ void mouseReleased () {
 
   if (mpButton.inside(m)) {
     currentScene = singlePlayer;
+    paused = false;
     singlePlayer.numPlayers = 2;
     keys.playingMultiplayer = true;
     singlePlayer.play(SinglePlayer.TRIASSIC);
@@ -425,10 +443,7 @@ void loadSettingsFromTXT () {
     output = createWriter(SETTINGS_FILENAME);
     String spacer = "     ";
     String settingsString = String.join("\n", 
-      "--Edit this text file to change your controls, set preferences, and even cheat.", 
-      "--(Restart DinoBlaster for changes to take effect.)", 
-      "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
-      "", 
+      "--edit this text file to change your controls, set preferences, and even cheat", 
       "", 
       "----CONTROLS----", 
       "player1LeftKey: a", 
@@ -451,7 +466,7 @@ void loadSettingsFromTXT () {
       "sfxVolume: 100", 
       "musicVolume: 100", 
       "", 
-      pss("reduceFlashing: false") + "--turn down flickering and palette swapping, for photosensitive people", 
+      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
       "hideButtons: false", 
       "hideSidePanels: false", 
       pss("glowiness: " + assets.DEFAULT_GLOWINESS) + "--requires GPU power. 0 to disable", 
@@ -522,7 +537,7 @@ void loadSettingsFromTXT () {
   currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
   currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   currentColor.swapFrequency = settings.getInt("superColorsSwapEvery", ColorDecider.DEFAULT_SWAP_FREQUENCY);
-  
+
   secretVersionButton = settings.getChar("version", '\0');
 
   triassicSelect = settings.getChar("triassicSelect", '1');
