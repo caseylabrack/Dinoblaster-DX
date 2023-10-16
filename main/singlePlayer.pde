@@ -110,7 +110,7 @@ class SinglePlayer extends Scene {
 
     finale = new SPFinale(assets.roidStuff.bigone, new PShape[]{assets.ufostuff.ufoFinalSingle, assets.ufostuff.ufoFinalDuo, assets.ufostuff.ufoFinalDuoZoom}, assets.playerStuff.brontoSVG);
 
-    music = assets.musicStuff.lvl1a;
+    //music = assets.musicStuff.lvl1a;
   }
 
   void loadSettings (SimpleTXTParser settings) {
@@ -231,8 +231,8 @@ class SinglePlayer extends Scene {
     starsSystem.setHyperspace(false);
     gameText.restart();
     finale.restart();
-    music.stop_();
-    music.rate(1);
+    //music.stop_();
+    //music.rate(1);
     starsSystem.restart();
 
     gameText.showRandomTip();
@@ -253,7 +253,7 @@ class SinglePlayer extends Scene {
     if (lvl == TRIASSIC) {
       if (settings.getBoolean("hypercubesEnabled", true)) hypercube.startCountDown();
       score = 0;
-      music = random(1) > .5 ? assets.musicStuff.lvl1a : assets.musicStuff.lvl1b;
+      //music = random(1) > .5 ? assets.musicStuff.lvl1a : assets.musicStuff.lvl1b;
     }
 
     if (lvl == JURASSIC) {
@@ -262,7 +262,7 @@ class SinglePlayer extends Scene {
         volcanoSystem.startCountdown();
       }
       score = 100;
-      music = random(1) > .5 ? assets.musicStuff.lvl2a : assets.musicStuff.lvl2b;
+      //music = random(1) > .5 ? assets.musicStuff.lvl2a : assets.musicStuff.lvl2b;
     }
 
     if (lvl == CRETACEOUS) {
@@ -279,7 +279,7 @@ class SinglePlayer extends Scene {
         println("init clock: " + time.getClock());
       }
       score = 200;
-      music = assets.musicStuff.lvl3;
+      //music = assets.musicStuff.lvl3;
     }
 
     //score = 295;
@@ -313,7 +313,7 @@ class SinglePlayer extends Scene {
 
       //scoring = true;
       lastScoreTick = time.getClock();
-      music.play(true);
+      //music.play(true);
     }
 
     //if (frameCount == 90) {
@@ -600,7 +600,7 @@ class SinglePlayer extends Scene {
           hypercube.goHyperspace();
           time.setHyperspace(true);
           starsSystem.setHyperspace(true);
-          music.rate(time.hyperspaceTimeScale);
+          //music.rate(time.hyperspaceTimeScale);
         }
       }
     }
@@ -610,7 +610,7 @@ class SinglePlayer extends Scene {
       time.setHyperspace(false);
       starsSystem.setHyperspace(false);
       hypercube.startCountDown();
-      music.rate(1);
+      //music.rate(1);
     }
 
     egg.update(time.getClock());
@@ -669,9 +669,9 @@ class SinglePlayer extends Scene {
         volcanoSystem.spawn();
         volcanoSystem.startCountdown();
       }
-      music.stop_();
-      music = random(1) > .5 ? assets.musicStuff.lvl2a : assets.musicStuff.lvl2b;
-      music.play(true);
+      //music.stop_();
+      //music = random(1) > .5 ? assets.musicStuff.lvl2a : assets.musicStuff.lvl2b;
+
     } else if (score == 200 && stage != CRETACEOUS) {
       stage = CRETACEOUS;
 
@@ -688,13 +688,13 @@ class SinglePlayer extends Scene {
       if (settings.getBoolean("trexEnabled", true)) {
         egg.startAnimation(angle, time.getClock());
       }
-      music.stop_();
-      music = assets.musicStuff.lvl3;
-      music.play(true);
+      //music.stop_();
+      //music = assets.musicStuff.lvl3;
+      //music.play(true);
     } else if (score == 300 && stage != FINALE) {
       stage = FINALE;
       scoring = false;
-      music.stop_();
+      //music.stop_();
 
       finale.state = trex.enabled && trex.state == Trex.WALKING ? SPFinale.WAITING_TREX : SPFinale.NO_TREX; // if trex is alive, prepare to hit it with the big one. otherwise just start big one.
       if (!(trex.enabled && trex.state == Trex.WALKING)) trexDeathAnimation.enabled = false;
@@ -739,7 +739,7 @@ class SinglePlayer extends Scene {
       earth.dr = settings.getFloat("earthRotationSpeed", Earth.DEFAULT_EARTH_ROTATION);
     }
     if (finale.state == SPFinale.EXPLODING && finale.lastState != SPFinale.EXPLODING) {
-      music.play(true);
+      //music.play(true);
       float angle = utils.angleOfRadians(earth.globalPos(), trex.globalPos());
       if (trex.enabled && trex.state == Trex.STUNNED) trexDeathAnimation.fire(time.getClock(), trex, new PVector(cos(angle) * (Earth.EARTH_RADIUS - 20), sin(angle) * (Earth.EARTH_RADIUS - 20)), 50, .99, .99, 50);
       trex.vanish();
@@ -826,7 +826,7 @@ class SinglePlayer extends Scene {
       if (extraLives <= 0) {
         gameText.goExtinct();
         assets.playerStuff.extinct.play(false);
-        music.stop_();
+        //music.stop_();
         if (score > highscore) {
           highscore = score;
           saveHighScore(score, SAVE_FILENAME);
@@ -845,7 +845,7 @@ class SinglePlayer extends Scene {
           //gameover
           gameText.goExtinct();
           assets.playerStuff.extinct.play(false);
-          music.stop_();
+          //music.stop_();
           if (score > highscore) {
             highscore = score;
             saveHighScore(score, SAVE_FILENAME);
@@ -875,7 +875,7 @@ class SinglePlayer extends Scene {
     if (!players[0].enabled && !players[1].enabled && !finale.won) {
       gameText.goExtinct();
       assets.playerStuff.extinct.play(false);
-      music.stop_();
+      //music.stop_();
     }
   }
 
@@ -893,7 +893,7 @@ class SinglePlayer extends Scene {
   }
 
   void cleanup() {
-    assets.stopAllMusic();
+    //assets.stopAllMusic();
     assets.stopAllSfx();
   }
 

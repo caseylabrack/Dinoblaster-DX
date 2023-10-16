@@ -278,7 +278,8 @@ class Time {
     elapsed = millis() - lastmillis;
     clock += elapsed * timeScale;
     lastmillis = millis();
-    delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
+        delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
+    //delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 4);
     lastNanos = frameRateLastNanos;
 
     if (state == DEATH) {

@@ -52,6 +52,8 @@ final static String SETTINGS_FILENAME = "settings.txt";
 final String VERSION_NUM = "v.156";
 final char versionchar = '`';
 
+boolean _async_loaded = false;
+
 boolean paused = false;
 Scene currentScene;
 
@@ -89,51 +91,66 @@ void setup () {
   //size(1024, 768, P2D);
   //size(1920, 1080, P2D);
   fullScreen(P2D);
-  smooth(4);
-  frameRate(30);
+  //smooth(4);
+  frameRate(20);
   //hint(DISABLE_OPTIMIZED_STROKE);
-  orientation(LANDSCAPE);
+  //orientation(LANDSCAPE);
 
   //pixelDensity(displayDensity());
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
-  surface.setTitle("DinoBlaster: 40th Anniversary Edition");
+  //surface.setTitle("DinoBlaster: 40th Anniversary Edition");
 
   colorMode(HSB, 360, 100, 100, 1);
   imageMode(CENTER);
 
   minim = new Minim(this);
 
-  assets.load(this, picadeSettings);
+  //assets.load(this, picadeSettings);
 
   key = 'a';
 
   loadSettingsFromTXT();
 
-  try {
-    picadeSettings = loadJSONObject("picade.txt");
-    noCursor();
-    //frameRate(30);
-  } 
-  catch(Exception e) {
-  }
+  //try {
+  //  picadeSettings = loadJSONObject("picade.txt");
+  //  noCursor();
+  //  //frameRate(30);
+  //} 
+  //catch(Exception e) {
+  //}
 
   spButton = new Rectangle(416, 162, 60, 60);
   mpButton = new Rectangle(416, 230, 60, 60);
   settingsButtonHitbox = new Rectangle(WIDTH_REF_HALF - 80, HEIGHT_REF_HALF - 80, 80, 80);
 
-  singlePlayer = new SinglePlayer(settings, assets);
-  singlePlayer.numPlayers = 1;
-  keys.playingMultiplayer = false;
-  singlePlayer.loadSettings(settings);
+  //singlePlayer = new SinglePlayer(settings, assets);
+  //singlePlayer.numPlayers = 1;
+  //keys.playingMultiplayer = false;
+  //singlePlayer.loadSettings(settings);
 
-  oviraptor = new Oviraptor(settings, assets);
+  //oviraptor = new Oviraptor(settings, assets);
 
   title = new Titlescreen();
 
   currentScene = title;
   //currentScene = oviraptor;
+
+  assets.uiStuff.titlescreenImage = loadImage("title.png");
+  assets.uiStuff.title40 = loadImage("title_fortieth.png");
+  assets.uiStuff.letterbox = loadImage("letterboxes.png");
+  assets.uiStuff.screenShine = loadImage("screenShine.png");
+  assets.uiStuff.progressBG = loadImage("progress-bg.png");
+  assets.uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
+  assets.uiStuff.tick = loadImage("progress-tick.png");
+  assets.uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
+  assets.uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
+  assets.uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
+  assets.uiStuff.buttons = loadImage("ui-buttons.png");
+
+  thread("loadAssetsAsync");
+  //loadAssetsAsync();
 }
 
 void touchStarted() {
@@ -141,6 +158,15 @@ void touchStarted() {
 }
 
 void draw () {
+
+  if (frameCount % 60 == 0) println(frameRate);
+
+  if (_async_loaded && singlePlayer == null) {
+    singlePlayer = new SinglePlayer(settings, assets);
+    singlePlayer.numPlayers = 1;
+    keys.playingMultiplayer = false;
+    singlePlayer.loadSettings(settings);
+  }
 
   //if(touches.length==0) {
   //  keys.setKey(Keys.LEFT, false);
@@ -155,8 +181,8 @@ void draw () {
   //assets.glow.set("blurSize", b);
   //assets.glow.set("sigma", s);
 
-  if (singlePlayer.requestsPause()) paused = true;
-  currentColor.update(); // always cycle colors, even when paused or whatever
+  //if (singlePlayer.requestsPause()) paused = true;
+  //currentColor.update(); // always cycle colors, even when paused or whatever
 
   background(0, 0, 0, 1);
 
@@ -183,7 +209,7 @@ void draw () {
     popStyle();
   }
 
-  assets.applyGlowiness();
+  //assets.applyGlowiness();
   pushMatrix();
   translate(width/2, height/2);
   scale(SCALE);
@@ -196,12 +222,12 @@ void draw () {
     image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
     image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
     push();
-    //imageMode(CENTER);
-    //float totalpixels = HEIGHT_REFERENCE - 80;
-    //float tickheight = 10;//assets.uiStuff.tick.height;
-    //for (int i = 0; i < totalpixels; i+=tickheight) {
-    //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
-    //}
+    imageMode(CENTER);
+    float totalpixels = HEIGHT_REFERENCE - 80;
+    float tickheight = 10;//assets.uiStuff.tick.height;
+    for (int i = 0; i < totalpixels; i+=tickheight) {
+      image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
+    }
     pop();
 
     popMatrix();
@@ -213,8 +239,8 @@ void draw () {
     if (!panelsHide) {
       image(assets.uiStuff.screenShine, 0, 0);
       imageMode(CORNER);
-      //image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      //image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
       imageMode(CENTER);
       image(assets.uiStuff.letterbox, 0, 0);
     }
@@ -355,6 +381,8 @@ void mouseMoved() {
 
 void mouseReleased () {
   currentScene.mouseUp();
+
+  if (_async_loaded) assets.roidStuff.hits[0].play();
 
   PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
@@ -591,4 +619,115 @@ void saveHighScore (int score, String filename) {
   nums[3] = (byte) ((score >>> 24) & 0xff);
 
   saveBytes(filename, nums);
+}
+
+void loadAssetsAsync () {
+  boolean raspi = false;
+  float ngainSFX = 0;
+  float ngainMusic = 0;
+  for (int i = 0; i < assets.roidStuff.hits.length; i++) {
+    assets.roidStuff.hits[i] = raspi ? new SoundM("_audio/roids/impact" + (i + 1) + ".wav", 0) : new SoundP("_audio/roids/impact" + (i + 1) + ".wav", this);
+    assets.sounds.add(assets.roidStuff.hits[i]);
+  }
+  assets.ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
+  assets.ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
+  assets.ufostuff.ufoSVG = loadShape("UFO.svg");
+  assets.ufostuff.ufoSVG.disableStyle();
+  assets.ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
+  assets.ufostuff.ufoFinalSingle.disableStyle();
+  assets.ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
+  assets.ufostuff.ufoFinalDuo.disableStyle();
+  assets.ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
+  assets.ufostuff.ufoFinalDuoZoom.disableStyle();
+
+  assets.ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", this);
+  assets.sounds.add(assets.ufostuff.ufoSound);
+
+  assets.ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", this);
+  assets.sounds.add(assets.ufostuff.ufoSound2);
+
+  assets.uiStuff.extinctType = createFont("Hyperspace.otf", 150);
+  //uiStuff.extinctSign = loadImage("gameover-lettering.png");
+  assets.uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
+
+  assets.volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
+  assets.volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", this);
+  assets.sounds.add(assets.volcanoStuff.rumble);
+
+  assets.roidStuff.explosionFrames = utils.sheetToSprites(loadImage("explosion.png"), 3, 1);
+  assets.roidStuff.roidFrames = utils.sheetToSprites(loadImage("roids.png"), 2, 2);
+  assets.roidStuff.trail = loadImage("roid-trail.png");
+  assets.roidStuff.bigone = loadImage("bigone.png");
+  assets.roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", this);
+  assets.sounds.add(assets.roidStuff.bigoneBlip);
+
+  assets.playerStuff.oviDethSVG = loadShape("ovi-death.svg");
+  assets.playerStuff.oviDethSVG.disableStyle();
+  assets.playerStuff.dethSVG = loadShape("bronto-death.svg");
+  assets.playerStuff.dethSVG.disableStyle();
+  assets.playerStuff.brontoSVG = loadShape("bronto-idle.svg");
+  assets.playerStuff.brontoSVG.disableStyle();
+  assets.playerStuff.brontoFrames = utils.sheetToSprites(loadImage("bronto-frames.png"), 3, 1);
+  assets.playerStuff.oviSVG = loadShape("ovi-idle.svg");
+  assets.playerStuff.oviSVG.disableStyle();
+  assets.playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
+  assets.playerStuff.eggWhole = loadImage("egg-whole.png");
+  for (int i=0; i<5; i++) {
+    assets.playerStuff.eggFrames[i] = loadImage("eggs_egg-crack" + i + ".png");
+  }
+  assets.playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", this);
+  assets.sounds.add(assets.playerStuff.extinct);
+  assets.playerStuff.spawn = raspi ? new SoundM("_audio/player/spawn.wav", ngainSFX) : new SoundP("_audio/player/spawn.wav", this);
+  assets.sounds.add(assets.playerStuff.spawn);
+  assets.playerStuff.step = raspi ? new SoundM("_audio/player/walking.wav", ngainSFX) : new SoundP("_audio/player/walking.wav", this);
+  assets.sounds.add(assets.playerStuff.step);
+  assets.playerStuff.tarStep = raspi ? new SoundM("_audio/player/walking-in-tar.wav", ngainSFX) : new SoundP("_audio/player/walking-in-tar.wav", this);
+  assets.sounds.add(assets.playerStuff.tarStep);
+  assets.playerStuff.littleDeath = raspi ? new SoundM("_audio/player/dino little death.wav", ngainSFX) : new SoundP("_audio/player/dino little death.wav", this);
+  assets.sounds.add(assets.playerStuff.littleDeath); 
+  assets.playerStuff.respawnRise = raspi ? new SoundM("_audio/player/revup2-loop-vol-adjusted.wav", ngainSFX) : new SoundP("_audio/player/revup2-loop-vol-adjusted.wav", this);
+  assets.sounds.add(assets.playerStuff.respawnRise); 
+
+  assets.trexStuff.trexIdle = loadImage("trex-idle.png");
+  assets.trexStuff.trexRun1 = loadImage("trex-run1.png");
+  assets.trexStuff.trexRun2 = loadImage("trex-run2.png");
+  assets.trexStuff.trexHead = loadImage("trex-head.png");
+  assets.trexStuff.eggCracked = loadImage("egg-cracked.png");
+  assets.trexStuff.eggBurst = loadImage("egg-burst.png");
+  assets.trexStuff.deth = loadShape("trexDeth.svg");
+  assets.trexStuff.eggHatch = raspi ? new SoundM("_audio/trex-and-egg/egg-hatch.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-hatch.wav", this);
+  assets.sounds.add(assets.trexStuff.eggHatch);
+  assets.trexStuff.eggWiggle = raspi ? new SoundM("_audio/trex-and-egg/egg-wiggle.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-wiggle.wav", this);
+  assets.sounds.add(assets.trexStuff.eggWiggle);
+  assets.trexStuff.rawr = raspi ? new SoundM("_audio/trex-and-egg/rawr.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/rawr.wav", this);
+  assets.sounds.add(assets.trexStuff.rawr);
+  assets.trexStuff.stomp = raspi ? new SoundM("_audio/trex-and-egg/trex-walking.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-walking.wav", this);
+  assets.sounds.add(assets.trexStuff.stomp);
+  assets.trexStuff.sinking = raspi ? new SoundM("_audio/trex-and-egg/trex-sinking-in-tar.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-sinking-in-tar.wav", this);
+  assets.sounds.add(assets.trexStuff.sinking);
+
+  assets.earthStuff.earth = loadImage("earth.png");
+  assets.earthStuff.earthV = loadShape("earth-v.svg");
+  assets.earthStuff.earth2 = loadImage("earth-east.png");
+  assets.earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
+  assets.earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
+  assets.earthStuff.mask = loadShader("pixelmask.glsl");
+  //assets.earthStuff.mask.set("mask", assets.earthStuff.tarpitMask);
+  assets.earthStuff.doodadBone = loadImage("doodad-bone.png");
+  assets.earthStuff.doodadFemur = loadImage("doodad-femur.png");
+  assets.earthStuff.doodadHead = loadImage("doodad-head.png");
+  assets.earthStuff.doodadRibs = loadImage("doodad-ribcage.png");
+
+  //musicStuff.lvl1a = raspi ? new SoundM("_music/lvl1.wav", ngainMusic) : new SoundP("_music/lvl1.wav", this);
+  //musicStuff.lvl1b = raspi ? new SoundM("_music/lvl1-jump.wav", ngainMusic) : new SoundP("_music/lvl1-jump.wav", this);
+  //musicStuff.lvl2a = raspi ? new SoundM("_music/lvl2.wav", ngainMusic) : new SoundP("_music/lvl2.wav", this);
+  //musicStuff.lvl2b = raspi ? new SoundM("_music/lvl2-seek.wav", ngainMusic) : new SoundP("_music/lvl2-seek.wav", this);
+  //musicStuff.lvl3 = raspi ? new SoundM("_music/lvl3.wav", ngainMusic) : new SoundP("_music/lvl3.wav", this);
+  //musics.add(musicStuff.lvl1a);
+  //musics.add(musicStuff.lvl1b);
+  //musics.add(musicStuff.lvl2a);
+  //musics.add(musicStuff.lvl2b);
+  //musics.add(musicStuff.lvl3);
+  _async_loaded = true;
+  println("loaded");
 }

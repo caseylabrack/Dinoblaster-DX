@@ -27,7 +27,7 @@ class Titlescreen extends Scene {
     imageMode(CENTER);
     image(assets.uiStuff.titlescreenImage, 0, 0);
     pushStyle();
-    tint(currentColor.getColor());
+    //tint(currentColor.getColor());
     image(assets.uiStuff.title40, 0, 0);
     popStyle();
     starsSystem.render(#FFFFFF);
