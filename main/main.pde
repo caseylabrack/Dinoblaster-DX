@@ -1,5 +1,5 @@
 // TO DO
-// more sound loop unpausing
+// slow sound effects during timescale events too
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
