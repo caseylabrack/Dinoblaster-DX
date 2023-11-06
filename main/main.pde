@@ -1,4 +1,5 @@
 // TO DO
+// shine over the glow
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
@@ -66,6 +67,8 @@ JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide;
 char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect, secretVersionButton;
+int effectStrength;
+float ghostingStrength;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -89,9 +92,9 @@ void setup () {
   //size(1920, 1080, P2D);
   //fullScreen(P2D);
   smooth(4);
-  frameRate(30);
+  frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
-  orientation(LANDSCAPE);
+  //orientation(LANDSCAPE);
 
   //pixelDensity(displayDensity());
 
@@ -158,36 +161,21 @@ void draw () {
   currentColor.update(); // always cycle colors, even when paused or whatever
 
   if (!paused) {
-    background(0, 0, 0, 1);
-    //fill(0, 0, 0, .5);
-    //rect(0, 0, width, height);
+    //background(0, 0, 0, 1);
+    fill(0, 0, 0, ghostingStrength);
+    rect(0, 0, width, height);
     //if (currentScene.status==Scene.DONE) {
     //  currentScene.cleanup();
     //  currentScene = new SinglePlayer(chooseNextLevel());
     //}
     currentScene.update();
-    //int GLOW_SPREAD = 1;
-    //for (int i = -GLOW_SPREAD; i <= GLOW_SPREAD; i++) {
-    //  for (int j = -GLOW_SPREAD; j <= GLOW_SPREAD; j++) {
-    //    pushMatrix();
-    //    pushStyle();
-    //    translate(i, j);
-        currentScene.renderPreGlow();
-    //    popStyle();
-    //    popMatrix();
-    //  }
-    //}
+    currentScene.renderPreGlow();
 
-    //assets.applyGlowiness();
-    //if(mousePressed) {
-    for (int i=  0; i < 15; i++) {
+    for (int i = 0; i < effectStrength; i++) {
       filter(assets.blur);
     }
-    //}
-    pushStyle();
-    //blendMode(ADD);
-    currentScene.renderPreGlow();
-    popStyle();
+
+    //filter(assets.glow);
 
     pushMatrix();
     translate(width/2, height/2);
@@ -250,6 +238,8 @@ void draw () {
     circle(width - 20, 20, 20);
     popStyle();
   }
+  
+  //if(frameCount % 60 == 0) println(frameRate);
 }
 
 void keyPressed() {
@@ -475,7 +465,10 @@ void loadSettingsFromTXT () {
       pss("reduceFlashing: false") + "--turn down flickering and palette swapping, for photosensitive people", 
       "hideButtons: false", 
       "hideSidePanels: false", 
-      pss("glowiness: " + assets.DEFAULT_GLOWINESS) + "--requires GPU power. 0 to disable", 
+      "", 
+      pss("effect: \"glow\": \"glow\"" ) + "--can be \"glow\" or \"sparkle\"", 
+      pss("effectStrength: " + assets.DEFAULT_GLOWINESS) + "--0-100. requires GPU power. 0 to disable.", 
+      pss("afterGlow: " + assets.DEFAULT_GHOSTING) + "--0-100. if using glow, how much persistent ghosting?", 
       "", 
       "", 
       "----GAMEPLAY----", 
@@ -543,6 +536,9 @@ void loadSettingsFromTXT () {
   currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
   currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   currentColor.swapFrequency = settings.getInt("superColorsSwapEvery", ColorDecider.DEFAULT_SWAP_FREQUENCY);
+
+  effectStrength = int(map(constrain(float(settings.getInt("effectStrength", assets.DEFAULT_GLOWINESS)), 0, 100), 0, 100, 0, AssetManager.MAX_GLOW));
+  ghostingStrength = map(constrain(settings.getInt("afterGlow", AssetManager.DEFAULT_GHOSTING), 0, 100), 0, 100, 1, AssetManager.MAX_GHOST);
 
   secretVersionButton = settings.getChar("version", '\0');
 

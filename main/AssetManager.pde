@@ -4,6 +4,9 @@ class AssetManager {
   final int DEFAULT_GLOWINESS = 30;
   final static int DEFAULT_EARTH = 1;
   final static int DEFAULT_EARTH_SIDE = 1;
+  final static int DEFAULT_GHOSTING = 50;
+  final static int MAX_GLOW = 60;
+  final static float MAX_GHOST = .1;
 
   final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods","rawr","hold on to your butts","remember to take breaks"};
   final String[] DEFAULT_COLORS = new String[]{"#ff3800", "#ffff00", "#00ff00", "#00ffff", "#ff57ff"};
