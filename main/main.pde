@@ -86,6 +86,8 @@ Rectangle spButton; // single player button
 Rectangle mpButton; // multiplayer button
 Rectangle settingsButtonHitbox;
 
+PGraphics buff;
+
 void setup () {
   //size(500, 500, P2D);
   size(1024, 768, P2D);
@@ -99,6 +101,8 @@ void setup () {
   //pixelDensity(displayDensity());
 
   SCALE = (float)height / HEIGHT_REFERENCE;
+
+  buff = createGraphics(width/8, height/8, P2D);
 
   surface.setTitle("DinoBlaster: 40th Anniversary Edition");
 
@@ -162,7 +166,7 @@ void draw () {
 
   if (!paused) {
     //background(0, 0, 0, 1);
-    fill(0, 0, 0, ghostingStrength);
+    fill(0, 0, 0, .75);
     rect(0, 0, width, height);
     //if (currentScene.status==Scene.DONE) {
     //  currentScene.cleanup();
@@ -170,12 +174,32 @@ void draw () {
     //}
     currentScene.update();
     currentScene.renderPreGlow();
+    loadPixels();
 
-    for (int i = 0; i < effectStrength; i++) {
-      filter(assets.blur);
-    }
+    buff.beginDraw();
+    buff.background(0);
+    PImage screen = get();
+    //buff.image(screen, 0, 0);
+    //buff.copy(screen, 0, 0, width, height, 0, 0, buff.width, buff.height);
+    buff.image(screen, 0, 0, buff.width, buff.height);
+    for (int i = 0; i < 2; i++) buff.filter(assets.blur);
+    buff.endDraw();
 
-    //filter(assets.glow);
+    //if (mousePressed) {
+      pushStyle();
+      pushMatrix();
+      blendMode(ADD);
+      image(buff, width/2, height/2, width, height);
+      popStyle();
+      popMatrix();
+    //}
+
+    //for (int i = 0; i < effectStrength; i++) {
+    //  filter(assets.blur);
+    //}
+
+    //currentScene.renderPostGlow();
+    //currentScene.renderPreGlow();
 
     pushMatrix();
     translate(width/2, height/2);
@@ -238,8 +262,8 @@ void draw () {
     circle(width - 20, 20, 20);
     popStyle();
   }
-  
-  //if(frameCount % 60 == 0) println(frameRate);
+
+  if (frameCount % 60 == 0) println(frameRate);
 }
 
 void keyPressed() {

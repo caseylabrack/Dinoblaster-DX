@@ -49,8 +49,8 @@ void main(void) {
   vec4 sum = (1.0 * col0 + 2.0 * col1 + 1.0 * col2 +
               2.0 * col3 + 4.0 * col4 + 2.0 * col5 +
               1.0 * col6 + 2.0 * col7 + 1.0 * col8) / 16.0;
-  //gl_FragColor = vec4(sum.rgb, 1.0) * vertColor;
-  gl_FragColor = max(vec4(sum.rgb, 1.0) * vertColor, col4);
+  gl_FragColor = vec4(sum.rgb, 1.0) * vertColor;
+  //gl_FragColor = max(vec4(sum.rgb, 1.0) * vertColor, col4);
   //gl_FragColor = mix(vec4(sum.rgb, 1.0) * vertColor, col4, .25);
   //gl_FragColor = mix(max(vec4(sum.rgb, 1.0) * vertColor, col4), col4, .5);
 }
