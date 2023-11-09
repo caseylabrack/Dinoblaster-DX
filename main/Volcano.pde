@@ -54,8 +54,8 @@ class VolcanoSystem {
       if (valid) {
         v.x = cos(radians(angle)) * Volcano.eruptStartDist;
         v.y = sin(radians(angle)) * Volcano.eruptStartDist;
-        v.r = angle + 90;
-        v.angle = angle;
+        v.r = 0 + 90;//angle + 90;
+        v.angle = 0;//angle;
         v.erupt();
 
         spawnSpacing = random(spawnMin, spawnMax);
@@ -144,9 +144,22 @@ class Volcano extends Entity implements obstacle {
   PImage[] frames;
   PImage flareFrame;
 
+  PGraphics mask;
+
+  PGraphics canvas;
+
   Volcano (PImage[] frames, PImage splosionFrame) {
     this.frames = frames;
     this.flareFrame = splosionFrame;
+
+    mask = createGraphics(width, height, P2D);
+    mask.beginDraw();
+    mask.translate(width/2, height/2);
+    mask.imageMode(CENTER);
+    mask.image(assets.earthStuff.earth2, 0, 0);
+    mask.endDraw();
+
+    canvas = createGraphics(width, height, P2D);
   }
 
   void erupt () {
@@ -243,27 +256,56 @@ class Volcano extends Entity implements obstacle {
   }
 
   void render (color funkyColor) {
+    println("ang: " + angle);
+    assets.testmask.set("mask", mask);
     if (!enabled) return;
+    shader(assets.testmask);
 
-    pushTransforms();
+    canvas.beginDraw();
+    canvas.imageMode(CENTER);
+    canvas.clear();
+    canvas.pushMatrix();
+    canvas.translate(width/2, height/2);
+    PVector pos = globalPos();
+    canvas.scale(facing, 1);
+    canvas.translate(pos.x * facing, pos.y);
+    canvas.rotate(radians(globalRote() * facing));
+    canvas.scale(scale);
+
     if (state != EXTINCT) {
-      image(frames[1], 0, 0); // shell
-      pushStyle();
-      tint(funkyColor);
-      image(frames[2], 0, 0); // lava
-      popStyle();
+      canvas.image(frames[1], 0, 0); // shell
+      canvas.pushStyle();
+      canvas.tint(funkyColor);
+      canvas.image(frames[2], 0, 0); // lava
+      canvas.popStyle();
     } else {
-      image(frames[3], 0, 0); // husk
+      canvas.image(frames[3], 0, 0); // husk
     }
+    canvas.popMatrix();
+    canvas.endDraw();
 
-    if (state==ACTIVE) {
-      pushStyle();
-      tint(funkyColor);      
-      rotate(radians(flareAngle));
-      translate(0, -75);
-      image(flareFrame, 0, 0);
-      popStyle();
-    }
-    popMatrix();
+    image(canvas, 0, 0);
+    resetShader();
+
+    //pushTransforms();
+    //if (state != EXTINCT) {
+    //  image(frames[1], 0, 0); // shell
+    //  pushStyle();
+    //  tint(funkyColor);
+    //  image(frames[2], 0, 0); // lava
+    //  popStyle();
+    //} else {
+    //  image(frames[3], 0, 0); // husk
+    //}
+
+    //if (state==ACTIVE) {
+    //  pushStyle();
+    //  tint(funkyColor);      
+    //  rotate(radians(flareAngle));
+    //  translate(0, -75);
+    //  image(flareFrame, 0, 0);
+    //  popStyle();
+    //}
+    //popMatrix();
   }
 }

@@ -27,6 +27,8 @@ class AssetManager {
   ArrayList<SoundPlayable> sounds = new ArrayList<SoundPlayable>(); 
   ArrayList<SoundPlayable> musics = new ArrayList<SoundPlayable>(); 
 
+  PShader testmask;
+
   void load (PApplet context, JSONObject picadeSettings) {
 
     float ngainSFX = 0;
@@ -38,6 +40,7 @@ class AssetManager {
       ngainMusic = picadeSettings.getFloat("negativeGainMusic", 30);
       raspi = true;
     }
+    testmask = loadShader("pixelmask.glsl");
 
     glow = loadShader("glowiness.glsl");
     blur = loadShader("blur.glsl");
@@ -131,7 +134,8 @@ class AssetManager {
     trexStuff.sinking = raspi ? new SoundM("_audio/trex-and-egg/trex-sinking-in-tar.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-sinking-in-tar.wav", context);
     sounds.add(trexStuff.sinking);
 
-    earthStuff.earth = loadImage("earth.png");
+    //earthStuff.earth = loadImage("earth.png");
+    earthStuff.earth = loadImage("earth-east-clear.png");
     earthStuff.earthV = loadShape("earth-v.svg");
     earthStuff.earth2 = loadImage("earth-east.png");
     earthStuff.earthPangea1 = loadImage("earth-pangea1.png");

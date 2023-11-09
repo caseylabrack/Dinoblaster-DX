@@ -1,5 +1,7 @@
 // TO DO
-// shine over the glow
+// try out new buffer technique on glow shader
+// get volcano masked properly
+// shine over the glow?
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
@@ -236,7 +238,7 @@ void draw () {
     popStyle();
   }
 
-  if (frameCount % 60 == 0) println(frameRate);
+  //if (frameCount % 60 == 0) println(frameRate);
 }
 
 void keyPressed() {
