@@ -105,20 +105,30 @@ class RoidManager {
     if (!enabled) return;
     for (Roid r : roids) {
       if (!r.enabled) continue;
-      pushMatrix();
-      imageMode(CENTER);
-      translate(r.x, r.y);
+      sb.pushMatrix();
+        sb.imageMode(CENTER);
+        sb.translate(r.x, r.y);
+  
+        sb.pushMatrix();
+        sb.rotate(radians(r.angle+90));
+        sb.image(assets.roidStuff.trail, 0, -25);
+        sb.popMatrix();
+  
+        sb.rotate(r.r);
+        sb.image(assets.roidStuff.roidFrames[r.modelIndex], 0, 0);
+      sb.popMatrix();
+      //pushMatrix();
+      //imageMode(CENTER);
+      //translate(r.x, r.y);
 
-      pushMatrix();
-      rotate(radians(r.angle+90));
-      image(assets.roidStuff.trail, 0, -25);
-      popMatrix();
+      //pushMatrix();
+      //rotate(radians(r.angle+90));
+      //sb.image(assets.roidStuff.trail, 0, -25);
+      //popMatrix();
 
-      rotate(r.r);
-      //image(r.model, 0, 0);
-      image(assets.roidStuff.roidFrames[r.modelIndex], 0, 0);
-      //image(model, 0, 0, model.width/2, model.height/2);
-      popMatrix();
+      //rotate(r.r);
+      //sb.image(assets.roidStuff.roidFrames[r.modelIndex], 0, 0);
+      //popMatrix();
     }
   }
 

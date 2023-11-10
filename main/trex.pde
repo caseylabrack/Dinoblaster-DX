@@ -140,8 +140,8 @@ class EggRescue extends Entity {
         pushStyle();
         tint(pcolor);
         pushTransforms();
-        image(playerModel, 0, 0);
-        image(model, 0, 0);
+        sb.image(playerModel, 0, 0);
+        sb.image(model, 0, 0);
         popMatrix();
         popStyle();
       } else {
@@ -149,8 +149,8 @@ class EggRescue extends Entity {
           pushStyle();
           tint(pcolor);
           pushTransforms();
-          image(playerModel, 0, 0);
-          image(model, 0, 0);
+          sb.image(playerModel, 0, 0);
+          sb.image(model, 0, 0);
           popMatrix();
           popStyle();
         }

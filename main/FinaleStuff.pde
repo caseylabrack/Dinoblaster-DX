@@ -338,13 +338,13 @@ class SPFinale {
         pushMatrix();
         translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
         rotate(radians(explosionRing.get(int(i)).z));
-        image(assets.roidStuff.explosionFrames[0], 0, 0);
+        sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
         popMatrix();
 
         pushMatrix();
         translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
         rotate(radians(explosionRing2.get(int(i)).z));
-        image(assets.roidStuff.explosionFrames[0], 0, 0);
+        sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
         popMatrix();
       }
       popMatrix();
@@ -359,13 +359,13 @@ class SPFinale {
         pushMatrix();
         translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
         rotate(radians(explosionRing.get(int(i)).z));
-        image(assets.roidStuff.explosionFrames[0], 0, 0);
+        sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
         popMatrix();
 
         pushMatrix();
         translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
         rotate(radians(explosionRing2.get(int(i)).z));
-        image(assets.roidStuff.explosionFrames[0], 0, 0);
+        sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
         popMatrix();
       }
       popMatrix();

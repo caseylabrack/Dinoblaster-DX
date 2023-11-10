@@ -168,7 +168,7 @@ class Earth extends Entity {
     pushMatrix();
     translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
     rotate(radians(tarpitArcStart + 200));
-    image(assets.earthStuff.doodadHead, 0, 0);
+    sb.image(assets.earthStuff.doodadHead, 0, 0);
     popMatrix();
 
     ang = tarpitArcStart + 15;
@@ -176,7 +176,7 @@ class Earth extends Entity {
     pushMatrix();
     translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
     rotate(radians(tarpitArcStart + 90));
-    image(assets.earthStuff.doodadRibs, 0, 0);
+    sb.image(assets.earthStuff.doodadRibs, 0, 0);
     popMatrix();
 
     ang = tarpitArcStart + 10;
@@ -184,7 +184,7 @@ class Earth extends Entity {
     pushMatrix();
     translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
     rotate(radians(tarpitArcStart + 180));
-    image(assets.earthStuff.doodadBone, 0, 0);
+    sb.image(assets.earthStuff.doodadBone, 0, 0);
     popMatrix();
 
     popMatrix();

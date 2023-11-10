@@ -25,10 +25,10 @@ class Titlescreen extends Scene {
     translate(width / 2, height / 2);
     scale(SCALE);
     imageMode(CENTER);
-    image(assets.uiStuff.titlescreenImage, 0, 0);
+    sb.image(assets.uiStuff.titlescreenImage, 0, 0);
     pushStyle();
     tint(currentColor.getColor());
-    image(assets.uiStuff.title40, 0, 0);
+    sb.image(assets.uiStuff.title40, 0, 0);
     popStyle();
     starsSystem.render(#FFFFFF);
     popMatrix();

@@ -88,6 +88,9 @@ Rectangle spButton; // single player button
 Rectangle mpButton; // multiplayer button
 Rectangle settingsButtonHitbox;
 
+PGraphics sb; // screen buffer
+PGraphics blurPass; // apply the blur shader to this to achieve glow
+
 void setup () {
   //size(500, 500, P2D);
   //size(1024, 768, P2D);
@@ -99,6 +102,16 @@ void setup () {
   //orientation(LANDSCAPE);
 
   //pixelDensity(displayDensity());
+
+  sb = createGraphics(width, height, P2D);
+  sb.smooth(4);
+  sb.beginDraw();
+  sb.colorMode(HSB, 360, 100, 100, 1);
+  sb.imageMode(CENTER);
+  sb.endDraw();
+  
+  blurPass = createGraphics(width/8, height/8, P2D);
+  blurPass.noSmooth();
 
   SCALE = (float)height / HEIGHT_REFERENCE;
 
@@ -138,6 +151,7 @@ void setup () {
 
   currentScene = title;
   //currentScene = oviraptor;
+  background(0,0,0,1);
 }
 
 void touchStarted() {
@@ -153,66 +167,68 @@ void draw () {
   //  keys.setKey(touches[0].x < width/2 ? Keys.LEFT : Keys.RIGHT, true);
   //}
 
-  //int b = int(map(mouseX, 0, width, 0, 25));
-  //float s = map(mouseY, 0, height, 0, 20);
-
-  //assets.glow.set("blurSize", b);
-  //assets.glow.set("sigma", s);
-
   if (singlePlayer.requestsPause()) paused = true;
   currentColor.update(); // always cycle colors, even when paused or whatever
 
   if (!paused) {
-    //background(0, 0, 0, 1);
-    for (int i = 0; i < 20; i++) {
-      filter(assets.blur);
-    }
-    fill(0, 0, 0, .3);
-    rect(0, 0, width, height);
+    background(0, 0, 0, 1);
+    //fill(0, 0, 0, .95);
+    //rect(0, 0, width, height);
     //if (currentScene.status==Scene.DONE) {
     //  currentScene.cleanup();
     //  currentScene = new SinglePlayer(chooseNextLevel());
     //}
     currentScene.update();
+    sb.beginDraw();
+    sb.background(0);
+    //sb.fill(0, 0, 0, .5);
+    //sb.rect(0, 0, width, height);
     currentScene.renderPreGlow();
-
+    sb.endDraw();
+    
     pushMatrix();
-    translate(width/2, height/2);
-    scale(SCALE);
-    if (!panelsHide) {
       imageMode(CORNER);
-      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
-      imageMode(CENTER);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
-      push();
-      //imageMode(CENTER);
-      //float totalpixels = HEIGHT_REFERENCE - 80;
-      //float tickheight = 10;//assets.uiStuff.tick.height;
-      //for (int i = 0; i < totalpixels; i+=tickheight) {
-      //  image(assets.uiStuff.tickInActive, -WIDTH_REF_HALF + 64, -HEIGHT_REF_HALF + 40 + i);
-      //}
-      pop();
-    }
+      image(sb, 0, 0, width, height);
     popMatrix();
-    currentScene.renderPostGlow();
+    
+    blurPass.beginDraw();
+    blurPass.background(0);
+    blurPass.image(sb,0,0,blurPass.width,blurPass.height);
+    for(int i = 0; i < 10; i++) blurPass.filter(assets.blur);
+    blurPass.endDraw();
+    
     pushMatrix();
-    translate(width/2, height/2);
-    scale(SCALE);
-    imageMode(CENTER);
-    if (!panelsHide) {
-      image(assets.uiStuff.screenShine, 0, 0);
       imageMode(CORNER);
-      //image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      //image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
-      imageMode(CENTER);
-      image(assets.uiStuff.letterbox, 0, 0);
-    }
-    if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
-
+      blendMode(ADD);
+      image(blurPass, 0, 0, width, height);
     popMatrix();
+
+    //pushMatrix();
+    //translate(width/2, height/2);
+    //scale(SCALE);
+    //if (!panelsHide) {
+    //  imageMode(CORNER);
+    //  image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+    //  image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+    //  imageMode(CENTER);
+    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+    //}
+    //popMatrix();
+    //currentScene.renderPostGlow();
+    //pushMatrix();
+    //translate(width/2, height/2);
+    //scale(SCALE);
+    //imageMode(CENTER);
+    //if (!panelsHide) {
+    //  image(assets.uiStuff.screenShine, 0, 0);
+    //  imageMode(CORNER);
+    //  imageMode(CENTER);
+    //  image(assets.uiStuff.letterbox, 0, 0);
+    //}
+    //if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
+    //popMatrix();
   }
 
   if (key==secretVersionButton) {

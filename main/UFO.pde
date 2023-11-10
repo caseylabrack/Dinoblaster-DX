@@ -256,11 +256,11 @@ class UFO extends Entity {
 
     // UFO itself
     if (state <= APPROACHING) {
-      pushStyle();
-      noFill();
-      stroke(funkyColor);
+      sb.pushStyle();
+      sb.noFill();
+      sb.stroke(funkyColor);
       simpleRenderImageVector();
-      popStyle();
+      sb.popStyle();
     }
   }
 
@@ -270,31 +270,31 @@ class UFO extends Entity {
 
     // tractor beam
     if (beamEnabled) {
-      pushStyle();
+      sb.pushStyle();
       //strokeWeight(assets.STROKE_WIDTH);
-      strokeWeight(1);      
-      stroke(funkyColor);
-      line(x, y, x + cos(radians(beamAngle + beamWidth)) * 250, y + sin(radians(beamAngle + beamWidth)) * 250);
-      line(x, y, x + cos(radians(beamAngle - beamWidth)) * 250, y + sin(radians(beamAngle - beamWidth)) * 250);
-      popStyle();
+      sb.strokeWeight(1);      
+      sb.stroke(funkyColor);
+      sb.line(x, y, x + cos(radians(beamAngle + beamWidth)) * 250, y + sin(radians(beamAngle + beamWidth)) * 250);
+      sb.line(x, y, x + cos(radians(beamAngle - beamWidth)) * 250, y + sin(radians(beamAngle - beamWidth)) * 250);
+      sb.popStyle();
     }
 
     // ABDUCTION
     if (state == SNATCHING) {
-      pushStyle();
-      noFill();
-      stroke(abducteeColor);
+      sb.pushStyle();
+      sb.noFill();
+      sb.stroke(abducteeColor);
       abductedGuy.simpleRenderImageVector();
-      popStyle();
+      sb.popStyle();
     }
 
     // UFO itself
     if (state > APPROACHING) {
-      pushStyle();
-      stroke(funkyColor);
-      fill(0, 0, 0, 1);
+      sb.pushStyle();
+      sb.stroke(funkyColor);
+      sb.fill(0, 0, 0, 1);
       simpleRenderImageVector();
-      popStyle();
+      sb.popStyle();
     }
   }
 }

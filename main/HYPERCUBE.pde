@@ -184,8 +184,8 @@ class Hypercube extends Entity {
     pg.popMatrix();
     pg.endDraw();
     pushTransforms();
-    image(pg, 0, 0);
-    popMatrix();
+    sb.image(pg, 0, 0);
+    sb.popMatrix();
   }
 
   void connect(int offset, int i, int j, PVector[] points) {

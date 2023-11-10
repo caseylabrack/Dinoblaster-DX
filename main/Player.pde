@@ -482,7 +482,7 @@ class GibsSystem extends Entity {
       line(g.p1.x, g.p1.y, g.p2.x, g.p2.y);
     }
     popStyle();
-    popMatrix();
+    sb.popMatrix();
   }
 
   class Gib {
