@@ -74,6 +74,7 @@ class UFO extends Entity {
     enabled = false;
     state = IDLE;
     beamEnabled = false;
+    assets.ufostuff.ufoSound.stop_();
     //abductedGuy.identity();
   }
 
@@ -234,6 +235,7 @@ class UFO extends Entity {
       } else {
         state = IDLE;
         spawnCountDown = random(spawnTimeLow, spawnTimeHigh) * 1000;
+        assets.ufostuff.ufoSound.stop_();
       }
       break;
 
@@ -341,6 +343,7 @@ class UFORespawn extends Entity {
     x = cos(angle) * UFO.initialDist;
     y = sin(angle) * UFO.initialDist;
     returningDino.modelVector = dino.getModel();
+    assets.ufostuff.ufoSound2.play(true);
   }
 
   boolean inTheProcessOfReturningPlayer () {
@@ -405,6 +408,7 @@ class UFORespawn extends Entity {
       } else {
         state = DONE;
         enabled = false;
+        assets.ufostuff.ufoSound2.stop_();
       }
       break;
 
@@ -452,5 +456,6 @@ class UFORespawn extends Entity {
 
   void restart () {
     enabled = false;
+    assets.ufostuff.ufoSound2.stop_();
   }
 }

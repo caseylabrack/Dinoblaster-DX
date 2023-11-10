@@ -2,15 +2,16 @@
 // try out new buffer technique on glow shader
 // get volcano masked properly
 // shine over the glow?
+// slow sound effects during timescale events too
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
 // start getting some trailer shots
-// more sound loop unpausing
 // find the processing sd card in the basement
 // should settings load every time you play()?
 // scale vectors with pshape.scale
 // Ptutorial
+// star streaks proportional to timescale (so when time slows on death, streaks disappear)
 // nongaussian blur glow
 // setting: fake ghosting
 // replace trex skull in tarpit with a different doodad
@@ -94,8 +95,8 @@ PGraphics blurPass; // apply the blur shader to this to achieve glow
 void setup () {
   //size(500, 500, P2D);
   //size(1024, 768, P2D);
-  //size(1920, 1080, P2D);
-  fullScreen(P2D);
+  size(1920, 1080, P2D);
+  //fullScreen(P2D);
   smooth(4);
   frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -170,6 +171,23 @@ void draw () {
   if (singlePlayer.requestsPause()) paused = true;
   currentColor.update(); // always cycle colors, even when paused or whatever
 
+  background(0, 0, 0, 1);
+
+  if (paused) { 
+    pushStyle();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    if (frameCount % 30 < 20) { 
+      fill(0, 0, 100, 1);
+      textFont(assets.uiStuff.MOTD);
+      textAlign(CENTER, CENTER);
+      text("- paused - ", 0, HEIGHT_REF_HALF - 50);
+    }
+    popMatrix();
+    popStyle();
+  }
+
   if (!paused) {
     background(0, 0, 0, 1);
     //fill(0, 0, 0, .95);
@@ -196,40 +214,43 @@ void draw () {
     blurPass.image(sb,0,0,blurPass.width,blurPass.height);
     for(int i = 0; i < 10; i++) blurPass.filter(assets.blur);
     blurPass.endDraw();
-    
+
     pushMatrix();
+      pushStyle();
       imageMode(CORNER);
       blendMode(ADD);
       image(blurPass, 0, 0, width, height);
+      popStyle();
     popMatrix();
 
-    //pushMatrix();
-    //translate(width/2, height/2);
-    //scale(SCALE);
-    //if (!panelsHide) {
-    //  imageMode(CORNER);
-    //  image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-    //  image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
-    //  imageMode(CENTER);
-    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
-    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
-    //  image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
-    //}
-    //popMatrix();
-    //currentScene.renderPostGlow();
-    //pushMatrix();
-    //translate(width/2, height/2);
-    //scale(SCALE);
-    //imageMode(CENTER);
-    //if (!panelsHide) {
-    //  image(assets.uiStuff.screenShine, 0, 0);
-    //  imageMode(CORNER);
-    //  imageMode(CENTER);
-    //  image(assets.uiStuff.letterbox, 0, 0);
-    //}
-    //if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
-    //popMatrix();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    if (!panelsHide) {
+      imageMode(CORNER);
+      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+      imageMode(CENTER);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+    }
+    popMatrix();
+    currentScene.renderPostGlow();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    imageMode(CENTER);
+    if (!panelsHide) {
+      image(assets.uiStuff.screenShine, 0, 0);
+      imageMode(CORNER);
+      imageMode(CENTER);
+      image(assets.uiStuff.letterbox, 0, 0);
+    }
+    if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
+    popMatrix();
   }
+
 
   if (key==secretVersionButton) {
     pushStyle();
@@ -375,6 +396,7 @@ void mouseReleased () {
 
   if (spButton.inside(m)) {
     currentScene = singlePlayer;
+    paused = false;
     singlePlayer.numPlayers = 1;
     keys.playingMultiplayer = false;
     singlePlayer.play(SinglePlayer.TRIASSIC);
@@ -382,6 +404,7 @@ void mouseReleased () {
 
   if (mpButton.inside(m)) {
     currentScene = singlePlayer;
+    paused = false;
     singlePlayer.numPlayers = 2;
     keys.playingMultiplayer = true;
     singlePlayer.play(SinglePlayer.TRIASSIC);
@@ -451,10 +474,7 @@ void loadSettingsFromTXT () {
     output = createWriter(SETTINGS_FILENAME);
     String spacer = "     ";
     String settingsString = String.join("\n", 
-      "--Edit this text file to change your controls, set preferences, and even cheat.", 
-      "--(Restart DinoBlaster for changes to take effect.)", 
-      "--Learn more about these settings here: https://github.com/caseylabrack/Dinoblaster-DX", 
-      "", 
+      "--edit this text file to change your controls, set preferences, and even cheat", 
       "", 
       "----CONTROLS----", 
       "player1LeftKey: a", 
@@ -477,7 +497,7 @@ void loadSettingsFromTXT () {
       "sfxVolume: 100", 
       "musicVolume: 100", 
       "", 
-      pss("reduceFlashing: false") + "--turn down flickering and palette swapping, for photosensitive people", 
+      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
       "hideButtons: false", 
       "hideSidePanels: false", 
       "", 

@@ -63,7 +63,7 @@ class SinglePlayer extends Scene {
     }
 
     for (int i = 0; i < 2; i++) {   
-      players[i] = new Player((i==0 ? assets.playerStuff.brontoSVG : assets.playerStuff.oviSVG), (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), assets.playerStuff.step, assets.playerStuff.tarStep);
+      players[i] = new Player((i==0 ? assets.playerStuff.brontoSVG : assets.playerStuff.oviSVG), (i==0 ? assets.playerStuff.brontoFrames : assets.playerStuff.oviFrames), (i==0 ? assets.playerStuff.step : assets.playerStuff.step2), assets.playerStuff.tarStep);
       players[i].id = i;
     }
 
@@ -203,6 +203,9 @@ class SinglePlayer extends Scene {
 
   void play (int lvl) {
     println("level: " + lvl + "  highscore: " + highscore);
+
+    assets.stopAllMusic();
+    assets.stopAllSfx();
 
     // restart stuff
     for (Player p : players) {
