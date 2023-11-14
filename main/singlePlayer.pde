@@ -148,10 +148,10 @@ class SinglePlayer extends Scene {
     playerRespawns[1].colour = p2color;
     rescueEggs[1].pcolor = p2color;
     playerDeathAnimations[1].c = p2color;
-    
-    for(PlayerIntro p : playerIntros) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
-    for(EggRescue e: rescueEggs) e.dontFlicker = settings.getBoolean("reduceFlashing", false);
-    for(PlayerRespawn p: playerRespawns) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
+
+    for (PlayerIntro p : playerIntros) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
+    for (EggRescue e : rescueEggs) e.dontFlicker = settings.getBoolean("reduceFlashing", false);
+    for (PlayerRespawn p : playerRespawns) p.dontFlicker = settings.getBoolean("reduceFlashing", false);
 
     startingExtraLives = settings.getInt("extraLives", 0);
 
@@ -179,7 +179,7 @@ class SinglePlayer extends Scene {
 
     ui.hideButtons = settings.getBoolean("hideButtons", false);
     ui.hideAll = settings.getBoolean("hideSidePanels", false);
-    
+
     gameText.setTips(settings.getStrings("tips", assets.DEFAULT_TIPS));
     gameText.dontFlicker = settings.getBoolean("reduceFlashing", false);
   }
@@ -767,28 +767,33 @@ class SinglePlayer extends Scene {
 
     // world-space
     sb.pushMatrix();
-      sb.translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
-      sb.scale(SCALE);
-      sb.rotate(radians(-camera.globalRote()));
-      
-      ufo.render(currentColor.getColor());
-      ufoRespawn.render(currentColor.getColor());
-      volcanoSystem.render(currentColor.getColor());
-      finale.render(earth); // behind earth
-      for (PlayerRespawn p : playerRespawns) p.render();
-      earth.render(time.getClock());
-      for (Player player : players) player.render();
-      for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
-      for (EggRescue r : rescueEggs) r.render();
-      roidManager.renderRoids();
-      roidManager.renderSplodes();
-      hypercube.render(time.getTimeScale(), currentColor.getColor());
-      egg.render(currentColor.getColor());
-      trex.render();
-      for (GibsSystem p : playerDeathAnimations) p.render();
-      trexDeathAnimation.render();
-      gameText.render(currentColor.getColor());
-      finale.renderBigOne(); // in front of earth
+    sb.translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
+    sb.scale(SCALE);
+    sb.rotate(radians(-camera.globalRote()));
+    sb.imageMode(CENTER);
+    sb.clip(width/2, height/2, height, height);
+
+    ufo.render(currentColor.getColor());
+    ufoRespawn.render(currentColor.getColor());
+    volcanoSystem.render(currentColor.getColor());
+    finale.render(earth); // behind earth
+    for (PlayerRespawn p : playerRespawns) p.render();
+    earth.render(time.getClock());
+    for (Player player : players) player.render();
+    for (PlayerIntro playerIntro : playerIntros) playerIntro.render();
+    for (EggRescue r : rescueEggs) r.render();
+    roidManager.renderRoids();
+    roidManager.renderSplodes();
+    egg.render(currentColor.getColor());
+    trex.render();
+    trexDeathAnimation.render();
+    sb.noClip();
+
+    for (GibsSystem p : playerDeathAnimations) p.render();
+    gameText.render(currentColor.getColor());
+    hypercube.render(time.getTimeScale(), currentColor.getColor());
+    finale.renderBigOne(); // in front of earth
+
     sb.popMatrix();
 
     // matte (screen space)
@@ -803,19 +808,12 @@ class SinglePlayer extends Scene {
 
     // world space again
     sb.pushMatrix();
-      sb.translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
-      sb.scale(SCALE);
-      sb.rotate(radians(-camera.globalRote()));
-      ufo.renderFront(currentColor.getColor());
-      starsSystem.render(currentColor.getColor());
+    sb.translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
+    sb.scale(SCALE);
+    sb.rotate(radians(-camera.globalRote()));
+    ufo.renderFront(currentColor.getColor());
+    starsSystem.render(currentColor.getColor());
     sb.popMatrix();
-    //pushMatrix(); 
-    //  translate(-camera.globalPos().x + width/2, -camera.globalPos().y + height/2);
-    //  scale(SCALE);
-    //  rotate(radians(-camera.globalRote()));
-    //  ufo.renderFront(currentColor.getColor());
-    //  starsSystem.render(currentColor.getColor());
-    //popMatrix();
   }
 
   void renderPostGlow () {

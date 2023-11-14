@@ -1,12 +1,10 @@
 // TO DO
-// new settings for glow
+// try again with splodes having longer deadliness time
 // slow sound effects during timescale events too
-// singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
 // start getting some trailer shots
 // oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
-// find the processing sd card in the basement
 // should settings load every time you play()?
 // scale vectors with pshape.scale
 // Ptutorial
@@ -67,10 +65,8 @@ AssetManager assets = new AssetManager();
 SimpleTXTParser settings;
 JSONObject picadeSettings;
 
-boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide;
+boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide, glow;
 char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect, secretVersionButton;
-int effectStrength;
-float ghostingStrength;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -94,8 +90,8 @@ PGraphics blurPass; // apply the blur shader to this to achieve glow
 void setup () {
   //size(500, 500, P2D);
   //size(1024, 768, P2D);
-  size(1920, 1080, P2D);
-  //fullScreen(P2D);
+  //size(1920, 1080, P2D);
+  fullScreen(P2D);
   smooth(4);
   frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -109,7 +105,7 @@ void setup () {
   sb.colorMode(HSB, 360, 100, 100, 1);
   sb.imageMode(CENTER);
   sb.endDraw();
-  
+
   blurPass = createGraphics(width/8, height/8, P2D);
   blurPass.noSmooth();
 
@@ -151,7 +147,7 @@ void setup () {
 
   currentScene = title;
   //currentScene = oviraptor;
-  background(0,0,0,1);
+  background(0, 0, 0, 1);
 }
 
 void touchStarted() {
@@ -172,20 +168,7 @@ void draw () {
 
   background(0, 0, 0, 1);
 
-  //if (paused) { 
-  //  pushStyle();
-  //  pushMatrix();
-  //  translate(width/2, height/2);
-  //  scale(SCALE);
-  //  if (frameCount % 30 < 20) { 
-  //    fill(0, 0, 100, 1);
-  //    textFont(assets.uiStuff.MOTD);
-  //    textAlign(CENTER, CENTER);
-  //    text("- paused - ", 0, HEIGHT_REF_HALF - 50);
-  //  }
-  //  popMatrix();
-  //  popStyle();
-  //}
+
 
   if (!paused) {
     background(0, 0, 0, 1);
@@ -196,59 +179,78 @@ void draw () {
     //  currentScene = new SinglePlayer(chooseNextLevel());
     //}
     currentScene.update();
-    sb.beginDraw();
-    sb.background(0);
-    //sb.fill(0, 0, 0, .5);
-    //sb.rect(0, 0, width, height);
-    currentScene.renderPreGlow();
-    sb.endDraw();
-    
-    pushMatrix();
-      imageMode(CORNER);
-      image(sb, 0, 0, width, height);
-    popMatrix();
-    
+  }
+  sb.beginDraw();
+  sb.background(0);
+  //sb.fill(0, 0, 0, .5);
+  //sb.rect(0, 0, width, height);
+  currentScene.renderPreGlow();
+  sb.endDraw();
+
+  pushMatrix();
+  imageMode(CORNER);
+  image(sb, 0, 0, width, height);
+  popMatrix();
+
+  if (glow) {
     blurPass.beginDraw();
     blurPass.background(0);
-    blurPass.image(sb,0,0,blurPass.width,blurPass.height);
-    for(int i = 0; i < 10; i++) blurPass.filter(assets.blur);
+    blurPass.image(sb, 0, 0, blurPass.width, blurPass.height);
+    for (int i = 0; i < 8; i++) blurPass.filter(assets.blur);
     blurPass.endDraw();
 
     pushMatrix();
-      pushStyle();
-      imageMode(CORNER);
-      blendMode(ADD);
-      image(blurPass, 0, 0, width, height);
-      popStyle();
-    popMatrix();
-
-    pushMatrix();
-    translate(width/2, height/2);
-    scale(SCALE);
-    if (!panelsHide) {
-      imageMode(CORNER);
-      image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
-      image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
-      imageMode(CENTER);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
-      image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
-    }
-    popMatrix();
-    currentScene.renderPostGlow();
-    pushMatrix();
-    translate(width/2, height/2);
-    scale(SCALE);
-    imageMode(CENTER);
-    if (!panelsHide) {
-      image(assets.uiStuff.screenShine, 0, 0);
-      imageMode(CORNER);
-      imageMode(CENTER);
-      image(assets.uiStuff.letterbox, 0, 0);
-    }
-    if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
+    pushStyle();
+    imageMode(CORNER);
+    blendMode(ADD);
+    image(blurPass, 0, 0, width, height);
+    //image(blurPass, 0, 0, width, height);
+    popStyle();
     popMatrix();
   }
+
+  if (paused) { 
+    pushStyle();
+    pushMatrix();
+    translate(width/2, height/2);
+    scale(SCALE);
+    if (frameCount % 30 < 20) { 
+      fill(0, 0, 100, 1);
+      textFont(assets.uiStuff.MOTD);
+      textAlign(CENTER, CENTER);
+      text("- paused - ", 0, HEIGHT_REF_HALF - 50);
+    }
+    popMatrix();
+    popStyle();
+  }
+
+  pushMatrix();
+  translate(width/2, height/2);
+  scale(SCALE);
+  if (!panelsHide) {
+    imageMode(CORNER);
+    image(assets.uiStuff.progressBG, -WIDTH_REF_HALF + 40, -HEIGHT_REF_HALF);
+    image(assets.uiStuff.extraDinosBG, WIDTH_REF_HALF - 100, -HEIGHT_REF_HALF);
+    imageMode(CENTER);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75);
+    image(assets.uiStuff.extraDinoInactive, WIDTH_REF_HALF - 65, -HEIGHT_REF_HALF + 75 + 75 + 75);
+  }
+  popMatrix();
+  currentScene.renderPostGlow();
+  pushMatrix();
+  translate(width/2, height/2);
+  scale(SCALE);
+  imageMode(CENTER);
+  if (!panelsHide) {
+    image(assets.uiStuff.screenShine, 0, 0);
+    imageMode(CORNER);
+    imageMode(CENTER);
+    image(assets.uiStuff.letterbox, 0, 0);
+  }
+  if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
+  popMatrix();
+
 
 
   if (key==secretVersionButton) {
@@ -496,13 +498,11 @@ void loadSettingsFromTXT () {
       "sfxVolume: 100", 
       "musicVolume: 100", 
       "", 
-      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
       "hideButtons: false", 
       "hideSidePanels: false", 
       "", 
-      pss("effect: \"glow\": \"glow\"" ) + "--can be \"glow\" or \"sparkle\"", 
-      pss("effectStrength: " + assets.DEFAULT_GLOWINESS) + "--0-100. requires GPU power. 0 to disable.", 
-      pss("afterGlow: " + assets.DEFAULT_GHOSTING) + "--0-100. if using glow, how much persistent ghosting?", 
+      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
+      pss("glowiness: true") + "-- uses GPU power", 
       "", 
       "", 
       "----GAMEPLAY----", 
@@ -559,6 +559,7 @@ void loadSettingsFromTXT () {
   cretaceousUnlocked = settings.getBoolean("CretaceousUnlockedCheat", false);
   buttonsHide = settings.getBoolean("hideButtons", false); 
   panelsHide = settings.getBoolean("hideSidePanels", false);
+  glow = settings.getBoolean("glowiness", true);
   leftkey1p = settings.getChar("player1LeftKey", 'a');
   rightkey1p = settings.getChar("player1RightKey", 'd');
   leftkey2p = settings.getChar("player2LeftKey", 'k');
@@ -571,9 +572,6 @@ void loadSettingsFromTXT () {
   currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
   currentColor.swapFrequency = settings.getInt("superColorsSwapEvery", ColorDecider.DEFAULT_SWAP_FREQUENCY);
 
-  effectStrength = int(map(constrain(float(settings.getInt("effectStrength", assets.DEFAULT_GLOWINESS)), 0, 100), 0, 100, 0, AssetManager.MAX_GLOW));
-  ghostingStrength = map(constrain(settings.getInt("afterGlow", AssetManager.DEFAULT_GHOSTING), 0, 100), 0, 100, 1, AssetManager.MAX_GHOST);
-
   secretVersionButton = settings.getChar("version", '\0');
 
   triassicSelect = settings.getChar("triassicSelect", '1');
@@ -581,7 +579,7 @@ void loadSettingsFromTXT () {
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
   onePlayerSelect = settings.getChar("singleplayerMode", 'o');
   twoPlayerSelect = settings.getChar("multiplayerMode", 'p');
-  assets.setGlowiness(settings.getInt("glowiness", assets.DEFAULT_GLOWINESS));
+
   int vsfx = settings.getInt("sfxVolume", 100);
   if (vsfx == 0) {
     assets.muteSFX(true);

@@ -11,9 +11,6 @@ class AssetManager {
   final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods","rawr","hold on to your butts","remember to take breaks"};
   final String[] DEFAULT_COLORS = new String[]{"#ff3800", "#ffff00", "#00ff00", "#00ffff", "#ff57ff"};
 
-  PShader glow;
-  boolean glowing = true;
-  
   PShader blur;
 
   UFOstuff ufostuff = new UFOstuff();
@@ -42,7 +39,6 @@ class AssetManager {
     }
     testmask = loadShader("pixelmask.glsl");
 
-    glow = loadShader("glowiness.glsl");
     blur = loadShader("blur.glsl");
 
     ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
@@ -162,24 +158,6 @@ class AssetManager {
     musics.add(musicStuff.lvl2a);
     musics.add(musicStuff.lvl2b);
     musics.add(musicStuff.lvl3);
-  }
-
-  void setGlowiness (int glowiness) {
-    if (glowiness != 0) {
-      assets.glow.set("blurSize", glowiness);
-      assets.glow.set("sigma", (float)glowiness/2);
-      glowing = true;
-    } else {
-      glowing = false;
-    }
-  }
-
-  void applyGlowiness () {
-    if (!glowing) return;
-    glow.set("horizontalPass", 0);
-    filter(glow);
-    glow.set("horizontalPass", 1);
-    filter(glow);
   }
 
   void volumeSFX (float v) {

@@ -22,7 +22,7 @@ class Hypercube extends Entity {
   float hyperspaceDuration = DEFAULT_HYPERSPACE_DURATION;
 
   final static float DEFAULT_MIN_SPAWN = 10e3;
-  final static float DEFAULT_MAX_SPAWN = 80e3;
+  final static float DEFAULT_MAX_SPAWN = 70e3;
   float minSpawn = DEFAULT_MIN_SPAWN;
   float maxSpawn = DEFAULT_MAX_SPAWN;
   float spawnCountDown;
