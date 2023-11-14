@@ -136,56 +136,56 @@ class StarsSystem {
   void render(color currentColor) {
 
     if (isZooming) {
-      pushMatrix();
-      pushStyle();
-      stroke(0, 0, 100, 1);
+      sb.pushMatrix();
+      sb.pushStyle();
+      sb.stroke(0, 0, 100, 1);
       //stroke(currentColor.getColor());
-      strokeWeight(assets.STROKE_WIDTH + 1.5);
+      sb.strokeWeight(assets.STROKE_WIDTH + 1.5);
       for (ZoomStar z : zoomStars) {
         float x1 = (z.x / z.z) * HEIGHT_REF_HALF;
         //float x1 = map(z.x/z.z, 0, 1, 0, HEIGHT_REF_HALF);
         float y1 = map(z.y/z.z, 0, 1, 0, HEIGHT_REF_HALF);
         float x2 = map(z.x/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
         float y2 = map(z.y/z.pz, 0, 1, 0, HEIGHT_REF_HALF);
-        line(x1, y1, x2, y2);
+        sb.line(x1, y1, x2, y2);
       }
-      popStyle();
-      popMatrix();
+      sb.popStyle();
+      sb.popMatrix();
     } else {
       float x = cos(a) * r;
       float y = sin(a) * r;
       float x2 = cos(a-(starSpeed * 6)) * r;
       float y2 = sin(a-(starSpeed * 6)) * r;
 
-      pushStyle();
+      sb.pushStyle();
       for (int i = 0; i < stars.length; i++) {
-        pushMatrix();
+        sb.pushMatrix();
         if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
           if (state == HYPERSPACE) {
-            strokeWeight(4);
-            fill(currentColor);
+            sb.strokeWeight(4);
+            sb.fill(currentColor);
             if (i % 6 == 0) {
-              stroke(currentColor);
-              line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
+              sb.stroke(currentColor);
+              sb.line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
             } else {
-              noStroke();
-              translate(stars[i].x - x, stars[i].y - y);
-              rotate(PI/4);
-              square(0, 0, 4);
+              sb.noStroke();
+              sb.translate(stars[i].x - x, stars[i].y - y);
+              sb.rotate(PI/4);
+              sb.square(0, 0, 4);
             }
           } else {
-            noStroke();
-            fill(0, 0, 100);
-            translate(stars[i].x - x, stars[i].y - y);
-            rotate(PI/4);
-            square(0, 0, 3);
+            sb.noStroke();
+            sb.fill(0, 0, 100, 1);
+            sb.translate(stars[i].x - x, stars[i].y - y);
+            sb.rotate(PI/4);
+            sb.square(0, 0, 3);
           }
         }
-        popMatrix();
+        sb.popMatrix();
       }
-      popStyle();
+      sb.popStyle();
     }
-  }
+  } //render
 
   void restart() {
     zoomStars.clear();

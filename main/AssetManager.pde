@@ -139,8 +139,8 @@ class AssetManager {
     trexStuff.sinking = raspi ? new SoundM("_audio/trex-and-egg/trex-sinking-in-tar.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-sinking-in-tar.wav", context);
     sounds.add(trexStuff.sinking);
 
-    //earthStuff.earth = loadImage("earth.png");
-    earthStuff.earth = loadImage("earth-east-clear.png");
+    earthStuff.earth = loadImage("earth.png");
+    //earthStuff.earth = loadImage("earth-east-clear.png");
     earthStuff.earthV = loadShape("earth-v.svg");
     earthStuff.earth2 = loadImage("earth-east.png");
     earthStuff.earthPangea1 = loadImage("earth-pangea1.png");

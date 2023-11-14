@@ -144,22 +144,9 @@ class Volcano extends Entity implements obstacle {
   PImage[] frames;
   PImage flareFrame;
 
-  //PGraphics mask;
-
-  //PGraphics canvas;
-
   Volcano (PImage[] frames, PImage splosionFrame) {
     this.frames = frames;
     this.flareFrame = splosionFrame;
-
-    //mask = createGraphics(width, height, P2D);
-    //mask.beginDraw();
-    //mask.translate(width/2, height/2);
-    //mask.imageMode(CENTER);
-    //mask.image(assets.earthStuff.earth2, 0, 0);
-    //mask.endDraw();
-
-    //canvas = createGraphics(width, height, P2D);
   }
 
   void erupt () {
@@ -256,55 +243,26 @@ class Volcano extends Entity implements obstacle {
   }
 
   void render (color funkyColor) {
-    //println("ang: " + angle);
-    //assets.testmask.set("mask", mask);
     if (!enabled) return;
-    //shader(assets.testmask);
-
-    //canvas.beginDraw();
-    //canvas.imageMode(CENTER);
-    //canvas.clear();
-    //canvas.pushMatrix();
-    //canvas.translate(width/2, height/2);
-    //PVector pos = globalPos();
-    //canvas.scale(facing, 1);
-    //canvas.translate(pos.x * facing, pos.y);
-    //canvas.rotate(radians(globalRote() * facing));
-    //canvas.scale(scale);
-
-    //if (state != EXTINCT) {
-    //  canvas.image(frames[1], 0, 0); // shell
-    //  canvas.pushStyle();
-    //  canvas.tint(funkyColor);
-    //  canvas.image(frames[2], 0, 0); // lava
-    //  canvas.popStyle();
-    //} else {
-    //  canvas.image(frames[3], 0, 0); // husk
-    //}
-    //canvas.popMatrix();
-    //canvas.endDraw();
-
-    //image(canvas, 0, 0);
-    //resetShader();
 
     pushTransforms();
     if (state != EXTINCT) {
       sb.image(frames[1], 0, 0); // shell
-      pushStyle();
-      tint(funkyColor);
+      sb.pushStyle();
+      sb.tint(funkyColor);
       sb.image(frames[2], 0, 0); // lava
-      popStyle();
+      sb.popStyle();
     } else {
       sb.image(frames[3], 0, 0); // husk
     }
 
     if (state==ACTIVE) {
-      pushStyle();
-      tint(funkyColor);      
-      rotate(radians(flareAngle));
-      translate(0, -75);
+      sb.pushStyle();
+      sb.tint(funkyColor);      
+      sb.rotate(radians(flareAngle));
+      sb.translate(0, -75);
       sb.image(flareFrame, 0, 0);
-      popStyle();
+      sb.popStyle();
     }
     sb.popMatrix();
   }

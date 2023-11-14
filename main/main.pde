@@ -1,12 +1,11 @@
 // TO DO
-// try out new buffer technique on glow shader
-// get volcano masked properly
-// shine over the glow?
+// new settings for glow
 // slow sound effects during timescale events too
 // singleplayer request reload
 // title screen animation (ripple distortion on titlescreen)
 // title screen sound or music
 // start getting some trailer shots
+// oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
 // find the processing sd card in the basement
 // should settings load every time you play()?
 // scale vectors with pshape.scale
@@ -173,20 +172,20 @@ void draw () {
 
   background(0, 0, 0, 1);
 
-  if (paused) { 
-    pushStyle();
-    pushMatrix();
-    translate(width/2, height/2);
-    scale(SCALE);
-    if (frameCount % 30 < 20) { 
-      fill(0, 0, 100, 1);
-      textFont(assets.uiStuff.MOTD);
-      textAlign(CENTER, CENTER);
-      text("- paused - ", 0, HEIGHT_REF_HALF - 50);
-    }
-    popMatrix();
-    popStyle();
-  }
+  //if (paused) { 
+  //  pushStyle();
+  //  pushMatrix();
+  //  translate(width/2, height/2);
+  //  scale(SCALE);
+  //  if (frameCount % 30 < 20) { 
+  //    fill(0, 0, 100, 1);
+  //    textFont(assets.uiStuff.MOTD);
+  //    textAlign(CENTER, CENTER);
+  //    text("- paused - ", 0, HEIGHT_REF_HALF - 50);
+  //  }
+  //  popMatrix();
+  //  popStyle();
+  //}
 
   if (!paused) {
     background(0, 0, 0, 1);

@@ -429,29 +429,29 @@ class UFORespawn extends Entity {
     if (state==ANTISNATCHING || state==WAITING) {
 
       // beam
-      pushStyle();
-      noFill();
-      strokeWeight(assets.STROKE_WIDTH);
-      stroke(funkyColor);
-      line(x, y, x + cos(radians(beamAngle + UFO.maxBeamWidth)) * 250, y + sin(radians(beamAngle + UFO.maxBeamWidth)) * 250);
-      line(x, y, x + cos(radians(beamAngle - UFO.maxBeamWidth)) * 250, y + sin(radians(beamAngle - UFO.maxBeamWidth)) * 250);
-      popStyle();
+      sb.pushStyle();
+      sb.noFill();
+      sb.strokeWeight(assets.STROKE_WIDTH);
+      sb.stroke(funkyColor);
+      sb.line(x, y, x + cos(radians(beamAngle + UFO.maxBeamWidth)) * 250, y + sin(radians(beamAngle + UFO.maxBeamWidth)) * 250);
+      sb.line(x, y, x + cos(radians(beamAngle - UFO.maxBeamWidth)) * 250, y + sin(radians(beamAngle - UFO.maxBeamWidth)) * 250);
+      sb.popStyle();
 
       // returning dino
-      pushStyle();
-      noFill();
-      stroke(colour);
+      sb.pushStyle();
+      sb.noFill();
+      sb.stroke(colour);
       //stroke(0, 0, 100, 1);
       if (returningDinoDisplay) returningDino.simpleRenderImageVector();
-      popStyle();
+      sb.popStyle();
     }
 
     // UFO itself
-    pushStyle();
-    fill(0, 0, 0, 1);
-    stroke(funkyColor);
+    sb.pushStyle();
+    sb.fill(0, 0, 0, 1);
+    sb.stroke(funkyColor);
     simpleRenderImageVector();
-    popStyle();
+    sb.popStyle();
   }
 
   void restart () {

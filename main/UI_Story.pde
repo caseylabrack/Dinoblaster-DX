@@ -81,25 +81,25 @@ class InGameText {
     if (!extinct && !showingTip) return;
 
     if (extinct) {
-      pushStyle();
-      fill(funkyColor);
-      textFont(extinctFont);
-      textAlign(CENTER, CENTER);
+      sb.pushStyle();
+      sb.fill(funkyColor);
+      sb.textFont(extinctFont);
+      sb.textAlign(CENTER, CENTER);
 
       if (dontFlicker) {
-        text("EXTINCT", 15, -15);
+        sb.text("EXTINCT", 15, -15);
       } else {
-        if (extinctDisplay) text("EXTINCT", 15, -15);
+        if (extinctDisplay) sb.text("EXTINCT", 15, -15);
       }
-      popStyle();
+      sb.popStyle();
     }
 
     if (showingTip) {
-      pushStyle();
-      textFont(tipFont);
-      textAlign(CENTER, CENTER);
-      text(tip, 0, -HEIGHT_REF_HALF + 50);
-      popStyle();
+      sb.pushStyle();
+      sb.textFont(tipFont);
+      sb.textAlign(CENTER, CENTER);
+      sb.text(tip, 0, -HEIGHT_REF_HALF + 50);
+      sb.popStyle();
     }
   }
 

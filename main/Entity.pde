@@ -62,19 +62,11 @@ class Entity {
     sb.translate(pos.x * facing, pos.y);
     sb.rotate(radians(globalRote() * facing));
     sb.scale(scale);
-    
-    //pushMatrix();
-    //PVector pos = globalPos();
-    //scale(facing, 1);
-    //translate(pos.x * facing, pos.y);
-    //rotate(radians(globalRote() * facing));
-    //scale(scale);
   }
 
   void simpleRenderImage (PImage im) {
     pushTransforms();
     sb.image(im, 0, 0);
-    //popMatrix();
     sb.popMatrix();
   }
 
@@ -94,13 +86,11 @@ class Entity {
 
   void simpleRenderImageVector () {
     pushTransforms();
-    sb.pushStyle();
-    sb.strokeWeight(assets.STROKE_WIDTH / scale);
-        //strokeWeight(1 / scale);
-    sb.shapeMode(CENTER);
-    sb.shape(modelVector, 0, 0);
-    sb.popStyle();
-    //popMatrix();
+      sb.pushStyle();
+      sb.strokeWeight(assets.STROKE_WIDTH / scale);
+      sb.shapeMode(CENTER);
+      sb.shape(modelVector, 0, 0);
+      sb.popStyle();
     sb.popMatrix();
   }
 

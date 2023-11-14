@@ -24,10 +24,10 @@ class EggOvi extends Entity {
 
   void render(color funkyColor) {
     if (!enabled) return;
-    pushStyle();
-    tint(funkyColor);
+    sb.pushStyle();
+    sb.tint(funkyColor);
     simpleRenderImage();
-    popStyle();
+    sb.popStyle();
   }
 }
 
@@ -137,29 +137,29 @@ class EggRescue extends Entity {
     if (state == BURST) {
       //if (frameCount % 4 > 4 / 2) {
       if (dontFlicker) {
-        pushStyle();
-        tint(pcolor);
+        sb.pushStyle();
+        sb.tint(pcolor);
         pushTransforms();
         sb.image(playerModel, 0, 0);
         sb.image(model, 0, 0);
-        popMatrix();
-        popStyle();
+        sb.popMatrix();
+        sb.popStyle();
       } else {
         if (display) {
-          pushStyle();
-          tint(pcolor);
+          sb.pushStyle();
+          sb.tint(pcolor);
           pushTransforms();
           sb.image(playerModel, 0, 0);
           sb.image(model, 0, 0);
-          popMatrix();
-          popStyle();
+          sb.popMatrix();
+          sb.popStyle();
         }
       }
     } 
-    pushStyle();
-    tint(pcolor);
+    sb.pushStyle();
+    sb.tint(pcolor);
     simpleRenderImage();
-    popStyle();
+    sb.popStyle();
   }
 
   void startAnimation (float angle, float clock) {
@@ -335,10 +335,10 @@ class EggHatch extends Entity {
 
   void render(color funkyColor) {
     if (!enabled) return;
-    pushStyle();
-    tint(funkyColor);
+    sb.pushStyle();
+    sb.tint(funkyColor);
     simpleRenderImage();
-    popStyle();
+    sb.popStyle();
   }
 
   void reset () {

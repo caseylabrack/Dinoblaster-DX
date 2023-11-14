@@ -32,6 +32,7 @@ class Earth extends Entity {
     this.pixelMask = pixelMask;
 
     int side = assets.earthStuff.earth.width; // square asset
+    //tarpitDynamicMask = createGraphics(width, height, P2D);
     tarpitDynamicMask = createGraphics(side, side, P2D);
     tarpitDynamicMask.noSmooth();
     tarpitDynamicMask.ellipseMode(CENTER);
@@ -101,6 +102,8 @@ class Earth extends Entity {
     int side = assets.earthStuff.earth.width; // square asset
     tarpitDynamicMask.beginDraw();
     tarpitDynamicMask.clear();
+    //tarpitDynamicMask.fill(100);
+        //tarpitDynamicMask.translate(width/2, height/2);
     tarpitDynamicMask.translate(side/2, side/2);
     tarpitDynamicMask.beginShape();
     tarpitDynamicMask.vertex(cos(radians(tarpitArcStart)) * (EARTH_RADIUS+100), sin(radians(tarpitArcStart)) * (EARTH_RADIUS+100));
@@ -122,23 +125,23 @@ class Earth extends Entity {
 
   void render(float clock) {
 
-    if (tarpitEnabled) shader(pixelMask);
+    if (tarpitEnabled) sb.shader(pixelMask);
     simpleRenderImage();
-    if (tarpitEnabled) resetShader();
+    if (tarpitEnabled) sb.resetShader();
 
     if (!tarpitEnabled) return;
 
     pushTransforms();
-    pushStyle();
-    strokeWeight(assets.STROKE_WIDTH);
-    stroke(0, 0, 100, 1);
-    noFill();
-    //fill(0, 0, 0, 1);
-    beginShape();
+    sb.pushStyle();
+    sb.strokeWeight(assets.STROKE_WIDTH);
+    sb.stroke(0, 0, 100, 1);
+    //sb.noFill();
+    sb.fill(0, 0, 0, 1);
+    sb.beginShape();
 
     // tarpit surface
     float arcDist = EARTH_RADIUS - 10;
-    vertex(cos(radians(tarpitArcStart)) * (arcDist), sin(radians(tarpitArcStart)) * (arcDist));
+    sb.vertex(cos(radians(tarpitArcStart)) * (arcDist), sin(radians(tarpitArcStart)) * (arcDist));
     float x, y;
     float amp = 4;
     float step = 6;
@@ -148,47 +151,46 @@ class Earth extends Entity {
       y = sin(radians(i)) * (arcDist);
       x += cos(i * phase + clock/500) * amp;
       y += sin(i * phase + clock/500) * amp;
-      //circle(x, y, 2);
-      vertex(x, y);
+      sb.vertex(x, y);
     }
-    vertex(cos(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist), sin(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist));
+    sb.vertex(cos(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist), sin(radians(tarpitArcStart + TARPIT_ARC)) * (arcDist));
 
     // tarpit floor
     float cx = cos(radians(tarpitArcStart + TARPIT_ARC/2)) * (arcDist * .75);
     float cy = sin(radians(tarpitArcStart + TARPIT_ARC/2)) * (arcDist * .75);
     float offset = tarpitArcStart + TARPIT_ARC * 2;
     for (int i = 0; i < 200; i+=35) { 
-      vertex(cx + cos(radians(i + offset)) * 60, cy + sin(radians(i + offset)) * 60);
+      sb.vertex(cx + cos(radians(i + offset)) * 60, cy + sin(radians(i + offset)) * 60);
     }
-    endShape(CLOSE);
+    sb.endShape(CLOSE);
 
-    // tarpit doodads
+     //tarpit doodads
     float ang = tarpitArcStart + TARPIT_ARC - 8;
     float d = (EARTH_RADIUS - 65) + (floor(sin(radians(0) + clock/1e3)) * 5); // bob up and down in a square wave
-    pushMatrix();
-    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
-    rotate(radians(tarpitArcStart + 200));
+    sb.pushMatrix();
+    sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    sb.rotate(radians(tarpitArcStart + 200));
     sb.image(assets.earthStuff.doodadHead, 0, 0);
-    popMatrix();
+    sb.popMatrix();
 
     ang = tarpitArcStart + 15;
     d = (EARTH_RADIUS - 85) + (floor(sin(radians(60) + clock/1e3)) * 5); // bob up and down in a square wave
-    pushMatrix();
-    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
-    rotate(radians(tarpitArcStart + 90));
+    sb.pushMatrix();
+    sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    sb.rotate(radians(tarpitArcStart + 90));
     sb.image(assets.earthStuff.doodadRibs, 0, 0);
-    popMatrix();
+    sb.popMatrix();
 
     ang = tarpitArcStart + 10;
     d = (EARTH_RADIUS - 55) + (floor(sin(radians(120) + clock/1e3)) * 5); // bob up and down in a square wave
-    pushMatrix();
-    translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
-    rotate(radians(tarpitArcStart + 180));
+    sb.pushMatrix();
+    sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    sb.rotate(radians(tarpitArcStart + 180));
     sb.image(assets.earthStuff.doodadBone, 0, 0);
-    popMatrix();
+    sb.popMatrix();
 
-    popMatrix();
-    popStyle();
+    sb.popMatrix();
+    sb.popStyle();
   }
 
   void restart() {

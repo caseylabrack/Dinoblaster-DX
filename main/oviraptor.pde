@@ -9,7 +9,6 @@
 class Titlescreen extends Scene {
 
   StarsSystem starsSystem = new StarsSystem();
-  //ColorDecider currentColor = new ColorDecider();
 
   Titlescreen () {
     starsSystem.spawnSomeStars();
@@ -21,17 +20,17 @@ class Titlescreen extends Scene {
   }
 
   void renderPreGlow () {
-    pushMatrix();
-    translate(width / 2, height / 2);
-    scale(SCALE);
-    imageMode(CENTER);
+    sb.pushMatrix();
+    sb.translate(width / 2, height / 2);
+    sb.scale(SCALE);
+    sb.imageMode(CENTER);
     sb.image(assets.uiStuff.titlescreenImage, 0, 0);
-    pushStyle();
-    tint(currentColor.getColor());
+    sb.pushStyle();
+    sb.tint(currentColor.getColor());
     sb.image(assets.uiStuff.title40, 0, 0);
-    popStyle();
+    sb.popStyle();
     starsSystem.render(#FFFFFF);
-    popMatrix();
+    sb.popMatrix();
   }
 
   void mouseUp () {

@@ -180,10 +180,10 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
   public void render() {
     if (!enabled) return;
-    pushStyle();
+    sb.pushStyle();
     if (usecolor) tint(c);
     simpleRenderImage();
-    popStyle();
+    sb.popStyle();
   }
 
   public void restart () {
@@ -472,16 +472,16 @@ class GibsSystem extends Entity {
   void render() {
     if (!enabled) return;
     pushTransforms();
-    pushStyle();
-    stroke(0, 0, 100);
-    if (useColor) stroke(c);
-    strokeWeight(assets.STROKE_WIDTH);
+    sb.pushStyle();
+    sb.stroke(0, 0, 100);
+    if (useColor) sb.stroke(c);
+    sb.strokeWeight(assets.STROKE_WIDTH);
 
     for (Gib g : gibs) {
       if (!g.enabled) continue;
-      line(g.p1.x, g.p1.y, g.p2.x, g.p2.y);
+      sb.line(g.p1.x, g.p1.y, g.p2.x, g.p2.y);
     }
-    popStyle();
+    sb.popStyle();
     sb.popMatrix();
   }
 
