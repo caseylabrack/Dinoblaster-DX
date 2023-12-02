@@ -6,6 +6,85 @@
 //  abstract void mouseUp();
 //}
 
+class Bootscreen extends Scene {
+
+  final int INTRO = 1;
+  final int TWO2 = 2;
+  int state = TWO2;
+  int stick = 0;
+
+  float dotsize;
+
+  float freqX = 6;
+  float freqY = 9; 
+  float modx = 19;
+
+  Bootscreen () {
+  }
+
+  void update () {
+    stick++;
+
+    switch (state) {
+
+    case INTRO:
+      dotsize = map(stick, 0, 60, 1, 20);
+
+      if (stick > 60) state = TWO2;
+      break;
+
+    case TWO2:
+      break;
+    }
+  }
+
+  void renderPreGlow () {
+    sb.pushMatrix();
+    sb.translate(width / 2, height / 2);
+    sb.scale(SCALE);
+    sb.imageMode(CENTER);
+    sb.pushStyle();
+
+    sb.fill(0, 0, 100, 1);
+    //sb.circle(0, 0, dotsize);
+    sb.circle(0, 0, 20);
+
+    sb.noFill();
+    sb.stroke(0,0,100,1);
+
+    float osc = ((sin(float(stick) / 90 - TWO_PI / 4) + 1) / 2);
+    //osc = utils.easeInOutCubic(osc);
+    println(osc);
+    //osc = constrain(osc, -.1, .1);
+    float mody = 9;//osc * 4;
+    modx = mody;
+
+    if (state > INTRO) {
+
+      sb.beginShape(); // start drawing freeform shape based on vertices
+      for (float i = 0; i < TWO_PI; i += TWO_PI / 360) {
+        // i = degrees from 0-359
+        sb.curveVertex(
+          //(sin(i * freqX + radians(frameCount * 4)) * cos(i * modx) * (HEIGHT_REF_HALF-10)) / 2, 
+          (sin(i * freqX + osc) * cos(i * modx) * (HEIGHT_REF_HALF-10)) / 2, 
+          (sin(i * freqY) * cos(i * mody) * (HEIGHT_REF_HALF-10)) / 2
+          );
+      }
+      sb.endShape(CLOSE);
+    }
+
+
+    sb.popStyle();
+    sb.popMatrix();
+  }
+
+  void mouseUp () {
+  }
+
+  void renderPostGlow() {
+  }
+}
+
 class Titlescreen extends Scene {
 
   StarsSystem starsSystem = new StarsSystem();
@@ -15,7 +94,7 @@ class Titlescreen extends Scene {
   }
 
   void update () {
-    starsSystem.update(2);
+    starsSystem.update(2, 1);
     //currentColor.update();
   }
 
@@ -29,7 +108,7 @@ class Titlescreen extends Scene {
     sb.tint(currentColor.getColor());
     sb.image(assets.uiStuff.title40, 0, 0);
     sb.popStyle();
-    starsSystem.render(#FFFFFF);
+    starsSystem.render(#FFFFFF, 1);
     sb.popMatrix();
   }
 
@@ -138,7 +217,7 @@ class Oviraptor extends Scene {
     player.move(keys.leftp1, keys.leftp2, time.getTimeScale(), time.getClock(), time.getScaledElapsed());
     playerDeathAnimation.update(time.getTimeScale(), time.getClock());
 
-    starsSystem.update(time.getTimeScale());
+    starsSystem.update(time.getTimeScale(), time.getTargetTimeScale());
     earth.move(time.getTimeScale(), time.getClock());
     //currentColor.update();
     roidManager.fireRoids(time.getClock(), earth.globalPos());
@@ -215,7 +294,7 @@ class Oviraptor extends Scene {
     playerIntro.render();
     player.render();
     trex.render();
-    starsSystem.render(currentColor.getColor());
+    starsSystem.render(currentColor.getColor(), 1);
     roidManager.renderRoids();
     roidManager.renderSplodes();
     playerDeathAnimation.render();

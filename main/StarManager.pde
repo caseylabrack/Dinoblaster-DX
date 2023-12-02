@@ -36,6 +36,12 @@ class StarsSystem {
 
   boolean isZooming = false;
 
+  float defaultTimeScale = 1;
+  float hyperTimeScale = 1.75;
+
+  StarsSystem () {
+  }
+
   void spawnSomeStars() {
     int k = 0;
     for (int j = 0; j < 360; j+= 9) {
@@ -51,12 +57,10 @@ class StarsSystem {
     state = h ? HYPERSPACE : SPINNING;
   }
 
-  //void spin (float dt) {
-  //  pa = a;
-  //  a += starSpeed * dt;
-  //}
+  void update (float dt, float timescale) {
 
-  void update (float dt) {
+    starSpeed = constrain(map(timescale, defaultTimeScale, hyperTimeScale, defaultStarSpeed, hyperspaceStarSpeed), defaultStarSpeed, hyperspaceStarSpeed);
+
     if (isZooming) {
       float progress = (millis() - zoomSpeedupStart) / zoomSpeedupDuration;
       //float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
@@ -94,26 +98,6 @@ class StarsSystem {
     return virtualThere.sub(virtualHere);
   }
 
-  //void zooming() {
-
-  //float progress = (millis() - zoomSpeedupStart) / zoomSpeedupDuration;
-  ////float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
-
-  ////float zoomSpeed = progress < 1 ? progress * zoomSpeedFinal : zoomSpeedFinal;
-  //float zoomSpeed = progress < 1 ? utils.easeInQuad(progress, 0, zoomSpeedFinal, 1) : zoomSpeedFinal;
-
-  //for (ZoomStar zoomer : zoomStars) {
-  //  zoomer.pz = zoomer.z;
-  //  zoomer.z -= zoomSpeed; //map(millis(), zoomSpeedupStart, zoomSpeedupStart + zoomSpeedupDuration, 0, 18);
-  //  if (zoomer.z < zoomSpeed) {
-  //    zoomer.x = random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF);
-  //    zoomer.y = random(-HEIGHT_REF_HALF, HEIGHT_REF_HALF);
-  //    zoomer.z = HEIGHT_REF_HALF;
-  //    zoomer.pz = zoomer.z;
-  //  }
-  //}
-  //}
-
   void startZooming () {
     isZooming = true;
     zoomSpeedupStart = millis();
@@ -133,7 +117,9 @@ class StarsSystem {
     }
   }
 
-  void render(color currentColor) {
+  void render(color currentColor, float timescale) {
+
+    //float trailFactor = constrain(map(timescale, defaultTimeScale, hyperTimeScale, 0, 1), 0, hyperTimeScale);
 
     if (isZooming) {
       sb.pushMatrix();
@@ -154,14 +140,17 @@ class StarsSystem {
     } else {
       float x = cos(a) * r;
       float y = sin(a) * r;
-      float x2 = cos(a-(starSpeed * 6)) * r;
-      float y2 = sin(a-(starSpeed * 6)) * r;
+      float x2 = cos(a-(starSpeed * 5) ) * r;
+      float y2 = sin(a-(starSpeed * 5) ) * r;
+      //float x2 = cos(a-(starSpeed * 6) ) * r;
+      //float y2 = sin(a-(starSpeed * 6) ) * r;
 
       sb.pushStyle();
       for (int i = 0; i < stars.length; i++) {
         sb.pushMatrix();
         if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
-          if (state == HYPERSPACE) {
+          //if (state == HYPERSPACE) {
+          if (timescale > 1) {
             sb.strokeWeight(4);
             sb.fill(currentColor);
             if (i % 6 == 0) {

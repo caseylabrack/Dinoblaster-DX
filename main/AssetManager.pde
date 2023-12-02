@@ -26,19 +26,11 @@ class AssetManager {
 
   PShader testmask;
 
-  void load (PApplet context, JSONObject picadeSettings) {
+  void load (PApplet context) {
 
-    float ngainSFX = 0;
-    float ngainMusic = 0;
     boolean raspi = false;
 
-    if (picadeSettings!=null) {
-      ngainSFX = picadeSettings.getFloat("negativeGainSFX", 30);
-      ngainMusic = picadeSettings.getFloat("negativeGainMusic", 30);
-      raspi = true;
-    }
     testmask = loadShader("pixelmask.glsl");
-
     blur = loadShader("blur.glsl");
 
     ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);

@@ -19,7 +19,6 @@ class SinglePlayer extends Scene {
   StarsSystem starsSystem = new StarsSystem();
   RoidManager roidManager = new RoidManager();
   VolcanoSystem volcanoSystem;
-  //ColorDecider currentColor = new ColorDecider();
   UIStory ui;
   UFO ufo;
   UFORespawn ufoRespawn;
@@ -48,13 +47,21 @@ class SinglePlayer extends Scene {
   boolean wantToPause = false;
 
   SoundPlayable music;
+  
+  ArrayList<SoundPlayable> soundsToTimeScale = new ArrayList<SoundPlayable>(); 
 
   SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
+    soundsToTimeScale.add(assets.playerStuff.step);
+    soundsToTimeScale.add(assets.playerStuff.tarStep);
+    for(SoundPlayable s : assets.roidStuff.hits) soundsToTimeScale.add(s);
+    soundsToTimeScale.add(assets.trexStuff.rawr);
+    soundsToTimeScale.add(assets.trexStuff.stomp);
+    
     highscore = loadHighScore(SAVE_FILENAME);
 
     earth = new Earth(assets.earthStuff.mask);
-
+    
     for (int i = 0; i <=1; i++) {
       playerIntros[i] = new PlayerIntro();
       playerIntros[i].model = i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0];
@@ -175,13 +182,17 @@ class SinglePlayer extends Scene {
     ufo.spawnTimeLow = settings.getFloat("ufoSpawnRateLow", UFO.DEFAULT_SPAWNRATE_LOW);
     ufo.spawnTimeHigh = settings.getFloat("ufoSpawnRateHigh", UFO.DEFAULT_SPAWNRATE_HIGH);
 
-    time.setDefaultTimeScale(settings.getFloat("defaultTimeScale", 1));
+    time.setDefaultTimeScale(settings.getFloat("defaultTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE));
+    time.setHyperTimeScale(settings.getFloat("hyperspaceTimeScale", Time.HYPERSPACE_DEFAULT_TIME));
 
     ui.hideButtons = settings.getBoolean("hideButtons", false);
     ui.hideAll = settings.getBoolean("hideSidePanels", false);
 
     gameText.setTips(settings.getStrings("tips", assets.DEFAULT_TIPS));
     gameText.dontFlicker = settings.getBoolean("reduceFlashing", false);
+    
+    starsSystem.defaultTimeScale = settings.getFloat("defaultTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
+    starsSystem.hyperTimeScale = settings.getFloat("hyperspaceTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
   }
 
   boolean canPlayLevel (int lvl) {
@@ -294,9 +305,12 @@ class SinglePlayer extends Scene {
   void update () {
 
     time.update();
-    starsSystem.update(time.getTimeScale());
+    starsSystem.update(time.getTimeScale(), time.getTargetTimeScale());
     //currentColor.update();
     gameText.update();
+    
+    for(SoundPlayable s : soundsToTimeScale) s.rate(time.getTargetTimeScale());
+    music.rate(time.getTargetTimeScale());
 
     scoring = numPlayers == 2 ? (players[0].enabled && players[1].enabled) : players[0].enabled;
 
@@ -603,7 +617,7 @@ class SinglePlayer extends Scene {
           hypercube.goHyperspace();
           time.setHyperspace(true);
           starsSystem.setHyperspace(true);
-          music.rate(time.hyperspaceTimeScale);
+          //music.rate(time.hyperspaceTimeScale);
         }
       }
     }
@@ -613,7 +627,8 @@ class SinglePlayer extends Scene {
       time.setHyperspace(false);
       starsSystem.setHyperspace(false);
       hypercube.startCountDown();
-      music.rate(1);
+      hypercube.enabled = false;
+      //music.rate(1);
     }
 
     egg.update(time.getClock());
@@ -812,7 +827,7 @@ class SinglePlayer extends Scene {
     sb.scale(SCALE);
     sb.rotate(radians(-camera.globalRote()));
     ufo.renderFront(currentColor.getColor());
-    starsSystem.render(currentColor.getColor());
+    starsSystem.render(currentColor.getColor(), time.getTargetTimeScale());
     sb.popMatrix();
   }
 

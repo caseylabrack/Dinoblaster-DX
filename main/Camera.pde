@@ -274,6 +274,10 @@ class Time {
   int state = NORM;
   float stateStart;
 
+  float hypeStart;
+  int hypeTransition = 0;
+  boolean hypeTransitioning = false;
+
   public void update () {
     elapsed = millis() - lastmillis;
     clock += elapsed * timeScale;
@@ -281,6 +285,22 @@ class Time {
     delta = min((frameRateLastNanos - lastNanos)/1e6/16.6666, 2.5);
     lastNanos = frameRateLastNanos;
 
+    // transition to and from hyperspace
+    if (hypeTransitioning) {
+      float progress = (millis() - hypeStart) / .75e3;
+      float targetTimeScale = hypeTransition == 1 ? hyperspaceTimeScale : defaultTimeScale;
+      float fromTimeScale = hypeTransition == 1 ? defaultTimeScale: hyperspaceTimeScale;
+      if (progress >= 1) {
+        hypeTransitioning = false;
+        timeScale = targetTimeScale;
+      } else {
+        //timeScale = utils.easeInQuad(progress, fromTimeScale, targetTimeScale - fromTimeScale, targetTimeScale);
+        timeScale = map(utils.easeInCubic(progress), 0, 1, fromTimeScale, targetTimeScale);
+      }
+    }
+
+    // drop to slow mo, then speed back up to target timescale (either default or hyperspace)
+    // overwrite the value from hyperspace transition
     if (state == DEATH) {
       float progress = (millis() - stateStart) / DEATH_SCALING_DURATION;
       float targetTimeScale = isHyperSpace ? hyperspaceTimeScale: defaultTimeScale;
@@ -299,12 +319,21 @@ class Time {
     if (!isHyperSpace || !isDying) timeScale = defaultTimeScale;
   }
 
+  void setHyperTimeScale (float n) {
+    hyperspaceTimeScale = n;
+    if (isHyperSpace) timeScale = hyperspaceTimeScale;
+  }
+
   void setHyperspace (boolean h) {
     isHyperSpace = h;
+    hypeTransitioning = true;
+    hypeStart = millis();
     if (h) {
-      timeScale = hyperspaceTimeScale;
+      //timeScale = hyperspaceTimeScale;
+      hypeTransition = 1;
     } else {
-      timeScale = defaultTimeScale;
+      //timeScale = defaultTimeScale;
+      hypeTransition = -1;
     }
   }
 
@@ -312,6 +341,10 @@ class Time {
     state = DEATH;
     stateStart = millis();
     isDying = false;
+  }
+
+  public float getTargetTimeScale () {
+    return timeScale;
   }
 
   public float getTimeScale () {

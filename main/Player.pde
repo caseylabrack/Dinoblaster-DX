@@ -181,7 +181,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
   public void render() {
     if (!enabled) return;
     sb.pushStyle();
-    if (usecolor) tint(c);
+    if (usecolor) sb.tint(c);
     simpleRenderImage();
     sb.popStyle();
   }
@@ -279,16 +279,16 @@ class PlayerIntro extends Entity {
   public void render () {
     if (state==DONE) return;
     if (dontFlicker) {
-      pushStyle();
-      if (usecolor) tint(colour);
+      sb.pushStyle();
+      if (usecolor) sb.tint(colour);
       simpleRenderImage();
-      popStyle();
+      sb.popStyle();
     } else {
       if (frameCount % FLICKER_RATE > FLICKER_RATE / 2) {
-        pushStyle();
-        if (usecolor) tint(colour);
+        sb.pushStyle();
+        if (usecolor) sb.tint(colour);
         simpleRenderImage();
-        popStyle();
+        sb.popStyle();
       }
     }
   }
@@ -350,16 +350,16 @@ class PlayerRespawn extends Entity {
   void render() {
     if (!enabled) return;
     if (dontFlicker) {
-      pushStyle();
-      if (usecolor) tint(colour);
+      sb.pushStyle();
+      if (usecolor) sb.tint(colour);
       simpleRenderImage();
-      popStyle();
+      sb.popStyle();
     } else {
       if (display) { 
-        pushStyle();
-        if (usecolor) tint(colour);
+        sb.pushStyle();
+        if (usecolor) sb.tint(colour);
         simpleRenderImage();
-        popStyle();
+        sb.popStyle();
       }
     }
   }

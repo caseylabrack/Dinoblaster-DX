@@ -1,20 +1,17 @@
 // TO DO
-// try again with splodes having longer deadliness time
-// slow sound effects during timescale events too
-// title screen animation (ripple distortion on titlescreen)
+// speako 8 read title at start https://www.lexaloffle.com/bbs/?tid=49108
+// title screen animation (ripple distortion on titlescreen) 
+//(fill in w lazer?). https://www.youtube.com/watch?v=wDkG1CgREaQ. start on dot. do the sine circle animation from insta. humming. clicking on each . in "graphics go . . . . . . ok". 
+// brontoscan logo
 // title screen sound or music
 // start getting some trailer shots
 // oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
 // should settings load every time you play()?
 // scale vectors with pshape.scale
-// Ptutorial
-// star streaks proportional to timescale (so when time slows on death, streaks disappear)
-// nongaussian blur glow
-// setting: fake ghosting
+// Ptutorial (if dino.dat is empty or 0)
+// try again with splodes having longer deadliness time. show splode sprite only when deadly?
 // replace trex skull in tarpit with a different doodad
-// special note to people with disabilities: warning, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
-// test ways to avoid tessalation slowness
-// maybe logging
+// special note to people with disabilities: warning, timescale, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
@@ -22,6 +19,7 @@
 // custom artwork for the picade
 // dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // probably put picade settings in dipswitches
+// try to not generate garbage
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
 // oviraptor mode (make its own release maybe)
@@ -63,10 +61,10 @@ final int RECORD_FRAMERATE = 1;
 Keys keys = new Keys();
 AssetManager assets = new AssetManager();
 SimpleTXTParser settings;
-JSONObject picadeSettings;
 
 boolean jurassicUnlocked, cretaceousUnlocked, buttonsHide, panelsHide, glow;
 char leftkey1p, rightkey1p, leftkey2p, rightkey2p, pauseKey, dipSwitches, triassicSelect, jurassicSelect, cretaceousSelect, onePlayerSelect, twoPlayerSelect, secretVersionButton;
+float ngainSFX, ngainMusic;
 
 float SCALE;
 float WIDTH_REFERENCE = 1024;
@@ -77,6 +75,7 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 SinglePlayer singlePlayer;
 Oviraptor oviraptor;
 Titlescreen title;
+Bootscreen bootScreen;
 
 ColorDecider currentColor = new ColorDecider();
 
@@ -89,9 +88,9 @@ PGraphics blurPass; // apply the blur shader to this to achieve glow
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
+  size(1024, 768, P2D);
   //size(1920, 1080, P2D);
-  fullScreen(P2D);
+  //fullScreen(P2D);
   smooth(4);
   frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -118,19 +117,11 @@ void setup () {
 
   minim = new Minim(this);
 
-  assets.load(this, picadeSettings);
+  assets.load(this);
 
   key = 'a';
 
   loadSettingsFromTXT();
-
-  try {
-    picadeSettings = loadJSONObject("picade.txt");
-    noCursor();
-    //frameRate(30);
-  } 
-  catch(Exception e) {
-  }
 
   spButton = new Rectangle(416, 162, 60, 60);
   mpButton = new Rectangle(416, 230, 60, 60);
@@ -144,8 +135,9 @@ void setup () {
   oviraptor = new Oviraptor(settings, assets);
 
   title = new Titlescreen();
+  bootScreen = new Bootscreen();
 
-  currentScene = title;
+  currentScene = bootScreen;//title;
   //currentScene = oviraptor;
   background(0, 0, 0, 1);
 }
@@ -166,18 +158,7 @@ void draw () {
   if (singlePlayer.requestsPause()) paused = true;
   currentColor.update(); // always cycle colors, even when paused or whatever
 
-  background(0, 0, 0, 1);
-
-
-
   if (!paused) {
-    background(0, 0, 0, 1);
-    //fill(0, 0, 0, .95);
-    //rect(0, 0, width, height);
-    //if (currentScene.status==Scene.DONE) {
-    //  currentScene.cleanup();
-    //  currentScene = new SinglePlayer(chooseNextLevel());
-    //}
     currentScene.update();
   }
   sb.beginDraw();
@@ -224,6 +205,7 @@ void draw () {
     popStyle();
   }
 
+  // side panels
   pushMatrix();
   translate(width/2, height/2);
   scale(SCALE);
@@ -250,8 +232,6 @@ void draw () {
   }
   if (!buttonsHide && !panelsHide) image(assets.uiStuff.buttons, 0, 0);
   popMatrix();
-
-
 
   if (key==secretVersionButton) {
     pushStyle();
@@ -579,6 +559,9 @@ void loadSettingsFromTXT () {
   cretaceousSelect = settings.getChar("cretaceousSelect", '3');  
   onePlayerSelect = settings.getChar("singleplayerMode", 'o');
   twoPlayerSelect = settings.getChar("multiplayerMode", 'p');
+
+  ngainSFX = settings.getFloat("negativeGainSFX", 30);
+  ngainMusic = settings.getFloat("negativeGainMusic", 30);
 
   int vsfx = settings.getInt("sfxVolume", 100);
   if (vsfx == 0) {

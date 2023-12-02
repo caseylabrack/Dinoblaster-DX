@@ -153,8 +153,16 @@ static class utils {
     return 1 - pow(1 - x, 3);
   }
 
+  static float easeInCubic(float x) {
+    return x * x * x;
+  }
+
   static float easeOutExpoT(float x) {
     return x == 1 ? 1 : 1 - pow(2, -10 * x);
+  }
+
+  static float easeInOutCubic(float x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - pow(-2 * x + 2, 3) / 2;
   }
 } 
 
