@@ -15,27 +15,36 @@ class Bootscreen extends Scene {
 
   float dotsize;
 
-  float freqX = 6;
-  float freqY = 9; 
-  float modx = 19;
+  float freqX = 9; //floor(random(1, 25));
+  float freqY = 9; //floor(random(1, 25));
+  float modx = 7; //floor(random(1, 25));
+  float mody = 3;
+
+  float max = 180;
+  float min = 18;
+  float dur = 240 * 2;
+  float delay = 30;
+  float frame = 0;
+  float tick = 0;
 
   Bootscreen () {
   }
 
   void update () {
-    stick++;
+    frame++;
+    //tick++;
 
-    switch (state) {
+    //switch (state) {
 
-    case INTRO:
-      dotsize = map(stick, 0, 60, 1, 20);
+    //case INTRO:
+    //  dotsize = map(stick, 0, 60, 1, 20);
 
-      if (stick > 60) state = TWO2;
-      break;
+    //  if (stick > 60) state = TWO2;
+    //  break;
 
-    case TWO2:
-      break;
-    }
+    //case TWO2:
+    //  break;
+    //}
   }
 
   void renderPreGlow () {
@@ -45,33 +54,32 @@ class Bootscreen extends Scene {
     sb.imageMode(CENTER);
     sb.pushStyle();
 
-    sb.fill(0, 0, 100, 1);
-    //sb.circle(0, 0, dotsize);
-    sb.circle(0, 0, 20);
 
     sb.noFill();
-    sb.stroke(0,0,100,1);
+    sb.stroke(0, 0, 100, 1);
+    sb.strokeWeight(2);
 
-    float osc = ((sin(float(stick) / 90 - TWO_PI / 4) + 1) / 2);
-    //osc = utils.easeInOutCubic(osc);
-    println(osc);
-    //osc = constrain(osc, -.1, .1);
-    float mody = 9;//osc * 4;
-    modx = mody;
-
-    if (state > INTRO) {
-
-      sb.beginShape(); // start drawing freeform shape based on vertices
-      for (float i = 0; i < TWO_PI; i += TWO_PI / 360) {
-        // i = degrees from 0-359
-        sb.curveVertex(
-          //(sin(i * freqX + radians(frameCount * 4)) * cos(i * modx) * (HEIGHT_REF_HALF-10)) / 2, 
-          (sin(i * freqX + osc) * cos(i * modx) * (HEIGHT_REF_HALF-10)) / 2, 
-          (sin(i * freqY) * cos(i * mody) * (HEIGHT_REF_HALF-10)) / 2
-          );
-      }
-      sb.endShape(CLOSE);
+    if (frame > delay) {
+      tick++;
     }
+    float t = utils.easeInExpo(constrain(tick / dur, 0, 1));
+    float p = map(t, 0, 1, min, max);
+
+    sb.beginShape(); // start drawing freeform shape based on vertices
+    for (float i = 0; i < TWO_PI; i += TWO_PI / p) {
+      // i = degrees from 0-359
+      sb.vertex(
+        (sin(i * freqX + radians(frameCount * 4)) * cos(i * modx) * HEIGHT_REFERENCE) / 4, 
+        (sin(i * freqY) * cos(i * mody) * HEIGHT_REFERENCE) / 4
+        );
+    }
+    sb.endShape(CLOSE);
+    //} else {
+    //  sb.pushStyle();
+    //  sb.fill(0, 0, 100, 1);
+    //  sb.circle(0, 0, frame/dur * 10);
+    //  sb.popStyle();
+    //}
 
 
     sb.popStyle();
@@ -85,17 +93,99 @@ class Bootscreen extends Scene {
   }
 }
 
+class Bootscreen2 extends Scene {
+
+  final int INTRO = 1;
+  final int TWO2 = 2;
+  int state = TWO2;
+  int stick = 0;
+
+  float dotsize;
+
+  float freqX = 9; //floor(random(1, 25));
+  float freqY = 9; //floor(random(1, 25));
+  float modx = 7; //floor(random(1, 25));
+  float mody = 3;
+
+  float max = 180;
+  float min = 18;
+  float dur = 240 * 2;
+  float delay = 30;
+  float frame = 0;
+  float tick = 0;
+
+  Bootscreen2 () {
+  }
+
+  void update () {
+    frame++;
+    //tick++;
+
+    //switch (state) {
+
+    //case INTRO:
+    //  dotsize = map(stick, 0, 60, 1, 20);
+
+    //  if (stick > 60) state = TWO2;
+    //  break;
+
+    //case TWO2:
+    //  break;
+    //}
+  }
+
+  void renderPreGlow () {
+
+    sb.pushMatrix();
+    sb.translate(width / 2, height / 2);
+    sb.scale(SCALE);
+    sb.shapeMode(CENTER);
+    sb.pushStyle();
+    sb.shape(assets.uiStuff.titlescreenImageVec, 0, 0, assets.uiStuff.titlescreenImageVec.width/2, assets.uiStuff.titlescreenImageVec.height/2);
+    sb.popStyle();
+    //sb.imageMode(CENTER);
+    //sb.image(assets.uiStuff.titlescreenImage, 0, 0, assets.uiStuff.titlescreenImage.width, assets.uiStuff.titlescreenImage.height);
+    sb.pushStyle();
+    sb.tint(currentColor.getColor());
+    sb.image(assets.uiStuff.title40, 0, 0);
+    sb.popStyle();
+    sb.popMatrix();
+
+    //sb.noFill();
+    //sb.stroke(0, 0, 100, 1);
+    //sb.strokeWeight(2);
+
+    //sb.pushStyle();
+    //sb.fill(0, 0, 100, 1);
+    //sb.circle(0, 0, frame/dur * 10);
+    //sb.popStyle();
+
+  }
+
+  void mouseUp () {
+  }
+
+  void renderPostGlow() {
+  }
+}
+
 class Titlescreen extends Scene {
 
   StarsSystem starsSystem = new StarsSystem();
+  int delayToPlayVoice = 10;
 
   Titlescreen () {
     starsSystem.spawnSomeStars();
+    
   }
 
   void update () {
     starsSystem.update(2, 1);
     //currentColor.update();
+    delayToPlayVoice--;
+    if(delayToPlayVoice == 0) {
+      assets.uiStuff.titleSpeak.play();
+    }
   }
 
   void renderPreGlow () {

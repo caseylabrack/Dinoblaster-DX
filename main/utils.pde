@@ -164,6 +164,10 @@ static class utils {
   static float easeInOutCubic(float x) {
     return x < 0.5 ? 4 * x * x * x : 1 - pow(-2 * x + 2, 3) / 2;
   }
+
+  static float easeInExpo(float x) {
+    return x == 0 ? 0 : pow(2, 10 * x - 10);
+  }
 } 
 
 class Rectangle {

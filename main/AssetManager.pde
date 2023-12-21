@@ -63,7 +63,10 @@ class AssetManager {
     uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
     uiStuff.buttons = loadImage("ui-buttons.png");
     uiStuff.titlescreenImage = loadImage("title.png");
+    uiStuff.titlescreenImageVec = loadShape("test.svg");
+    uiStuff.titlescreenImageVec.disableStyle();
     uiStuff.title40 = loadImage("title_fortieth.png");
+    uiStuff.titleSpeak =  raspi ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", context);
 
     volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
     volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
@@ -206,7 +209,9 @@ class AssetManager {
     PFont extinctType;
     //PImage DIPswitchesBtn;
     PImage titlescreenImage;
+    PShape titlescreenImageVec;
     PImage title40;
+    SoundPlayable titleSpeak;
   }
 
   class VolcanoStuff {

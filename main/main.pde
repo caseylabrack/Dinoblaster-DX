@@ -75,7 +75,7 @@ float HEIGHT_REF_HALF = HEIGHT_REFERENCE/2;
 SinglePlayer singlePlayer;
 Oviraptor oviraptor;
 Titlescreen title;
-Bootscreen bootScreen;
+Bootscreen2 bootScreen;
 
 ColorDecider currentColor = new ColorDecider();
 
@@ -88,9 +88,9 @@ PGraphics blurPass; // apply the blur shader to this to achieve glow
 
 void setup () {
   //size(500, 500, P2D);
-  size(1024, 768, P2D);
+  //size(1024, 768, P2D);
   //size(1920, 1080, P2D);
-  //fullScreen(P2D);
+  fullScreen(P2D);
   smooth(4);
   frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -135,9 +135,9 @@ void setup () {
   oviraptor = new Oviraptor(settings, assets);
 
   title = new Titlescreen();
-  bootScreen = new Bootscreen();
+  bootScreen = new Bootscreen2();
 
-  currentScene = bootScreen;//title;
+  currentScene = title;
   //currentScene = oviraptor;
   background(0, 0, 0, 1);
 }
