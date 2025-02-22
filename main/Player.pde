@@ -12,7 +12,7 @@ interface tarpitSinkable {
 
 class Player extends Entity implements abductable, targetable, tarpitSinkable {
   final static float DIST_FROM_EARTH = 194;//197;
-  final static float DEFAULT_RUNSPEED = 5;
+  final static float DEFAULT_RUNSPEED = 3;
   final static float TARPIT_SLOW_FACTOR = .25;
   final static float TARPIT_BOTTOM_DIST = 110;
   final float TARPIT_RISE_FACTOR = 2;
@@ -22,6 +22,9 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
   final static String P1_DEFAULT_COLOR = "#00ffff";
   final static String P2_DEFAULT_COLOR = "#ff57ff";
+  
+  final static float PLAYER_COLLISION_BOUNCE_FORCE = 10;
+  final static float ROID_PUSHBACK_ANGLE_RANGE = 20;
 
   final int IDLE = 0;
   final int RUNNING = 1;
@@ -40,7 +43,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
 
   color c;
   boolean usecolor = false;
-  int bounceDir;
+  //int bounceDir;
 
   PVector ppos = new PVector(); // previous position (last frame)
   float pr; // previous angle
@@ -72,10 +75,9 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     this.tarStep = tarStep;
     model = frames[0];
   }
-
-  void bounceStart (int dir) {
-    bounceDir = dir;
-    va = bounceForce * dir;
+  
+  void bounceStart(float force) {
+    va = force;
     vm = bounceForceUp;
     grounded = false;
   }
@@ -84,7 +86,6 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     if (!enabled) return;
 
     targetAngle = utils.angleOf(utils.ZERO_VECTOR, localPos());
-    //targetDist = DIST_FROM_EARTH;
     targetDist = (inTarpit || !grounded) ? dist(0, 0, x, y) : DIST_FROM_EARTH;
 
     if (inTarpit && !tarpitImmune) vm = TAR_SINK_RATE * delta;

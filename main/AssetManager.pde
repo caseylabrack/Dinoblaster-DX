@@ -20,6 +20,7 @@ class AssetManager {
   PlayerStuff playerStuff = new PlayerStuff();
   TrexStuff trexStuff = new TrexStuff();
   EarthStuff earthStuff = new EarthStuff();
+  PtutorialStuff ptutorialStuff = new PtutorialStuff();
   MusicStuff musicStuff = new MusicStuff();
   ArrayList<SoundPlayable> sounds = new ArrayList<SoundPlayable>(); 
   ArrayList<SoundPlayable> musics = new ArrayList<SoundPlayable>(); 
@@ -132,7 +133,8 @@ class AssetManager {
 
     earthStuff.earth = loadImage("earth.png");
     //earthStuff.earth = loadImage("earth-east-clear.png");
-    earthStuff.earthV = loadShape("earth-v.svg");
+    earthStuff.earthV = loadShape("earth.svg");
+    earthStuff.earthV.disableStyle();
     earthStuff.earth2 = loadImage("earth-east.png");
     earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
     earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
@@ -142,6 +144,10 @@ class AssetManager {
     earthStuff.doodadFemur = loadImage("doodad-femur.png");
     earthStuff.doodadHead = loadImage("doodad-head.png");
     earthStuff.doodadRibs = loadImage("doodad-ribcage.png");
+    
+    ptutorialStuff.pteroIdle = loadImage("/_art/ptutorial/ptero_idle.png");
+    ptutorialStuff.pteroFlap1 = loadImage("/_art/ptutorial/ptero_flap1.png");
+    ptutorialStuff.pteroFlap2 = loadImage("/_art/ptutorial/ptero_flap2.png");
 
     musicStuff.lvl1a = raspi ? new SoundM("_music/lvl1.wav", ngainMusic) : new SoundP("_music/lvl1.wav", context);
     musicStuff.lvl1b = raspi ? new SoundM("_music/lvl1-jump.wav", ngainMusic) : new SoundP("_music/lvl1-jump.wav", context);
@@ -273,6 +279,12 @@ class AssetManager {
     PImage doodadFemur;
     PImage doodadHead;
     PImage doodadRibs;
+  }
+  
+  class PtutorialStuff {
+    PImage pteroIdle;
+    PImage pteroFlap1;
+    PImage pteroFlap2;
   }
 
   class MusicStuff {

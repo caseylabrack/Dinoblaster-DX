@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="125.41923"
+   height="102.06036"
+   viewBox="0 0 33.183837 27.003469"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="ptutorial.svg"
+   inkscape:export-batch-path="C:\Users\clabr\Documents\Processing\sketches\Dinoblaster-DX\main\data\_art\ptutorial"
+   inkscape:export-batch-name="ptero"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#888888"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.3637493"
+     inkscape:cx="1235.1977"
+     inkscape:cy="191.01751"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#4c4c4c00" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-307.95059,46.113049)">
+    <g
+       id="g19"
+       inkscape:label="idle">
+      <rect
+         style="fill:#000000;fill-opacity:0;stroke:none;stroke-width:0.389007;stroke-linecap:round;stroke-miterlimit:11.2"
+         id="boundingbox"
+         width="33.183838"
+         height="27.003469"
+         x="307.95059"
+         y="-46.113049"
+         inkscape:label="boundingbox"
+         transform="translate(1.0400022e-6)" />
+      <path
+         style="display:inline;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
+         d="m 310.19162,-32.239655 2.64583,-2.99861 3.2632,-1.85209 5.99722,-1.14652 5.82083,2.02847 2.20486,0.79375 1.23472,-1.6757 -1.94027,-4.93888 2.64583,2.02847 2.64583,1.32291 3.70417,3.52778 -6.08542,-0.97014 -1.94028,2.55765 -2.02847,-0.88195 2.64584,3.61597 1.32291,0.70556 -1.41111,-0.17639 -3.61597,3.79236 -5.82083,1.058339 -3.52778,-0.617369 2.46944,-2.29305 1.32292,-2.99861 -3.175,-2.20486 -3.08681,-0.61737 -1.94027,2.73403 -0.52917,0.26459 0.97014,-3.17501 -3.2632,1.7639 z"
+         id="idle"
+         inkscape:label="idle" />
+    </g>
+  </g>
+</svg>

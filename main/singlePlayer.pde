@@ -425,8 +425,8 @@ class SinglePlayer extends Scene {
         float an2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
         float newNewDiff = utils.signedAngleDiff(an1, an2) * -1;
 
-        if (!players[0].inTarpit) players[0].bounceStart(utils.sign(newNewDiff));
-        if (!players[1].inTarpit) players[1].bounceStart(utils.sign(newNewDiff) * -1);
+        if (!players[0].inTarpit) players[0].bounceStart(utils.sign(newNewDiff) * Player.PLAYER_COLLISION_BOUNCE_FORCE);
+        if (!players[1].inTarpit) players[1].bounceStart(utils.sign(newNewDiff) * -1 * Player.PLAYER_COLLISION_BOUNCE_FORCE);
       }
     }
 
@@ -493,7 +493,8 @@ class SinglePlayer extends Scene {
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
           e.bounce(time.getClock());
-          p.bounceStart(utils.sign(diff) * -1);
+          //p.bounceStart(utils.sign(diff) * -1);
+          p.bounceStart(utils.sign(diff) * -1 * Player.PLAYER_COLLISION_BOUNCE_FORCE);
         }
       }
     }
@@ -594,8 +595,19 @@ class SinglePlayer extends Scene {
               println("died from roid");
 
               playerKilled(player.id);
+            } else if (utils.unsignedAngleDiff(splode.r, player.r) < Player.ROID_PUSHBACK_ANGLE_RANGE) { // near miss
+              float diff = utils.unsignedAngleDiff(splode.r,player.r);
+              float min = Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2;
+              float max = Player.ROID_PUSHBACK_ANGLE_RANGE;
+              float range = max - min;
+              float d = diff - min;
+              float pct = 1 - (d / range);
+              float force = pct * 10;
+              float dir = utils.sign(utils.signedAngleDiff(splode.r,player.r));
+              //player.bounceStart(force * dir);
+              player.bounceStart(Player.PLAYER_COLLISION_BOUNCE_FORCE * dir);
             }
-          }
+          } 
         }
       }
     }

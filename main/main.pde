@@ -1,29 +1,26 @@
-// TO DO
-// speako 8 read title at start https://www.lexaloffle.com/bbs/?tid=49108
+// TO DO INDIECADE
+// Ptutorial (if dino.dat is empty or 0)
+// finale: thanks for playing
+// finale: music don't scale
+// finale: two-player rescue ufo?
+
+// OTHER
 // title screen animation (ripple distortion on titlescreen) 
 //(fill in w lazer?). https://www.youtube.com/watch?v=wDkG1CgREaQ. start on dot. do the sine circle animation from insta. humming. clicking on each . in "graphics go . . . . . . ok". 
 // brontoscan logo
-// title screen sound or music
 // start getting some trailer shots
 // oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
 // should settings load every time you play()?
 // scale vectors with pshape.scale
-// Ptutorial (if dino.dat is empty or 0)
 // try again with splodes having longer deadliness time. show splode sprite only when deadly?
 // replace trex skull in tarpit with a different doodad
-// special note to people with disabilities: warning, timescale, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
-// design the custom console for picade; order console; assemble
-// custom artwork for the picade
-// dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // probably put picade settings in dipswitches
 // try to not generate garbage
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
-// oviraptor mode (make its own release maybe)
-// bring back near-miss shake? or maybe sweat animation?
 // coding train license add: https://github.com/CodingTrain/Coding-Challenges/blob/main/LICENSE
 // blogposts: fan art; differences from last edition; in-depth on the dipswitches; spotlight on the picade
 
@@ -76,6 +73,7 @@ SinglePlayer singlePlayer;
 Oviraptor oviraptor;
 Titlescreen title;
 Bootscreen2 bootScreen;
+Ptutorial ptutorial;
 
 ColorDecider currentColor = new ColorDecider();
 
@@ -88,9 +86,9 @@ PGraphics blurPass; // apply the blur shader to this to achieve glow
 
 void setup () {
   //size(500, 500, P2D);
-  //size(1024, 768, P2D);
+  size(1024, 768, P2D);
   //size(1920, 1080, P2D);
-  fullScreen(P2D);
+  //fullScreen(P2D);
   smooth(4);
   frameRate(60);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -131,14 +129,17 @@ void setup () {
   singlePlayer.numPlayers = 1;
   keys.playingMultiplayer = false;
   singlePlayer.loadSettings(settings);
+  
+  ptutorial = new Ptutorial(settings, assets);
 
   oviraptor = new Oviraptor(settings, assets);
 
   title = new Titlescreen();
   bootScreen = new Bootscreen2();
 
-  currentScene = title;
+  //currentScene = title;
   //currentScene = oviraptor;
+  currentScene = ptutorial;
   background(0, 0, 0, 1);
 }
 
@@ -455,7 +456,8 @@ void loadSettingsFromTXT () {
     output = createWriter(SETTINGS_FILENAME);
     String spacer = "     ";
     String settingsString = String.join("\n", 
-      "--edit this text file to change your controls, set preferences, and even cheat", 
+      "--edit this text file to change your controls, set preferences, and even cheat",
+      "--learn more at https://github.com/caseylabrack/Dinoblaster-DX/blob/master/README.md",
       "", 
       "----CONTROLS----", 
       "player1LeftKey: a", 
@@ -493,8 +495,8 @@ void loadSettingsFromTXT () {
       "tarpitsEnabled: " + true, 
       "", 
       "hypercubesEnabled: " + true, 
-      "hyperspaceDurationInSeconds: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3), 
       "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
+      "hyperspaceDurationInSeconds: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3), 
       "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
       "", 
       "playerSpeed: " + Player.DEFAULT_RUNSPEED, 
@@ -517,17 +519,17 @@ void loadSettingsFromTXT () {
       "", 
       "----MISC----", 
       "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
-      "-- put tips inside double quotes, seperate with comma, don't linebreak", 
+      "-- put tips inside double quotes, separate with comma", 
       "", 
       "player1Color: \"#00ffff\"", 
       "player2Color: \"#ff57ff\"", 
       "", 
       pss("superColorsSwapEvery: " + ColorDecider.DEFAULT_SWAP_FREQUENCY) + "--swap palette every x number of frames", 
       "superColors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
-      "-- put colors inside double quotes, seperate with comma, don't linebreak", 
+      "-- put colors inside double quotes, separate with comma", 
       "-- colors can be hexadecimal, like \"#FF69B4\"", 
       "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
-      "-- you can have any number of colors. make a list with only fuschia, or one that creates a gradient, or one where the colors get brighter and darker, etc"
+      "-- you can have any number of colors. make a list with only fuchsia, or one that creates a gradient, etc"
       );
     output.println(settingsString);
     output.flush();
