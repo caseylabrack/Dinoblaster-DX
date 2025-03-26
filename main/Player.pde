@@ -140,7 +140,7 @@ class Player extends Entity implements abductable, targetable, tarpitSinkable {
     }
 
     if (!grounded) {
-      va *= bounceFriction * delta;
+      va *= bounceFriction;// * delta;  
       vm -= bounceGravity * delta;
       if (targetDist + vm < DIST_FROM_EARTH) {
         //vm = DIST_FROM_EARTH - targetDist;

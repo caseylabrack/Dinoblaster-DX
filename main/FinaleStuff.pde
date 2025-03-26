@@ -10,7 +10,8 @@ class SPFinale {
   final static int PULLING_AWAY = 7;
   final static int ZOOMING = 8;
   final static int FADING = 9;
-  final static int DONE = 10;
+  final static int ROLL_CREDITS = 10;
+  final static int DONE = 11;
   int state = NOT_FINALE;
   int lastState = NOT_FINALE;
 
@@ -58,6 +59,8 @@ class SPFinale {
   final float FADING_DURATION = 6e3;
   PVector fadingStartPos;
 
+  PFont thanksFont;
+  String thanksMessage = "";
 
   SPFinale (PImage bigOneModel, PShape[] finaleUFOFrames, PShape abducteeModel) {
 
@@ -120,6 +123,8 @@ class SPFinale {
     //  ring1[i].y = sin(radians(a)) * Earth.EARTH_RADIUS;
     //  ring1[i].r = a + 90;
     //}
+
+    thanksFont = assets.uiStuff.MOTD;
   }
 
   void update(Earth earth, Trex trex, Player[] ps, Time time) {
@@ -305,7 +310,15 @@ class SPFinale {
         finalUFO.y += (noise(sin(float(frameCount)/53)) * 2 - 1) * (1 - progress) * 20; // add some shake
         finalUFO.scale = map(progress, 0, 1, finalUFO.FINAL_SCALE, .001);
       } else {
-        state = DONE;
+        state = ROLL_CREDITS;
+        stateStart = millis();
+      }
+      break;
+
+    case ROLL_CREDITS: 
+      progress = (millis() - stateStart) / 2e3;
+      if(progress > 1) {
+       thanksMessage = "Thanks for playing!\n\nSpecial thanks:\nSara Bennett\nJeff Labrack\nJonathan Lauffer"; 
       }
       break;
 
@@ -403,13 +416,19 @@ class SPFinale {
       break;
     }
 
-    if (state!=INCOMING && state != DONE) {
+    if (state!=INCOMING && state != DONE && state != ROLL_CREDITS) {
       sb.pushStyle();
       sb.fill(0, 0, 0, 1);
       sb.stroke(0, 0, 100, 1);
       finalUFO.simpleRenderImageVector();
       sb.popStyle();
     }
+
+    sb.pushStyle();
+    sb.textFont(thanksFont);
+    sb.textAlign(CENTER, CENTER);
+    sb.text(thanksMessage, 0, 0);
+    sb.popStyle();
   }
 
   void restart() {
@@ -423,6 +442,7 @@ class SPFinale {
     finalUFO.scale = finalUFO.START_SCALE;
     finalUFO.modelVector = finalUFO.frames[0];
     bigOne.parent = null;
+    thanksMessage = "";
   }
 }
 

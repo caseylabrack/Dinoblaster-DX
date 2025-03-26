@@ -1,10 +1,11 @@
 // TO DO INDIECADE
-// Ptutorial (if dino.dat is empty or 0)
-// finale: thanks for playing
-// finale: music don't scale
-// finale: two-player rescue ufo?
+// bug: restarting from finale
+// bug: restarting t-rex from tarpit
+// https://jotform.com/draft/01958fe749217f7cb0a102fd1015253b0716
 
 // OTHER
+// speech respects sfx volume
+// finale: two-player rescue ufo?
 // title screen animation (ripple distortion on titlescreen) 
 //(fill in w lazer?). https://www.youtube.com/watch?v=wDkG1CgREaQ. start on dot. do the sine circle animation from insta. humming. clicking on each . in "graphics go . . . . . . ok". 
 // brontoscan logo
@@ -129,7 +130,7 @@ void setup () {
   singlePlayer.numPlayers = 1;
   keys.playingMultiplayer = false;
   singlePlayer.loadSettings(settings);
-  
+
   ptutorial = new Ptutorial(settings, assets);
 
   oviraptor = new Oviraptor(settings, assets);
@@ -137,9 +138,10 @@ void setup () {
   title = new Titlescreen();
   bootScreen = new Bootscreen2();
 
-  //currentScene = title;
+  currentScene = title;
   //currentScene = oviraptor;
-  currentScene = ptutorial;
+  //currentScene = ptutorial;
+
   background(0, 0, 0, 1);
 }
 
@@ -269,6 +271,13 @@ void keyPressed() {
     if (keyCode==LEFT) keys.arrowleft = true;
     if (keyCode==RIGHT) keys.arrowright = true;
   } else {
+    if (key==triassicSelect || key==jurassicSelect || key==cretaceousSelect) { // if there's no highscore file, launch ptutorial instead
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
+    }
     if (key==triassicSelect) {
       paused = false;
       currentScene = singlePlayer;
@@ -316,6 +325,11 @@ void keyReleased() {
     if (key==leftkey2p) keys.leftp2 = false; 
     if (key==rightkey2p) keys.rightp2 = false; 
     if (key==onePlayerSelect) {
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 1;
       keys.playingMultiplayer = false;
@@ -325,6 +339,11 @@ void keyReleased() {
       paused = false;
     }
     if (key==twoPlayerSelect) {
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
@@ -377,18 +396,32 @@ void mouseReleased () {
   }
 
   if (spButton.inside(m)) {
+    if (loadBytes(SAVE_FILENAME)==null) {
+      currentScene = ptutorial;
+      ptutorial.play();
+      return;
+    }
     currentScene = singlePlayer;
     paused = false;
     singlePlayer.numPlayers = 1;
     keys.playingMultiplayer = false;
+    loadSettingsFromTXT();
+    singlePlayer.loadSettings(settings);
     singlePlayer.play(SinglePlayer.TRIASSIC);
   }
 
   if (mpButton.inside(m)) {
+    if (loadBytes(SAVE_FILENAME)==null) {
+      currentScene = ptutorial;
+      ptutorial.play();
+      return;
+    }
     currentScene = singlePlayer;
     paused = false;
     singlePlayer.numPlayers = 2;
     keys.playingMultiplayer = true;
+    loadSettingsFromTXT();
+    singlePlayer.loadSettings(settings);
     singlePlayer.play(SinglePlayer.TRIASSIC);
   }
 }
@@ -456,8 +489,8 @@ void loadSettingsFromTXT () {
     output = createWriter(SETTINGS_FILENAME);
     String spacer = "     ";
     String settingsString = String.join("\n", 
-      "--edit this text file to change your controls, set preferences, and even cheat",
-      "--learn more at https://github.com/caseylabrack/Dinoblaster-DX/blob/master/README.md",
+      "--edit this text file to change your controls, set preferences, and even cheat", 
+      "--learn more at https://github.com/caseylabrack/Dinoblaster-DX/blob/master/README.md", 
       "", 
       "----CONTROLS----", 
       "player1LeftKey: a", 
@@ -483,14 +516,14 @@ void loadSettingsFromTXT () {
       "hideButtons: false", 
       "hideSidePanels: false", 
       "", 
-      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
+      pss("reduceFlashing: false") + "--reduce flickering and palette swapping", 
       pss("glowiness: true") + "-- uses GPU power", 
       "", 
       "", 
       "----GAMEPLAY----", 
       "roidsEnabled: " + true, 
       "trexEnabled: " + true, 
-      "volcanosEnabled: " + true, 
+      "volcanosEnabled: " + true,
       "ufosEnabled: " + true, 
       "tarpitsEnabled: " + true, 
       "", 
@@ -508,8 +541,8 @@ void loadSettingsFromTXT () {
       "", 
       "roidsPerSecond: " + 3, 
       "", 
-      pss("ufoSpawnRateLow: " + 30) + "--spawn a UFO at least this often (seconds)", 
-      pss("ufoSpawnRateHigh: " + 90) + "--spawn a UFO no more than this often (seconds)", 
+      pss("ufoSpawnRateLow: " + 45) + "--spawn a UFO at least this often (seconds)", 
+      pss("ufoSpawnRateHigh: " + 100) + "--spawn a UFO no more than this often (seconds)", 
       "", 
       "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
       pss("trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE) + "-- how far the trex \"sees\", in degrees", 

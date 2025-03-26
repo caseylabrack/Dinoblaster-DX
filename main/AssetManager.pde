@@ -8,7 +8,7 @@ class AssetManager {
   final static int MAX_GLOW = 60;
   final static float MAX_GHOST = .1;
 
-  final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods","rawr","hold on to your butts","remember to take breaks"};
+  final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods", "rawr", "hold on to your butts", "remember to take breaks"};
   final String[] DEFAULT_COLORS = new String[]{"#ff3800", "#ffff00", "#00ff00", "#00ffff", "#ff57ff"};
 
   PShader blur;
@@ -47,7 +47,7 @@ class AssetManager {
 
     ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
     sounds.add(ufostuff.ufoSound);
-    
+
     ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
     sounds.add(ufostuff.ufoSound2);
 
@@ -83,7 +83,7 @@ class AssetManager {
     roidStuff.bigone = loadImage("bigone.png");
     roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
     sounds.add(roidStuff.bigoneBlip);
-    
+
     playerStuff.oviDethSVG = loadShape("ovi-death.svg");
     playerStuff.oviDethSVG.disableStyle();
     playerStuff.dethSVG = loadShape("bronto-death.svg");
@@ -95,7 +95,7 @@ class AssetManager {
     playerStuff.oviSVG.disableStyle();
     playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
     playerStuff.eggWhole = loadImage("egg-whole.png");
-    for(int i=0; i<5; i++) {
+    for (int i=0; i<5; i++) {
       playerStuff.eggFrames[i] = loadImage("eggs_egg-crack" + i + ".png");
     }
     playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", context);
@@ -144,10 +144,13 @@ class AssetManager {
     earthStuff.doodadFemur = loadImage("doodad-femur.png");
     earthStuff.doodadHead = loadImage("doodad-head.png");
     earthStuff.doodadRibs = loadImage("doodad-ribcage.png");
-    
+
     ptutorialStuff.pteroIdle = loadImage("/_art/ptutorial/ptero_idle.png");
     ptutorialStuff.pteroFlap1 = loadImage("/_art/ptutorial/ptero_flap1.png");
     ptutorialStuff.pteroFlap2 = loadImage("/_art/ptutorial/ptero_flap2.png");
+    ptutorialStuff.earth = loadImage("/_art/ptutorial/ptero_earth.png");
+    ptutorialStuff.flap = raspi ? new SoundM("_audio/ptutorial/flap2.wav", ngainMusic) : new SoundP("_audio/ptutorial/flap2.wav", context);
+    ptutorialStuff.success = raspi ? new SoundM("_audio/ptutorial/success.wav", ngainMusic) : new SoundP("_audio/ptutorial/success.wav", context);
 
     musicStuff.lvl1a = raspi ? new SoundM("_music/lvl1.wav", ngainMusic) : new SoundP("_music/lvl1.wav", context);
     musicStuff.lvl1b = raspi ? new SoundM("_music/lvl1-jump.wav", ngainMusic) : new SoundP("_music/lvl1-jump.wav", context);
@@ -280,11 +283,14 @@ class AssetManager {
     PImage doodadHead;
     PImage doodadRibs;
   }
-  
+
   class PtutorialStuff {
     PImage pteroIdle;
     PImage pteroFlap1;
     PImage pteroFlap2;
+    PImage earth;
+    SoundPlayable flap;
+    SoundPlayable success;
   }
 
   class MusicStuff {
@@ -303,6 +309,7 @@ interface SoundPlayable {
   void stop_();
   void rate(float r);
   void vol(float v);
+  boolean isPlaying();
 }
 
 // the Minim library for Processing (Picade needs)
@@ -363,6 +370,11 @@ class SoundM implements SoundPlayable {
   void vol(float v) {
     out.setVolume(v);
   }
+
+  // to do
+  boolean isPlaying() {
+    return true;
+  }
 }
 
 // the Processing 3.0 official sound library (Android needs)
@@ -391,6 +403,10 @@ class SoundP implements SoundPlayable {
     } else {
       player.play();
     }
+  }
+
+  boolean isPlaying() {
+    return player.isPlaying();
   }
 
   void stop_ () {

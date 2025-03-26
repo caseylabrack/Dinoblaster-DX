@@ -10,6 +10,8 @@ class Ptutorial extends Scene {
   final static int WAIT_RIGHT = 2;
   final static int PTERO_LEFT = 3;
   final static int WAIT_LEFT = 4;
+  final static int TO_REPORT = 5;
+  final static int SUCCESS = 6;
   int state = START;
   float stateStart;
 
@@ -17,10 +19,15 @@ class Ptutorial extends Scene {
   float startPteroAngle;
 
   final static float WALK_ARC = 22;
+  float countDownFactor = 0;
+
+  SoundPlayable success;
 
   PlayerIntro playerIntro;
   PtutorialBronto player = new PtutorialBronto();
   PtutorialPtero ptero = new PtutorialPtero();
+  
+  boolean playing = false;
 
   class PtutorialPtero extends Entity {
     PImage idle;
@@ -28,6 +35,7 @@ class Ptutorial extends Scene {
     PImage flap2;
     final static float ORBIT = 775;
     boolean flapping = false;
+    SoundPlayable flap;
 
     void flap() {
       model = (time.clock % 100) > 100 / 2 ? flap1 : flap2;
@@ -47,13 +55,18 @@ class Ptutorial extends Scene {
       if (dir==0) {
         model = frames[0];
         walking = false;
+        step.stop_();
       } else {
+        if (!walking) {
+          walking = true;
+          step.play(true);
+        }
         model = millis() % 100 > 50 ? frames[1] : frames[2];
         facing = dir;
         earthAngle += RUN_SPEED * dir;
       }
       x = cos(radians(earthAngle)) * ORBIT;
-      y = HEIGHT_REF_HALF + sin(radians(earthAngle)) * ORBIT + earth.y;
+      y = HEIGHT_REF_HALF + sin(radians(earthAngle)) * ORBIT;
       r = earthAngle + 90;
     }
 
@@ -71,8 +84,9 @@ class Ptutorial extends Scene {
     ptero.flap1 = assets.ptutorialStuff.pteroFlap1;
     ptero.flap2 = assets.ptutorialStuff.pteroFlap2;
     ptero.model = ptero.idle;
+    ptero.flap = assets.ptutorialStuff.flap;
 
-    earth.model = loadImage("/_art/ptutorial/ptero_earth.png");
+    earth.model = assets.ptutorialStuff.earth;
 
     player.frames = assets.playerStuff.brontoFrames;
     player.model = player.frames[0];
@@ -80,18 +94,27 @@ class Ptutorial extends Scene {
 
     playerIntro = new PlayerIntro();
     playerIntro.model = assets.playerStuff.brontoFrames[0];
+    playerIntro.dontFlicker = settings.getBoolean("reduceFlashing", false);
 
     tipFont = assets.uiStuff.MOTD;
 
-    play();
+    success = assets.ptutorialStuff.success;
   }
 
   void play() {
+    if(playing) return;
+    playing = true;
+    
+    assets.playerStuff.spawn.play();
+    
     time.restart();
     earth.y = 150;
     ptero.x = earth.x + cos(radians(-90)) * PtutorialPtero.ORBIT;
     ptero.y = earth.y + HEIGHT_REF_HALF + sin(radians(-90)) * PtutorialPtero.ORBIT;
     ptero.r = 0;
+
+    earth.addChild(ptero);
+    earth.addChild(player);
 
     state = START;
     stateStart = time.getClock();
@@ -113,9 +136,9 @@ class Ptutorial extends Scene {
       playerIntro.update();
       if (playerIntro.state == PlayerIntro.SPAWNING) {
         playerIntro.state = PlayerIntro.DONE;
-        player.y = playerIntro.y;
-        player.r = playerIntro.r;
         player.enabled = true;
+        player.move(0);
+        ptero.flap.play(true);
         state = PTERO_RIGHT;
         stateStart = millis();
       }
@@ -128,11 +151,12 @@ class Ptutorial extends Scene {
         float endAngle = startAngle + WALK_ARC;
         float diff = endAngle - startAngle;
         float dist = pct * diff;
-        ptero.x = earth.x + cos(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
-        ptero.y = earth.y + HEIGHT_REF_HALF + sin(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
+        ptero.x = cos(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
+        ptero.y = HEIGHT_REF_HALF + sin(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
         ptero.r = startAngle + dist + 90;
         ptero.flap();
       } else {
+        ptero.flap.stop_();
         ptero.facing = -1;
         ptero.model = ptero.idle;
         state = WAIT_RIGHT;
@@ -149,6 +173,7 @@ class Ptutorial extends Scene {
       if (player.earthAngle>=-90 + WALK_ARC) {
         player.move(0);
         state = PTERO_LEFT;
+        ptero.flap.play(true);
         stateStart = millis();
       }
       break;
@@ -160,11 +185,12 @@ class Ptutorial extends Scene {
         float endAngle = -90 - WALK_ARC;
         float diff = endAngle - startAngle;
         float dist = pct * diff;
-        ptero.x = earth.x + cos(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
-        ptero.y = earth.y + HEIGHT_REF_HALF + sin(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
+        ptero.x = cos(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
+        ptero.y = HEIGHT_REF_HALF + sin(radians(startAngle + dist)) * PtutorialPtero.ORBIT;
         ptero.r = startAngle + dist + 90;
         ptero.flap();
       } else {
+        ptero.flap.stop_();
         ptero.facing = 1;
         ptero.model = ptero.idle;
         state = WAIT_LEFT;
@@ -179,9 +205,33 @@ class Ptutorial extends Scene {
         player.move(0);
       }
       if (player.earthAngle<=-90 - WALK_ARC) {
-        player.move(0);
-        state = 100000;
+        player.move(0);        
+        success.play();
+        state = TO_REPORT;
         stateStart = millis();
+      }
+      break;
+
+    case TO_REPORT:
+      pct = (millis() - stateStart) / 2e3;
+      pct = utils.easeInExpo(pct);
+      if (pct < 1) {
+        earth.y = 150 + pct * -550;
+      } else {
+        state = SUCCESS;
+        stateStart = millis();
+      }
+      break;
+
+    case SUCCESS:
+      pct = (millis() - stateStart) / 3e3;
+      if (pct < 1) {
+        countDownFactor = millis() - stateStart;
+      } else {
+        currentScene = singlePlayer;
+        loadSettingsFromTXT();
+        singlePlayer.loadSettings(settings);
+        singlePlayer.play(SinglePlayer.TRIASSIC);
       }
       break;
     }
@@ -196,6 +246,12 @@ class Ptutorial extends Scene {
     sb.imageMode(CENTER);
     sb.clip(width/2, height/2, height, height);
     sb.pushStyle();
+
+    sb.pushStyle();
+    sb.textFont(tipFont);
+    sb.textAlign(CENTER, CENTER);
+    sb.text("Ptutorial", 0, -HEIGHT_REF_HALF + 50);
+    sb.popStyle();
 
     earth.simpleRenderImage();
 
@@ -215,6 +271,7 @@ class Ptutorial extends Scene {
         sb.textFont(tipFont);
         sb.textAlign(CENTER, CENTER);
         sb.text("Move right", 0, HEIGHT_REF_HALF - 250);
+        sb.text("<" + rightkey1p + "> key", 0, HEIGHT_REF_HALF - 250 + 50);
         sb.popStyle();
       }
       break;
@@ -225,6 +282,7 @@ class Ptutorial extends Scene {
         sb.textFont(tipFont);
         sb.textAlign(CENTER, CENTER);
         sb.text("Move left", 0, HEIGHT_REF_HALF - 250);
+        sb.text("<" + leftkey1p + "> key", 0, HEIGHT_REF_HALF - 250 + 50);
         sb.popStyle();
       }
       break;
@@ -233,8 +291,19 @@ class Ptutorial extends Scene {
     sb.pushStyle();
     sb.textFont(tipFont);
     sb.textAlign(CENTER, CENTER);
-    sb.text("Ptutorial", 0, -HEIGHT_REF_HALF + 50);
+    sb.fill(currentColor.getColor());  
+    sb.text("You're ready!", 0, earth.y + 300);
+    if (state == SUCCESS) { // print 3... 2... 1...
+      float i = 3 - floor(countDownFactor/1e3);
+      String formatNum = "" + int(i);
+      for(int z = 0; z < countDownFactor % 1000; z += 333) {
+        formatNum = " " + formatNum + ".";
+      }
+      sb.text("" + formatNum, 0, earth.y + 350);
+    }
+
     sb.popStyle();
+
 
     sb.popStyle();
 
