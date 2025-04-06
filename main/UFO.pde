@@ -79,7 +79,7 @@ class UFO extends Entity {
   }
 
   void startCountDown () {
-    spawnCountDown = random(0, spawnTimeHigh) * 1000;
+    spawnCountDown = random(20, spawnTimeHigh) * 1000;
     enabled = true;
   }
 
@@ -227,7 +227,7 @@ class UFO extends Entity {
 
     case LEAVING:
       dist = dist(x, y, 0, 0);
-      if (dist < 2000) {
+      if (dist < 500) {
         angle = (float)Math.atan2(y, x);
         x = cos(angle) * (dist + (initialSpeed * dt));
         y = sin(angle) * (dist + (initialSpeed * dt));
@@ -401,7 +401,7 @@ class UFORespawn extends Entity {
 
     case LEAVING:
       dist = dist(x, y, 0, 0);
-      if (dist < 2000) {
+      if (dist < 500) {
         angle = (float)Math.atan2(y, x);
         x = cos(angle) * (dist+UFO.initialSpeed * dt);
         y = sin(angle) * (dist+UFO.initialSpeed * dt);

@@ -74,15 +74,15 @@ class Entity {
     simpleRenderImage(model);
   }
 
-  void simpleRenderImage (PShape im) {
-    pushTransforms();
-    pushStyle();
-    strokeWeight(assets.STROKE_WIDTH / scale);
-    shapeMode(CENTER);
-    shape(im, 0, 0);
-    popStyle();
-    popMatrix();
-  }
+  //void simpleRenderImage (PShape im) {
+  //  pushTransforms();
+  //  pushStyle();
+  //  strokeWeight(assets.STROKE_WIDTH / scale);
+  //  shapeMode(CENTER);
+  //  shape(im, 0, 0);
+  //  popStyle();
+  //  popMatrix();
+  //}
 
   void simpleRenderImageVector () {
     pushTransforms();

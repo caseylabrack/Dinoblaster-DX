@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="125.41923"
+   height="102.06036"
+   viewBox="0 0 33.183837 27.003469"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="ptutorial.svg"
+   inkscape:export-batch-path="C:\Users\clabr\Documents\Processing\sketches\Dinoblaster-DX\main\data\_art\ptutorial"
+   inkscape:export-batch-name="ptero"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#888888"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.3637493"
+     inkscape:cx="1235.1977"
+     inkscape:cy="191.01751"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#4c4c4c00" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-395.29077,46.113049)">
+    <g
+       id="g22"
+       transform="translate(1.0400022e-6)"
+       inkscape:label="flap2">
+      <rect
+         style="fill:#000000;fill-opacity:0;stroke:none;stroke-width:0.389007;stroke-linecap:round;stroke-miterlimit:11.2"
+         id="rect2"
+         width="33.183838"
+         height="27.003469"
+         x="395.29077"
+         y="-46.113049"
+         inkscape:label="boundingbox" />
+      <path
+         style="display:inline;fill:none;stroke:#ffffff;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
+         d="m 397.36667,-32.170182 2.64583,-2.998608 3.26319,-1.852083 5.99722,-1.146528 5.82084,2.028472 2.20486,0.79375 1.23472,-1.675694 -1.94028,-4.938889 2.64584,2.028472 2.64583,1.322917 3.70417,3.527777 -6.08542,-0.970139 -1.94028,2.557643 -2.02847,-0.881948 2.64583,3.615968 1.32292,0.70556 -1.41111,-0.17639 -6.61458,8.81945 -3.88056,-6.87917 1.32292,-2.99861 -3.175,-3.615975 -3.08681,0.79375 -1.94028,2.734025 -0.52916,0.26459 0.97014,-3.175004 -3.2632,1.763894 -0.52916,0.35277"
+         id="flap2"
+         inkscape:label="flap2" />
+    </g>
+  </g>
+</svg>

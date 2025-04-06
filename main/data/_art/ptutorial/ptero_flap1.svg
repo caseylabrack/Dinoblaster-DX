@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="125.41923"
+   height="102.06036"
+   viewBox="0 0 33.183837 27.003469"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="ptutorial.svg"
+   inkscape:export-batch-path="C:\Users\clabr\Documents\Processing\sketches\Dinoblaster-DX\main\data\_art\ptutorial"
+   inkscape:export-batch-name="ptero"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#888888"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.3637493"
+     inkscape:cx="1235.1977"
+     inkscape:cy="191.01751"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#4c4c4c00" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-351.71793,46.113049)">
+    <g
+       id="g20"
+       inkscape:label="flap1">
+      <rect
+         style="fill:#000000;fill-opacity:0;stroke:none;stroke-width:0.389007;stroke-linecap:round;stroke-miterlimit:11.2"
+         id="rect18"
+         width="33.183838"
+         height="27.003469"
+         x="351.71793"
+         y="-46.113049"
+         inkscape:label="boundingbox"
+         transform="translate(1.0400022e-6)" />
+      <path
+         style="display:inline;fill:none;stroke:#ffffff;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
+         d="m 378.30421,-38.657269 -2.64583,-1.32291 -2.64584,-2.02847 1.94028,4.93888 -1.23472,1.6757 -2.20486,-0.79375 -0.0882,-0.52917 -3.52777,-6.87916 -3.08681,5.55625 -5.11528,0.97013 -3.26319,1.85209 -2.64583,2.99861 0.52916,-0.35277 3.2632,-1.7639 -0.97014,3.17501 0.52916,-0.26459 1.94028,-2.73403 3.08681,-0.79375 7.49653,2.02848 2.29305,-1.49931 2.02847,0.88195 1.94028,-2.55765 6.08542,0.97014 -3.70417,-3.52778"
+         id="flap1"
+         inkscape:label="flap1" />
+    </g>
+  </g>
+</svg>

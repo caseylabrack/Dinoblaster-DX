@@ -8,7 +8,7 @@ class AssetManager {
   final static int MAX_GLOW = 60;
   final static float MAX_GHOST = .1;
 
-  final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods","rawr","hold on to your butts","remember to take breaks"};
+  final String[] DEFAULT_TIPS = new String[]{"Real Winners Say No to Drugs", "This is Fine", "Life Finds a Way", "Tough Out There for Sauropods", "rawr", "hold on to your butts", "remember to take breaks"};
   final String[] DEFAULT_COLORS = new String[]{"#ff3800", "#ffff00", "#00ff00", "#00ffff", "#ff57ff"};
 
   PShader blur;
@@ -20,6 +20,7 @@ class AssetManager {
   PlayerStuff playerStuff = new PlayerStuff();
   TrexStuff trexStuff = new TrexStuff();
   EarthStuff earthStuff = new EarthStuff();
+  PtutorialStuff ptutorialStuff = new PtutorialStuff();
   MusicStuff musicStuff = new MusicStuff();
   ArrayList<SoundPlayable> sounds = new ArrayList<SoundPlayable>(); 
   ArrayList<SoundPlayable> musics = new ArrayList<SoundPlayable>(); 
@@ -33,126 +34,134 @@ class AssetManager {
     //testmask = loadShader("pixelmask.glsl");
     blur = loadShader("blur.glsl");
 
-    //ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
-    //ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
-    //ufostuff.ufoSVG = loadShape("UFO.svg");
-    //ufostuff.ufoSVG.disableStyle();
-    //ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
-    //ufostuff.ufoFinalSingle.disableStyle();
-    //ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
-    //ufostuff.ufoFinalDuo.disableStyle();
-    //ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
-    //ufostuff.ufoFinalDuoZoom.disableStyle();
+    ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
+    ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
+    ufostuff.ufoSVG = loadShape("UFO.svg");
+    ufostuff.ufoSVG.disableStyle();
+    ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
+    ufostuff.ufoFinalSingle.disableStyle();
+    ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
+    ufostuff.ufoFinalDuo.disableStyle();
+    ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
+    ufostuff.ufoFinalDuoZoom.disableStyle();
 
-    //ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
-    //sounds.add(ufostuff.ufoSound);
-    
-    //ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
-    //sounds.add(ufostuff.ufoSound2);
+    ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
+    sounds.add(ufostuff.ufoSound);
 
-    //uiStuff.extinctType = createFont("Hyperspace.otf", 150);
-    ////uiStuff.extinctSign = loadImage("gameover-lettering.png");
-    //uiStuff.letterbox = loadImage("letterboxes.png");
-    //uiStuff.screenShine = loadImage("screenShine.png");
-    //uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
-    //uiStuff.progressBG = loadImage("progress-bg.png");
-    //uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
-    //uiStuff.tick = loadImage("progress-tick.png");
-    //uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
-    //uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
-    //uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
-    //uiStuff.buttons = loadImage("ui-buttons.png");
-    //uiStuff.titlescreenImage = loadImage("title.png");
-    //uiStuff.titlescreenImageVec = loadShape("test.svg");
-    //uiStuff.titlescreenImageVec.disableStyle();
-    //uiStuff.title40 = loadImage("title_fortieth.png");
-    //uiStuff.titleSpeak =  raspi ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", context);
+    ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
+    sounds.add(ufostuff.ufoSound2);
 
-    //volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
-    //volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
-    //sounds.add(volcanoStuff.rumble);
+    uiStuff.extinctType = createFont("Hyperspace.otf", 150);
+    //uiStuff.extinctSign = loadImage("gameover-lettering.png");
+    uiStuff.letterbox = loadImage("letterboxes.png");
+    uiStuff.screenShine = loadImage("screenShine.png");
+    uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
+    uiStuff.progressBG = loadImage("progress-bg.png");
+    uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
+    uiStuff.tick = loadImage("progress-tick.png");
+    uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
+    uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
+    uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
+    uiStuff.buttons = loadImage("ui-buttons.png");
+    uiStuff.titlescreenImage = loadImage("title.png");
+    uiStuff.titlescreenImageVec = loadShape("test.svg");
+    uiStuff.titlescreenImageVec.disableStyle();
+    uiStuff.title40 = loadImage("title_fortieth.png");
+    uiStuff.titleSpeak =  raspi ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", context);
 
-    //roidStuff.explosionFrames = utils.sheetToSprites(loadImage("explosion.png"), 3, 1);
-    //roidStuff.roidFrames = utils.sheetToSprites(loadImage("roids.png"), 2, 2);
-    //roidStuff.trail = loadImage("roid-trail.png");
-    //for (int i = 0; i < roidStuff.hits.length; i++) {
-    //  roidStuff.hits[i] = raspi ? new SoundM("_audio/roids/impact" + (i + 1) + ".wav", ngainSFX) : new SoundP("_audio/roids/impact" + (i + 1) + ".wav", context);
-    //  sounds.add(roidStuff.hits[i]);
-    //}
-    //roidStuff.bigone = loadImage("bigone.png");
-    //roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
-    //sounds.add(roidStuff.bigoneBlip);
-    
-    //playerStuff.oviDethSVG = loadShape("ovi-death.svg");
-    //playerStuff.oviDethSVG.disableStyle();
-    //playerStuff.dethSVG = loadShape("bronto-death.svg");
-    //playerStuff.dethSVG.disableStyle();
-    //playerStuff.brontoSVG = loadShape("bronto-idle.svg");
-    //playerStuff.brontoSVG.disableStyle();
-    //playerStuff.brontoFrames = utils.sheetToSprites(loadImage("bronto-frames.png"), 3, 1);
-    //playerStuff.oviSVG = loadShape("ovi-idle.svg");
-    //playerStuff.oviSVG.disableStyle();
-    //playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
-    //playerStuff.eggWhole = loadImage("egg-whole.png");
-    //for(int i=0; i<5; i++) {
-    //  playerStuff.eggFrames[i] = loadImage("eggs_egg-crack" + i + ".png");
-    //}
-    //playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", context);
-    //sounds.add(playerStuff.extinct);
-    //playerStuff.spawn = raspi ? new SoundM("_audio/player/spawn.wav", ngainSFX) : new SoundP("_audio/player/spawn.wav", context);
-    //sounds.add(playerStuff.spawn);
-    //playerStuff.step = raspi ? new SoundM("_audio/player/walking.wav", ngainSFX) : new SoundP("_audio/player/walking.wav", context);
-    //sounds.add(playerStuff.step);
-    //playerStuff.step2 = raspi ? new SoundM("_audio/player/step2b.wav", ngainSFX) : new SoundP("_audio/player/step2b.wav", context);
-    //sounds.add(playerStuff.step2);
-    //playerStuff.tarStep = raspi ? new SoundM("_audio/player/walking-in-tar.wav", ngainSFX) : new SoundP("_audio/player/walking-in-tar.wav", context);
-    //sounds.add(playerStuff.tarStep);
-    //playerStuff.littleDeath = raspi ? new SoundM("_audio/player/dino little death.wav", ngainSFX) : new SoundP("_audio/player/dino little death.wav", context);
-    //sounds.add(playerStuff.littleDeath); 
-    //playerStuff.respawnRise = raspi ? new SoundM("_audio/player/revup2-loop-vol-adjusted.wav", ngainSFX) : new SoundP("_audio/player/revup2-loop-vol-adjusted.wav", context);
-    //sounds.add(playerStuff.respawnRise); 
+    volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
+    volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
+    sounds.add(volcanoStuff.rumble);
 
-    //trexStuff.trexIdle = loadImage("trex-idle.png");
-    //trexStuff.trexRun1 = loadImage("trex-run1.png");
-    //trexStuff.trexRun2 = loadImage("trex-run2.png");
-    //trexStuff.trexHead = loadImage("trex-head.png");
-    //trexStuff.eggCracked = loadImage("egg-cracked.png");
-    //trexStuff.eggBurst = loadImage("egg-burst.png");
-    //trexStuff.deth = loadShape("trexDeth.svg");
-    //trexStuff.eggHatch = raspi ? new SoundM("_audio/trex-and-egg/egg-hatch.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-hatch.wav", context);
-    //sounds.add(trexStuff.eggHatch);
-    //trexStuff.eggWiggle = raspi ? new SoundM("_audio/trex-and-egg/egg-wiggle.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-wiggle.wav", context);
-    //sounds.add(trexStuff.eggWiggle);
-    //trexStuff.rawr = raspi ? new SoundM("_audio/trex-and-egg/rawr.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/rawr.wav", context);
-    //sounds.add(trexStuff.rawr);
-    //trexStuff.stomp = raspi ? new SoundM("_audio/trex-and-egg/trex-walking.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-walking.wav", context);
-    //sounds.add(trexStuff.stomp);
-    //trexStuff.sinking = raspi ? new SoundM("_audio/trex-and-egg/trex-sinking-in-tar.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-sinking-in-tar.wav", context);
-    //sounds.add(trexStuff.sinking);
+    roidStuff.explosionFrames = utils.sheetToSprites(loadImage("explosion.png"), 3, 1);
+    roidStuff.roidFrames = utils.sheetToSprites(loadImage("roids.png"), 2, 2);
+    roidStuff.trail = loadImage("roid-trail.png");
+    for (int i = 0; i < roidStuff.hits.length; i++) {
+      roidStuff.hits[i] = raspi ? new SoundM("_audio/roids/impact" + (i + 1) + ".wav", ngainSFX) : new SoundP("_audio/roids/impact" + (i + 1) + ".wav", context);
+      sounds.add(roidStuff.hits[i]);
+    }
+    roidStuff.bigone = loadImage("bigone.png");
+    roidStuff.bigoneBlip = raspi ? new SoundM("_audio/bigone-incoming-blip.wav", ngainSFX) : new SoundP("_audio/bigone-incoming-blip.wav", context);
+    sounds.add(roidStuff.bigoneBlip);
 
-    //earthStuff.earth = loadImage("earth.png");
-    ////earthStuff.earth = loadImage("earth-east-clear.png");
-    //earthStuff.earthV = loadShape("earth-v.svg");
-    //earthStuff.earth2 = loadImage("earth-east.png");
-    //earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
-    //earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
-    //earthStuff.mask = loadShader("pixelmask.glsl");
-    ////earthStuff.mask.set("mask", earthStuff.tarpitMask);
-    //earthStuff.doodadBone = loadImage("doodad-bone.png");
-    //earthStuff.doodadFemur = loadImage("doodad-femur.png");
-    //earthStuff.doodadHead = loadImage("doodad-head.png");
-    //earthStuff.doodadRibs = loadImage("doodad-ribcage.png");
+    playerStuff.oviDethSVG = loadShape("ovi-death.svg");
+    playerStuff.oviDethSVG.disableStyle();
+    playerStuff.dethSVG = loadShape("bronto-death.svg");
+    playerStuff.dethSVG.disableStyle();
+    playerStuff.brontoSVG = loadShape("bronto-idle.svg");
+    playerStuff.brontoSVG.disableStyle();
+    playerStuff.brontoFrames = utils.sheetToSprites(loadImage("bronto-frames.png"), 3, 1);
+    playerStuff.oviSVG = loadShape("ovi-idle.svg");
+    playerStuff.oviSVG.disableStyle();
+    playerStuff.oviFrames = utils.sheetToSprites(loadImage("ovi-frames.png"), 3, 1);
+    playerStuff.eggWhole = loadImage("egg-whole.png");
+    for (int i=0; i<5; i++) {
+      playerStuff.eggFrames[i] = loadImage("eggs_egg-crack" + i + ".png");
+    }
+    playerStuff.extinct = raspi ? new SoundM("_audio/player/extinct.wav", ngainSFX) : new SoundP("_audio/player/extinct.wav", context);
+    sounds.add(playerStuff.extinct);
+    playerStuff.spawn = raspi ? new SoundM("_audio/player/spawn.wav", ngainSFX) : new SoundP("_audio/player/spawn.wav", context);
+    sounds.add(playerStuff.spawn);
+    playerStuff.step = raspi ? new SoundM("_audio/player/walking.wav", ngainSFX) : new SoundP("_audio/player/walking.wav", context);
+    sounds.add(playerStuff.step);
+    playerStuff.step2 = raspi ? new SoundM("_audio/player/step2b.wav", ngainSFX) : new SoundP("_audio/player/step2b.wav", context);
+    sounds.add(playerStuff.step2);
+    playerStuff.tarStep = raspi ? new SoundM("_audio/player/walking-in-tar.wav", ngainSFX) : new SoundP("_audio/player/walking-in-tar.wav", context);
+    sounds.add(playerStuff.tarStep);
+    playerStuff.littleDeath = raspi ? new SoundM("_audio/player/dino little death.wav", ngainSFX) : new SoundP("_audio/player/dino little death.wav", context);
+    sounds.add(playerStuff.littleDeath); 
+    playerStuff.respawnRise = raspi ? new SoundM("_audio/player/revup2-loop-vol-adjusted.wav", ngainSFX) : new SoundP("_audio/player/revup2-loop-vol-adjusted.wav", context);
+    sounds.add(playerStuff.respawnRise); 
 
-    //musicStuff.lvl1a = raspi ? new SoundM("_music/lvl1.wav", ngainMusic) : new SoundP("_music/lvl1.wav", context);
-    //musicStuff.lvl1b = raspi ? new SoundM("_music/lvl1-jump.wav", ngainMusic) : new SoundP("_music/lvl1-jump.wav", context);
-    //musicStuff.lvl2a = raspi ? new SoundM("_music/lvl2.wav", ngainMusic) : new SoundP("_music/lvl2.wav", context);
-    //musicStuff.lvl2b = raspi ? new SoundM("_music/lvl2-seek.wav", ngainMusic) : new SoundP("_music/lvl2-seek.wav", context);
-    //musicStuff.lvl3 = raspi ? new SoundM("_music/lvl3.wav", ngainMusic) : new SoundP("_music/lvl3.wav", context);
-    //musics.add(musicStuff.lvl1a);
-    //musics.add(musicStuff.lvl1b);
-    //musics.add(musicStuff.lvl2a);
-    //musics.add(musicStuff.lvl2b);
-    //musics.add(musicStuff.lvl3);
+    trexStuff.trexIdle = loadImage("trex-idle.png");
+    trexStuff.trexRun1 = loadImage("trex-run1.png");
+    trexStuff.trexRun2 = loadImage("trex-run2.png");
+    trexStuff.trexHead = loadImage("trex-head.png");
+    trexStuff.eggCracked = loadImage("egg-cracked.png");
+    trexStuff.eggBurst = loadImage("egg-burst.png");
+    trexStuff.deth = loadShape("trexDeth.svg");
+    trexStuff.eggHatch = raspi ? new SoundM("_audio/trex-and-egg/egg-hatch.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-hatch.wav", context);
+    sounds.add(trexStuff.eggHatch);
+    trexStuff.eggWiggle = raspi ? new SoundM("_audio/trex-and-egg/egg-wiggle.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/egg-wiggle.wav", context);
+    sounds.add(trexStuff.eggWiggle);
+    trexStuff.rawr = raspi ? new SoundM("_audio/trex-and-egg/rawr.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/rawr.wav", context);
+    sounds.add(trexStuff.rawr);
+    trexStuff.stomp = raspi ? new SoundM("_audio/trex-and-egg/trex-walking.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-walking.wav", context);
+    sounds.add(trexStuff.stomp);
+    trexStuff.sinking = raspi ? new SoundM("_audio/trex-and-egg/trex-sinking-in-tar.wav", ngainSFX) : new SoundP("_audio/trex-and-egg/trex-sinking-in-tar.wav", context);
+    sounds.add(trexStuff.sinking);
+
+    earthStuff.earth = loadImage("earth.png");
+    //earthStuff.earth = loadImage("earth-east-clear.png");
+    earthStuff.earthV = loadShape("earth.svg");
+    earthStuff.earthV.disableStyle();
+    earthStuff.earth2 = loadImage("earth-east.png");
+    earthStuff.earthPangea1 = loadImage("earth-pangea1.png");
+    earthStuff.earthPangea2 = loadImage("earth-pangea2.png");
+    earthStuff.mask = loadShader("pixelmask.glsl");
+    //earthStuff.mask.set("mask", earthStuff.tarpitMask);
+    earthStuff.doodadBone = loadImage("doodad-bone.png");
+    earthStuff.doodadFemur = loadImage("doodad-femur.png");
+    earthStuff.doodadHead = loadImage("doodad-head.png");
+    earthStuff.doodadRibs = loadImage("doodad-ribcage.png");
+
+    ptutorialStuff.pteroIdle = loadImage("/_art/ptutorial/ptero_idle.png");
+    ptutorialStuff.pteroFlap1 = loadImage("/_art/ptutorial/ptero_flap1.png");
+    ptutorialStuff.pteroFlap2 = loadImage("/_art/ptutorial/ptero_flap2.png");
+    ptutorialStuff.earth = loadImage("/_art/ptutorial/ptero_earth.png");
+    ptutorialStuff.flap = raspi ? new SoundM("_audio/ptutorial/flap2.wav", ngainMusic) : new SoundP("_audio/ptutorial/flap2.wav", context);
+    ptutorialStuff.success = raspi ? new SoundM("_audio/ptutorial/success.wav", ngainMusic) : new SoundP("_audio/ptutorial/success.wav", context);
+
+    musicStuff.lvl1a = raspi ? new SoundM("_music/lvl1.wav", ngainMusic) : new SoundP("_music/lvl1.wav", context);
+    musicStuff.lvl1b = raspi ? new SoundM("_music/lvl1-jump.wav", ngainMusic) : new SoundP("_music/lvl1-jump.wav", context);
+    musicStuff.lvl2a = raspi ? new SoundM("_music/lvl2.wav", ngainMusic) : new SoundP("_music/lvl2.wav", context);
+    musicStuff.lvl2b = raspi ? new SoundM("_music/lvl2-seek.wav", ngainMusic) : new SoundP("_music/lvl2-seek.wav", context);
+    musicStuff.lvl3 = raspi ? new SoundM("_music/lvl3.wav", ngainMusic) : new SoundP("_music/lvl3.wav", context);
+    musics.add(musicStuff.lvl1a);
+    musics.add(musicStuff.lvl1b);
+    musics.add(musicStuff.lvl2a);
+    musics.add(musicStuff.lvl2b);
+    musics.add(musicStuff.lvl3);
   }
 
   void volumeSFX (float v) {
@@ -275,6 +284,15 @@ class AssetManager {
     PImage doodadRibs;
   }
 
+  class PtutorialStuff {
+    PImage pteroIdle;
+    PImage pteroFlap1;
+    PImage pteroFlap2;
+    PImage earth;
+    SoundPlayable flap;
+    SoundPlayable success;
+  }
+
   class MusicStuff {
     SoundPlayable lvl1a;
     SoundPlayable lvl1b;
@@ -291,6 +309,7 @@ interface SoundPlayable {
   void stop_();
   void rate(float r);
   void vol(float v);
+  boolean isPlaying();
 }
 
 // the Minim library for Processing (Picade needs)
@@ -351,6 +370,11 @@ class SoundM implements SoundPlayable {
   void vol(float v) {
     out.setVolume(v);
   }
+
+  // to do
+  boolean isPlaying() {
+    return true;
+  }
 }
 
 // the Processing 3.0 official sound library (Android needs)
@@ -379,6 +403,10 @@ class SoundP implements SoundPlayable {
     } else {
       player.play();
     }
+  }
+
+  boolean isPlaying() {
+    return player.isPlaying();
   }
 
   void stop_ () {

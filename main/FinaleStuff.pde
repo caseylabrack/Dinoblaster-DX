@@ -10,7 +10,8 @@ class SPFinale {
   final static int PULLING_AWAY = 7;
   final static int ZOOMING = 8;
   final static int FADING = 9;
-  final static int DONE = 10;
+  final static int ROLL_CREDITS = 10;
+  final static int DONE = 11;
   int state = NOT_FINALE;
   int lastState = NOT_FINALE;
 
@@ -58,6 +59,8 @@ class SPFinale {
   final float FADING_DURATION = 6e3;
   PVector fadingStartPos;
 
+  PFont thanksFont;
+  String thanksMessage = "";
 
   SPFinale (PImage bigOneModel, PShape[] finaleUFOFrames, PShape abducteeModel) {
 
@@ -120,6 +123,8 @@ class SPFinale {
     //  ring1[i].y = sin(radians(a)) * Earth.EARTH_RADIUS;
     //  ring1[i].r = a + 90;
     //}
+
+    thanksFont = assets.uiStuff.MOTD;
   }
 
   void update(Earth earth, Trex trex, Player[] ps, Time time) {
@@ -305,7 +310,15 @@ class SPFinale {
         finalUFO.y += (noise(sin(float(frameCount)/53)) * 2 - 1) * (1 - progress) * 20; // add some shake
         finalUFO.scale = map(progress, 0, 1, finalUFO.FINAL_SCALE, .001);
       } else {
-        state = DONE;
+        state = ROLL_CREDITS;
+        stateStart = millis();
+      }
+      break;
+
+    case ROLL_CREDITS: 
+      progress = (millis() - stateStart) / 2e3;
+      if(progress > 1) {
+       thanksMessage = "Thanks for playing!\n\nSpecial thanks:\nSara Bennett\nJeff Labrack\nJonathan Lauffer"; 
       }
       break;
 
@@ -328,88 +341,94 @@ class SPFinale {
       return;
 
     case EXPLODING:
-      pushMatrix();
-      translate(earth.globalPos().x, earth.globalPos().y);
+      sb.pushMatrix();
+      sb.translate(earth.globalPos().x, earth.globalPos().y);
       float progress = (millis() - stateStart) / EXPLOSIONS_DURATION;
       for (float i = 0; i < NUM_EXPLOSIONS - 1; i++) {
         if (i/float(NUM_EXPLOSIONS) > progress) { 
           break;
         }
-        pushMatrix();
-        translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
-        rotate(radians(explosionRing.get(int(i)).z));
+        sb.pushMatrix();
+        sb.translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
+        sb.rotate(radians(explosionRing.get(int(i)).z));
         sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
-        popMatrix();
+        sb.popMatrix();
 
-        pushMatrix();
-        translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
-        rotate(radians(explosionRing2.get(int(i)).z));
+        sb.pushMatrix();
+        sb.translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
+        sb.rotate(radians(explosionRing2.get(int(i)).z));
         sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
-        popMatrix();
+        sb.popMatrix();
       }
-      popMatrix();
+      sb.popMatrix();
       break;
 
     case RESCUING:
 
       // explosions
-      pushMatrix();
-      translate(earth.globalPos().x, earth.globalPos().y);
+      sb.pushMatrix();
+      sb.translate(earth.globalPos().x, earth.globalPos().y);
       for (float i = 0; i < NUM_EXPLOSIONS; i++) {
-        pushMatrix();
-        translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
-        rotate(radians(explosionRing.get(int(i)).z));
+        sb.pushMatrix();
+        sb.translate(explosionRing.get(int(i)).x, explosionRing.get(int(i)).y);
+        sb.rotate(radians(explosionRing.get(int(i)).z));
         sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
-        popMatrix();
+        sb.popMatrix();
 
-        pushMatrix();
-        translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
-        rotate(radians(explosionRing2.get(int(i)).z));
+        sb.pushMatrix();
+        sb.translate(explosionRing2.get(int(i)).x, explosionRing2.get(int(i)).y);
+        sb.rotate(radians(explosionRing2.get(int(i)).z));
         sb.image(assets.roidStuff.explosionFrames[0], 0, 0);
-        popMatrix();
+        sb.popMatrix();
       }
-      popMatrix();
+      sb.popMatrix();
 
       // UFO beam
-      pushStyle();
-      noFill();
-      strokeWeight(assets.STROKE_WIDTH);
-      stroke(0, 0, 100, 1);
+      sb.pushStyle();
+      sb.noFill();
+      sb.strokeWeight(assets.STROKE_WIDTH);
+      sb.stroke(0, 0, 100, 1);
       //stroke(currentColor.getColor());
       float angle = degrees(atan2(0 - finalUFO.y, 0 - finalUFO.x));
-      line(finalUFO.x, finalUFO.y, finalUFO.x + cos(radians(angle + UFO.maxBeamWidth)) * 250, finalUFO.y + sin(radians(angle + UFO.maxBeamWidth)) * 250);
-      line(finalUFO.x, finalUFO.y, finalUFO.x + cos(radians(angle - UFO.maxBeamWidth)) * 250, finalUFO.y + sin(radians(angle - UFO.maxBeamWidth)) * 250);
-      popStyle();
+      sb.line(finalUFO.x, finalUFO.y, finalUFO.x + cos(radians(angle + UFO.maxBeamWidth)) * 250, finalUFO.y + sin(radians(angle + UFO.maxBeamWidth)) * 250);
+      sb.line(finalUFO.x, finalUFO.y, finalUFO.x + cos(radians(angle - UFO.maxBeamWidth)) * 250, finalUFO.y + sin(radians(angle - UFO.maxBeamWidth)) * 250);
+      sb.popStyle();
 
       // DINO ABDUCTING
       if (!p1Died) {
-        pushMatrix();
-        pushStyle();
-        noFill();
-        stroke(0, 0, 100, 1);
+        sb.pushMatrix();
+        sb.pushStyle();
+        sb.noFill();
+        sb.stroke(0, 0, 100, 1);
         dummyBronto1.simpleRenderImageVector();
-        popStyle();
-        popMatrix();
+        sb.popStyle();
+        sb.popMatrix();
       }
       if (!p2Died) {
-        pushMatrix();
-        pushStyle();
-        noFill();
-        stroke(0, 0, 100, 1);
+        sb.pushMatrix();
+        sb.pushStyle();
+        sb.noFill();
+        sb.stroke(0, 0, 100, 1);
         dummyBronto2.simpleRenderImageVector();
-        popStyle();
-        popMatrix();
+        sb.popStyle();
+        sb.popMatrix();
       }
       break;
     }
 
-    if (state!=INCOMING && state != DONE) {
-      pushStyle();
-      fill(0, 0, 0, 1);
-      stroke(0, 0, 100, 1);
+    if (state!=INCOMING && state != DONE && state != ROLL_CREDITS) {
+      sb.pushStyle();
+      sb.fill(0, 0, 0, 1);
+      sb.stroke(0, 0, 100, 1);
       finalUFO.simpleRenderImageVector();
-      popStyle();
+      sb.popStyle();
     }
+
+    sb.pushStyle();
+    sb.textFont(thanksFont);
+    sb.textAlign(CENTER, CENTER);
+    sb.text(thanksMessage, 0, 0);
+    sb.popStyle();
   }
 
   void restart() {
@@ -423,6 +442,7 @@ class SPFinale {
     finalUFO.scale = finalUFO.START_SCALE;
     finalUFO.modelVector = finalUFO.frames[0];
     bigOne.parent = null;
+    thanksMessage = "";
   }
 }
 

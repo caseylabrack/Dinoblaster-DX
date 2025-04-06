@@ -1,28 +1,25 @@
-// TO DO
-// scale vectors with pshape.scale
-// design the custom console for picade; order console; assemble
+// TO DO INDIECADE
+// bug: restarting from finale
+// bug: restarting t-rex from tarpit
+// https://jotform.com/draft/01958fe749217f7cb0a102fd1015253b0716
 
+// OTHER
+// speech respects sfx volume
+// finale: two-player rescue ufo?
 // title screen animation (ripple distortion on titlescreen) 
 // (fill in w lazer?). https://www.youtube.com/watch?v=wDkG1CgREaQ. start on dot. do the sine circle animation from insta. humming. clicking on each . in "graphics go . . . . . . ok". 
 // brontoscan logo
-// title screen sound or music
 // start getting some trailer shots
 // oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
 // should settings load every time you play()?
-// Ptutorial (if dino.dat is empty or 0)
 // try again with splodes having longer deadliness time. show splode sprite only when deadly?
 // replace trex skull in tarpit with a different doodad
-// special note to people with disabilities: warning, timescale, no flash, rebinds and mousewheel (but not joystick), vestibular (rotation)
 // try-catch for launching dipswitches notepad
 // player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
-// custom artwork for the picade
-// dipswitch option for kingofthedinosaurs mode: override all difficulty settings with a special chef's blend of extra spicy difficulty
 // try to not generate garbage
 // settings: allow bare colors? (no quote marks)
 // fun stuff on edge of screen for aspect ratios > 4:3
-// oviraptor mode (make its own release maybe)
-// bring back near-miss shake? or maybe sweat animation?
 // coding train license add: https://github.com/CodingTrain/Coding-Challenges/blob/main/LICENSE
 // blogposts: fan art; differences from last edition; in-depth on the dipswitches; spotlight on the picade
 
@@ -78,6 +75,7 @@ SinglePlayer singlePlayer;
 Oviraptor oviraptor;
 Titlescreen title;
 Bootscreen2 bootScreen;
+Ptutorial ptutorial;
 
 ColorDecider currentColor = new ColorDecider();
 
@@ -130,11 +128,21 @@ void setup () {
   mpButton = new Rectangle(416, 230, 60, 60);
   settingsButtonHitbox = new Rectangle(WIDTH_REF_HALF - 80, HEIGHT_REF_HALF - 80, 80, 80);
 
+  singlePlayer = new SinglePlayer(settings, assets);
+  singlePlayer.numPlayers = 1;
+  keys.playingMultiplayer = false;
+  singlePlayer.loadSettings(settings);
+
+  ptutorial = new Ptutorial(settings, assets);
+
+  oviraptor = new Oviraptor(settings, assets);
 
   title = new Titlescreen();
 
   currentScene = title;
   //currentScene = oviraptor;
+  //currentScene = ptutorial;
+
   background(0, 0, 0, 1);
 
   // sync load stuff needed for frame 1
@@ -285,6 +293,13 @@ void keyPressed() {
     if (keyCode==LEFT) keys.arrowleft = true;
     if (keyCode==RIGHT) keys.arrowright = true;
   } else {
+    if (key==triassicSelect || key==jurassicSelect || key==cretaceousSelect) { // if there's no highscore file, launch ptutorial instead
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
+    }
     if (key==triassicSelect) {
       paused = false;
       currentScene = singlePlayer;
@@ -334,6 +349,11 @@ void keyReleased() {
     if (key==leftkey2p) keys.leftp2 = false; 
     if (key==rightkey2p) keys.rightp2 = false; 
     if (key==onePlayerSelect) {
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 1;
       keys.playingMultiplayer = false;
@@ -343,6 +363,11 @@ void keyReleased() {
       paused = false;
     }
     if (key==twoPlayerSelect) {
+      if (loadBytes(SAVE_FILENAME)==null) {
+        currentScene = ptutorial;
+        ptutorial.play();
+        return;
+      }
       currentScene = singlePlayer;
       singlePlayer.numPlayers = 2;
       keys.playingMultiplayer = true;
@@ -401,18 +426,32 @@ void mouseReleased () {
   }
 
   if (spButton.inside(m)) {
+    if (loadBytes(SAVE_FILENAME)==null) {
+      currentScene = ptutorial;
+      ptutorial.play();
+      return;
+    }
     currentScene = singlePlayer;
     paused = false;
     singlePlayer.numPlayers = 1;
     keys.playingMultiplayer = false;
+    loadSettingsFromTXT();
+    singlePlayer.loadSettings(settings);
     singlePlayer.play(SinglePlayer.TRIASSIC);
   }
 
   if (mpButton.inside(m)) {
+    if (loadBytes(SAVE_FILENAME)==null) {
+      currentScene = ptutorial;
+      ptutorial.play();
+      return;
+    }
     currentScene = singlePlayer;
     paused = false;
     singlePlayer.numPlayers = 2;
     keys.playingMultiplayer = true;
+    loadSettingsFromTXT();
+    singlePlayer.loadSettings(settings);
     singlePlayer.play(SinglePlayer.TRIASSIC);
   }
 }
@@ -481,6 +520,7 @@ void loadSettingsFromTXT () {
     String spacer = "     ";
     String settingsString = String.join("\n", 
       "--edit this text file to change your controls, set preferences, and even cheat", 
+      "--learn more at https://github.com/caseylabrack/Dinoblaster-DX/blob/master/README.md", 
       "", 
       "----CONTROLS----", 
       "player1LeftKey: a", 
@@ -506,20 +546,20 @@ void loadSettingsFromTXT () {
       "hideButtons: false", 
       "hideSidePanels: false", 
       "", 
-      pss("reduceFlashing: false") + "--reduce flickering and palette swapping, for photosensitive people", 
+      pss("reduceFlashing: false") + "--reduce flickering and palette swapping", 
       pss("glowiness: true") + "-- uses GPU power", 
       "", 
       "", 
       "----GAMEPLAY----", 
       "roidsEnabled: " + true, 
       "trexEnabled: " + true, 
-      "volcanosEnabled: " + true, 
+      "volcanosEnabled: " + true,
       "ufosEnabled: " + true, 
       "tarpitsEnabled: " + true, 
       "", 
       "hypercubesEnabled: " + true, 
-      "hyperspaceDurationInSeconds: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3), 
       "hyperspaceTimeScale: " + Time.HYPERSPACE_DEFAULT_TIME, 
+      "hyperspaceDurationInSeconds: " + int(StarsSystem.DEFAULT_HYPERSPACE_DURATION / 1e3), 
       "defaultTimeScale: " + Time.DEFAULT_DEFAULT_TIME_SCALE, 
       "", 
       "playerSpeed: " + Player.DEFAULT_RUNSPEED, 
@@ -531,8 +571,8 @@ void loadSettingsFromTXT () {
       "", 
       "roidsPerSecond: " + 3, 
       "", 
-      pss("ufoSpawnRateLow: " + 30) + "--spawn a UFO at least this often (seconds)", 
-      pss("ufoSpawnRateHigh: " + 90) + "--spawn a UFO no more than this often (seconds)", 
+      pss("ufoSpawnRateLow: " + 45) + "--spawn a UFO at least this often (seconds)", 
+      pss("ufoSpawnRateHigh: " + 100) + "--spawn a UFO no more than this often (seconds)", 
       "", 
       "trexSpeed: " + Trex.DEFAULT_RUNSPEED, 
       pss("trexAttackAngle: " + Trex.DEFAULT_ATTACK_ANGLE) + "-- how far the trex \"sees\", in degrees", 
@@ -542,17 +582,17 @@ void loadSettingsFromTXT () {
       "", 
       "----MISC----", 
       "tips: " + "\"" + join(assets.DEFAULT_TIPS, "\",\"") + "\"", 
-      "-- put tips inside double quotes, seperate with comma, don't linebreak", 
+      "-- put tips inside double quotes, separate with comma", 
       "", 
       "player1Color: \"#00ffff\"", 
       "player2Color: \"#ff57ff\"", 
       "", 
       pss("superColorsSwapEvery: " + ColorDecider.DEFAULT_SWAP_FREQUENCY) + "--swap palette every x number of frames", 
       "superColors: " + "\"" + join(assets.DEFAULT_COLORS, "\",\"") + "\"", 
-      "-- put colors inside double quotes, seperate with comma, don't linebreak", 
+      "-- put colors inside double quotes, separate with comma", 
       "-- colors can be hexadecimal, like \"#FF69B4\"", 
       "-- or use one of the HTML named colors, like \"hotpink\" (see https://en.wikipedia.org/wiki/Web_colors#Extended_colors)", 
-      "-- you can have any number of colors. make a list with only fuschia, or one that creates a gradient, or one where the colors get brighter and darker, etc"
+      "-- you can have any number of colors. make a list with only fuchsia, or one that creates a gradient, etc"
       );
     output.println(settingsString);
     output.flush();

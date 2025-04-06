@@ -47,21 +47,21 @@ class SinglePlayer extends Scene {
   boolean wantToPause = false;
 
   SoundPlayable music;
-  
+
   ArrayList<SoundPlayable> soundsToTimeScale = new ArrayList<SoundPlayable>(); 
 
   SinglePlayer(SimpleTXTParser settings, AssetManager assets) {
 
     soundsToTimeScale.add(assets.playerStuff.step);
     soundsToTimeScale.add(assets.playerStuff.tarStep);
-    for(SoundPlayable s : assets.roidStuff.hits) soundsToTimeScale.add(s);
+    for (SoundPlayable s : assets.roidStuff.hits) soundsToTimeScale.add(s);
     soundsToTimeScale.add(assets.trexStuff.rawr);
     soundsToTimeScale.add(assets.trexStuff.stomp);
-    
+
     highscore = loadHighScore(SAVE_FILENAME);
 
     earth = new Earth(assets.earthStuff.mask);
-    
+
     for (int i = 0; i <=1; i++) {
       playerIntros[i] = new PlayerIntro();
       playerIntros[i].model = i==0 ? assets.playerStuff.brontoFrames[0] : assets.playerStuff.oviFrames[0];
@@ -190,7 +190,7 @@ class SinglePlayer extends Scene {
 
     gameText.setTips(settings.getStrings("tips", assets.DEFAULT_TIPS));
     gameText.dontFlicker = settings.getBoolean("reduceFlashing", false);
-    
+
     starsSystem.defaultTimeScale = settings.getFloat("defaultTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
     starsSystem.hyperTimeScale = settings.getFloat("hyperspaceTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
   }
@@ -308,9 +308,14 @@ class SinglePlayer extends Scene {
     starsSystem.update(time.getTimeScale(), time.getTargetTimeScale());
     //currentColor.update();
     gameText.update();
-    
-    for(SoundPlayable s : soundsToTimeScale) s.rate(time.getTargetTimeScale());
-    music.rate(time.getTargetTimeScale());
+
+    if (stage == FINALE) {
+      for (SoundPlayable s : soundsToTimeScale) s.rate(1);
+      music.rate(1);
+    } else {
+      music.rate(time.getTargetTimeScale());
+      for (SoundPlayable s : soundsToTimeScale) s.rate(time.getTargetTimeScale());
+    }
 
     scoring = numPlayers == 2 ? (players[0].enabled && players[1].enabled) : players[0].enabled;
 
@@ -425,8 +430,8 @@ class SinglePlayer extends Scene {
         float an2 = utils.angleOf(utils.ZERO_VECTOR, players[1].localPos());
         float newNewDiff = utils.signedAngleDiff(an1, an2) * -1;
 
-        if (!players[0].inTarpit) players[0].bounceStart(utils.sign(newNewDiff));
-        if (!players[1].inTarpit) players[1].bounceStart(utils.sign(newNewDiff) * -1);
+        if (!players[0].inTarpit) players[0].bounceStart(utils.sign(newNewDiff) * Player.PLAYER_COLLISION_BOUNCE_FORCE);
+        if (!players[1].inTarpit) players[1].bounceStart(utils.sign(newNewDiff) * -1 * Player.PLAYER_COLLISION_BOUNCE_FORCE);
       }
     }
 
@@ -493,7 +498,8 @@ class SinglePlayer extends Scene {
           p.y = sin(radians(fixedAngle)) * p.getRadius();
           p.r = utils.angleOfOrigin(p.localPos()) + 90;
           e.bounce(time.getClock());
-          p.bounceStart(utils.sign(diff) * -1);
+          //p.bounceStart(utils.sign(diff) * -1);
+          p.bounceStart(utils.sign(diff) * -1 * Player.PLAYER_COLLISION_BOUNCE_FORCE);
         }
       }
     }
@@ -594,6 +600,17 @@ class SinglePlayer extends Scene {
               println("died from roid");
 
               playerKilled(player.id);
+            } else if (utils.unsignedAngleDiff(splode.r, player.r) < Player.ROID_PUSHBACK_ANGLE_RANGE) { // near miss
+              float diff = utils.unsignedAngleDiff(splode.r, player.r);
+              float min = Player.BOUNDING_ARC/2 + Explosion.BOUNDING_ARC/2;
+              float max = Player.ROID_PUSHBACK_ANGLE_RANGE;
+              float range = max - min;
+              float d = diff - min;
+              float pct = 1 - (d / range);
+              float force = pct * 10;
+              float dir = utils.sign(utils.signedAngleDiff(splode.r, player.r));
+              //player.bounceStart(force * dir);
+              player.bounceStart(Player.PLAYER_COLLISION_BOUNCE_FORCE * dir);
             }
           }
         }
@@ -856,6 +873,7 @@ class SinglePlayer extends Scene {
       } else {
         extraLives--;
         ufo.pauseCountDown();
+        assets.ufostuff.ufoSound.stop_();
         ufoRespawn.dispatch(players[id], earth.globalPos());
         assets.playerStuff.littleDeath.play(false);
       }
