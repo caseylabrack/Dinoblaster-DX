@@ -193,6 +193,7 @@ class SinglePlayer extends Scene {
 
     starsSystem.defaultTimeScale = settings.getFloat("defaultTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
     starsSystem.hyperTimeScale = settings.getFloat("hyperspaceTimeScale", Time.DEFAULT_DEFAULT_TIME_SCALE);
+    starsSystem.isStatic = !settings.getBoolean("starsMove", true);
   }
 
   boolean canPlayLevel (int lvl) {
@@ -296,7 +297,7 @@ class SinglePlayer extends Scene {
       music = assets.musicStuff.lvl3;
     }
 
-    //score = 295;
+    //score = 270;
 
     lastScoreTick = time.getClock();
     //earth.addChild(camera);
@@ -634,18 +635,17 @@ class SinglePlayer extends Scene {
           hypercube.goHyperspace();
           time.setHyperspace(true);
           starsSystem.setHyperspace(true);
-          //music.rate(time.hyperspaceTimeScale);
         }
       }
     }
 
     // hyperspace finished?
-    if (hypercube.state == Hypercube.HYPERSPACE_DONE) {
-      time.setHyperspace(false);
-      starsSystem.setHyperspace(false);
-      hypercube.startCountDown();
-      hypercube.enabled = false;
-      //music.rate(1);
+    if (hypercube.enabled && hypercube.state == Hypercube.HYPERSPACE_DONE) {
+      if (time.getHyperspace()) { // hyperspace could have also ended with a death
+        time.setHyperspace(false);
+        starsSystem.setHyperspace(false);
+        hypercube.enabled = false;
+      }
     }
 
     egg.update(time.getClock());
@@ -686,6 +686,7 @@ class SinglePlayer extends Scene {
     // restart
     gameText.update();
     if (gameText.doneFlashExtinct() && keys.anyKey()) {
+      if (stage==FINALE) stage = CRETACEOUS;
       play(stage);
     }
 
@@ -860,6 +861,10 @@ class SinglePlayer extends Scene {
   }
 
   void playerKilled(int id) {
+
+    // always end hyperspace upon death
+    time.setHyperspace(false);
+    starsSystem.setHyperspace(false);
 
     if (numPlayers==1) {
       if (extraLives <= 0) {

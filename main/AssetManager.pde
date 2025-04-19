@@ -32,46 +32,47 @@ class AssetManager {
     //println("is picade?", raspi);
     
     //testmask = loadShader("pixelmask.glsl");
-    blur = loadShader("blur.glsl");
+    //blur = loadShader("blur.glsl");
 
-    ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
-    ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
-    ufostuff.ufoSVG = loadShape("UFO.svg");
-    ufostuff.ufoSVG.disableStyle();
-    ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
-    ufostuff.ufoFinalSingle.disableStyle();
-    ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
-    ufostuff.ufoFinalDuo.disableStyle();
-    ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
-    ufostuff.ufoFinalDuoZoom.disableStyle();
+    //ufostuff.ufoFrames = utils.sheetToSprites(loadImage("ufo-resizing-sheet.png"), 3, 3);
+    //ufostuff.brontoAbductionFrames = utils.sheetToSprites(loadImage("bronto-abduction-sheet.png"), 3, 3);    
+    //ufostuff.ufoSVG = loadShape("UFO.svg");
+    //ufostuff.ufoSVG.disableStyle();
+    //ufostuff.ufoFinalSingle = loadShape("UFO-final-pilot.svg");
+    //ufostuff.ufoFinalSingle.disableStyle();
+    //ufostuff.ufoFinalDuo = loadShape("UFO-final-pilot2.svg");
+    //ufostuff.ufoFinalDuo.disableStyle();
+    //ufostuff.ufoFinalDuoZoom = loadShape("UFO-final-pilot3.svg");
+    //ufostuff.ufoFinalDuoZoom.disableStyle();
 
-    ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
-    sounds.add(ufostuff.ufoSound);
+    //ufostuff.ufoSound = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
+    //sounds.add(ufostuff.ufoSound);
 
-    ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
-    sounds.add(ufostuff.ufoSound2);
+    //ufostuff.ufoSound2 = raspi ? new SoundM("_audio/ufo theme loop-low.wav", ngainSFX) : new SoundP("_audio/ufo theme loop-low.wav", context);
+    //sounds.add(ufostuff.ufoSound2);
 
-    uiStuff.extinctType = createFont("Hyperspace.otf", 150);
+    //uiStuff.extinctType = createFont("Hyperspace.otf", 150);
     //uiStuff.extinctSign = loadImage("gameover-lettering.png");
-    uiStuff.letterbox = loadImage("letterboxes.png");
-    uiStuff.screenShine = loadImage("screenShine.png");
-    uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
-    uiStuff.progressBG = loadImage("progress-bg.png");
-    uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
-    uiStuff.tick = loadImage("progress-tick.png");
-    uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
-    uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
-    uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
-    uiStuff.buttons = loadImage("ui-buttons.png");
-    uiStuff.titlescreenImage = loadImage("title.png");
-    uiStuff.titlescreenImageVec = loadShape("test.svg");
-    uiStuff.titlescreenImageVec.disableStyle();
-    uiStuff.title40 = loadImage("title_fortieth.png");
-    uiStuff.titleSpeak =  raspi ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", context);
+    //uiStuff.letterbox = loadImage("letterboxes.png");
+    //uiStuff.screenShine = loadImage("screenShine.png");
+    //uiStuff.MOTD = createFont("Hyperspace Bold.otf", 32);
+    //uiStuff.progressBG = loadImage("progress-bg.png");
+    //uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
+    //uiStuff.tick = loadImage("progress-tick.png");
+    //uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
+    //uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
+    //uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
+    //uiStuff.buttons = loadImage("ui-buttons.png");
+    //uiStuff.titlescreenImage = loadImage("title.png");
+    //uiStuff.titlescreenImageVec = loadShape("test.svg");
+    //uiStuff.titlescreenImageVec.disableStyle();
+    //uiStuff.title40 = loadImage("title_fortieth.png");
+    //uiStuff.titleSpeak =  raspi ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", context);
+    //sounds.add(assets.uiStuff.titleSpeak);
 
-    volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
-    volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
-    sounds.add(volcanoStuff.rumble);
+    //volcanoStuff.volcanoFrames = utils.sheetToSprites(loadImage("volcanos.png"), 4, 1);
+    //volcanoStuff.rumble = raspi ? new SoundM("_audio/volcano rumble2.wav", ngainSFX) : new SoundP("_audio/volcano rumble2.wav", context);
+    //sounds.add(volcanoStuff.rumble);
 
     roidStuff.explosionFrames = utils.sheetToSprites(loadImage("explosion.png"), 3, 1);
     roidStuff.roidFrames = utils.sheetToSprites(loadImage("roids.png"), 2, 2);

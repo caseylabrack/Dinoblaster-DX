@@ -1,25 +1,4 @@
-// TO DO INDIECADE
-// bug: restarting from finale
-// bug: restarting t-rex from tarpit
-// https://jotform.com/draft/01958fe749217f7cb0a102fd1015253b0716
-
-// OTHER
-// speech respects sfx volume
-// finale: two-player rescue ufo?
-// title screen animation (ripple distortion on titlescreen) 
-// (fill in w lazer?). https://www.youtube.com/watch?v=wDkG1CgREaQ. start on dot. do the sine circle animation from insta. humming. clicking on each . in "graphics go . . . . . . ok". 
-// brontoscan logo
-// start getting some trailer shots
-// oviraptor is a hidden game mode unlocked by beating level 2. key combo to start
-// should settings load every time you play()?
-// try again with splodes having longer deadliness time. show splode sprite only when deadly?
-// replace trex skull in tarpit with a different doodad
-// try-catch for launching dipswitches notepad
-// player can wait out hyperspace duration in respawn any-key mode, fix
 // fix: caps-lock messes with input keys
-// try to not generate garbage
-// settings: allow bare colors? (no quote marks)
-// fun stuff on edge of screen for aspect ratios > 4:3
 // coding train license add: https://github.com/CodingTrain/Coding-Challenges/blob/main/LICENSE
 // blogposts: fan art; differences from last edition; in-depth on the dipswitches; spotlight on the picade
 
@@ -87,9 +66,7 @@ PGraphics sb; // screen buffer
 PGraphics blurPass; // apply the blur shader to this to achieve glow
 
 void setup () {
-  //size(500, 500, P2D);
   size(1024, 768, P2D);
-  //size(1920, 1080, P2D);
   //fullScreen(P2D);
   smooth(4);
   //hint(DISABLE_OPTIMIZED_STROKE);
@@ -116,9 +93,25 @@ void setup () {
 
   minim = new Minim(this);
 
-  loadSettingsFromTXT();
+  // sync load stuff needed for titlescreen, async load the rest
+  assets.blur = loadShader("blur.glsl");
+  assets.uiStuff.titlescreenImage = loadImage("title.png");
+  assets.uiStuff.title40 = loadImage("title_fortieth.png");
+  assets.uiStuff.letterbox = loadImage("letterboxes.png");
+  assets.uiStuff.screenShine = loadImage("screenShine.png");
+  assets.uiStuff.progressBG = loadImage("progress-bg.png");
+  assets.uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
+  assets.uiStuff.tick = loadImage("progress-tick.png");
+  assets.uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
+  assets.uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
+  assets.uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
+  assets.uiStuff.buttons = loadImage("ui-buttons.png");
+  assets.uiStuff.titleSpeak = isPicade ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", this);
+  assets.sounds.add(assets.uiStuff.titleSpeak);
 
   assets.load(this, isPicade);
+
+  loadSettingsFromTXT();
 
   key = 'a';
 
@@ -137,32 +130,15 @@ void setup () {
 
   oviraptor = new Oviraptor(settings, assets);
 
-  title = new Titlescreen();
-
+  title = new Titlescreen(settings);
   currentScene = title;
-  //currentScene = oviraptor;
-  //currentScene = ptutorial;
 
   background(0, 0, 0, 1);
 
-  // sync load stuff needed for frame 1
-  assets.uiStuff.titlescreenImage = loadImage("title.png");
-  assets.uiStuff.title40 = loadImage("title_fortieth.png");
-  assets.uiStuff.letterbox = loadImage("letterboxes.png");
-  assets.uiStuff.screenShine = loadImage("screenShine.png");
-  assets.uiStuff.progressBG = loadImage("progress-bg.png");
-  assets.uiStuff.extraDinosBG = loadImage("extra-life-bg.png");
-  assets.uiStuff.tick = loadImage("progress-tick.png");
-  assets.uiStuff.tickInActive = loadImage("progress-tick-inactive.png");
-  assets.uiStuff.extraDinoActive = loadImage("extra-dino-active.png");
-  assets.uiStuff.extraDinoInactive = loadImage("extra-dino-deactive.png");
-  assets.uiStuff.buttons = loadImage("ui-buttons.png");
-  assets.uiStuff.titleSpeak =  isPicade ? new SoundM("_audio/title_speak.wav", ngainSFX) : new SoundP("_audio/title_speak.wav", this);
+
 
   // async load the rest
   thread("loadAssetsAsync");
-  
-  //noCursor();
 }
 
 void touchStarted() {
@@ -286,8 +262,8 @@ void keyPressed() {
 
   //println(key, keyCode);
   //println(key==CODED);
-  
-  if(!_async_loaded) return;
+
+  if (!_async_loaded) return;
 
   if (key==CODED) {
     if (keyCode==LEFT) keys.arrowleft = true;
@@ -337,8 +313,8 @@ void keyPressed() {
 }
 
 void keyReleased() {
-  
-  if(!_async_loaded) return;
+
+  if (!_async_loaded) return;
 
   if (key==CODED) {
     if (keyCode==LEFT) keys.arrowleft = false; 
@@ -400,9 +376,9 @@ void keyReleased() {
 }
 
 void mouseMoved() {
-  
-  if(buttonsHide) return;
-  
+
+  if (buttonsHide) return;
+
   PVector m = screenspaceToWorldspace(mouseX, mouseY);
 
   if (settingsButtonHitbox.inside(m) || spButton.inside(m) || mpButton.inside(m)) {
@@ -413,9 +389,9 @@ void mouseMoved() {
 }
 
 void mouseReleased () {
-  
-  if(!_async_loaded) return;
-  
+
+  if (!_async_loaded) return;
+
   currentScene.mouseUp();
 
   PVector m = screenspaceToWorldspace(mouseX, mouseY);
@@ -547,13 +523,14 @@ void loadSettingsFromTXT () {
       "hideSidePanels: false", 
       "", 
       pss("reduceFlashing: false") + "--reduce flickering and palette swapping", 
+      pss("starsMove: true") + "--set to false if it helps with motion sensitivity", 
       pss("glowiness: true") + "-- uses GPU power", 
       "", 
       "", 
       "----GAMEPLAY----", 
       "roidsEnabled: " + true, 
       "trexEnabled: " + true, 
-      "volcanosEnabled: " + true,
+      "volcanosEnabled: " + true, 
       "ufosEnabled: " + true, 
       "tarpitsEnabled: " + true, 
       "", 
@@ -612,8 +589,8 @@ void loadSettingsFromTXT () {
   pauseKey = settings.getChar("pauseKey", 'g');
   dipSwitches = settings.getChar("openSettings", 't');
   keys.p2HasArrows = settings.getBoolean("player2GetsArrowKeys", true);
-  
-  if(buttonsHide) noCursor();
+
+  if (buttonsHide) noCursor();
 
   currentColor.dontPaletteSwap = settings.getBoolean("reduceFlashing", false);
   currentColor.parseUserColors(settings.getStrings("superColors", assets.DEFAULT_COLORS), assets.DEFAULT_COLORS);
@@ -790,7 +767,7 @@ void loadAssetsAsync () {
   assets.musics.add(assets.musicStuff.lvl2a);
   assets.musics.add(assets.musicStuff.lvl2b);
   assets.musics.add(assets.musicStuff.lvl3);
-  
+
   singlePlayer = new SinglePlayer(settings, assets);
   singlePlayer.numPlayers = 1;
   keys.playingMultiplayer = false;

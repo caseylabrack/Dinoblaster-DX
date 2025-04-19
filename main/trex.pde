@@ -473,6 +473,8 @@ class Trex extends Entity implements tarpitSinkable {
 
   void restart() {
     enabled = false;
+    state = WALKING;
+    model = this.idle;
   }
 
   float angleOnEarth () {

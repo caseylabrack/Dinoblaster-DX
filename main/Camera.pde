@@ -336,6 +336,10 @@ class Time {
       hypeTransition = -1;
     }
   }
+  
+  boolean getHyperspace() {
+    return isHyperSpace;
+  }
 
   public void deathStart () {
     state = DEATH;

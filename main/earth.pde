@@ -167,14 +167,14 @@ class Earth extends Entity {
      //tarpit doodads
     float ang = tarpitArcStart + TARPIT_ARC - 8;
     float d = (EARTH_RADIUS - 65) + (floor(sin(radians(0) + clock/1e3)) * 5); // bob up and down in a square wave
-    sb.pushMatrix();
-    sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
-    sb.rotate(radians(tarpitArcStart + 200));
-    sb.image(assets.earthStuff.doodadHead, 0, 0);
-    sb.popMatrix();
+    //sb.pushMatrix();
+    //sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
+    //sb.rotate(radians(tarpitArcStart + 200));
+    //sb.image(assets.earthStuff.doodadHead, 0, 0);
+    //sb.popMatrix();
 
-    ang = tarpitArcStart + 15;
-    d = (EARTH_RADIUS - 85) + (floor(sin(radians(60) + clock/1e3)) * 5); // bob up and down in a square wave
+    ang = tarpitArcStart + 35;
+    d = (EARTH_RADIUS - 75) + (floor(sin(radians(60) + clock/1e3)) * 5); // bob up and down in a square wave
     sb.pushMatrix();
     sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
     sb.rotate(radians(tarpitArcStart + 90));
@@ -182,7 +182,7 @@ class Earth extends Entity {
     sb.popMatrix();
 
     ang = tarpitArcStart + 10;
-    d = (EARTH_RADIUS - 55) + (floor(sin(radians(120) + clock/1e3)) * 5); // bob up and down in a square wave
+    d = (EARTH_RADIUS - 65) + (floor(sin(radians(120) + clock/1e3)) * 5); // bob up and down in a square wave
     sb.pushMatrix();
     sb.translate(cos(radians(ang)) * d, sin(radians(ang)) * d);
     sb.rotate(radians(tarpitArcStart + 180));

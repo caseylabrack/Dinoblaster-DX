@@ -93,6 +93,7 @@ class VolcanoSystem {
     spawning = false;
     for (Volcano v : volcanos) {
       v.enabled = false;
+      v.delayingImpassability = true;
     }
   }
 
@@ -114,10 +115,10 @@ class Volcano extends Entity implements obstacle {
   private int state = DELAYING;
   float stateStart;
 
-  final float eruptPassablePeriod = 6e3;
   final static float ERUPT_DURATION = 7e3;
   final static float eruptStartDist = 125;
   final static float eruptEndDist = 190;
+  boolean delayingImpassability = true;
 
   public float angle;
 
@@ -164,6 +165,7 @@ class Volcano extends Entity implements obstacle {
   }
 
   boolean isPassable() {
+    if(delayingImpassability) return true;
     return state==EXTINCT;
   }
 
@@ -204,6 +206,7 @@ class Volcano extends Entity implements obstacle {
         dist = utils.easeInQuad(progress, eruptStartDist, eruptEndDist - eruptStartDist, 1);
         setPosition(new PVector(cos(radians(angle)) * dist, sin(radians(angle)) * dist));
         margin = map(progress, 0, 1, minMargin, maxMargin);
+        if(progress > .75) delayingImpassability = false;
       } else {
         setPosition(new PVector(cos(radians(angle)) * eruptEndDist, sin(radians(angle)) * eruptEndDist));
         margin = maxMargin;

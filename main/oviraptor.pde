@@ -173,9 +173,11 @@ class Titlescreen extends Scene {
 
   StarsSystem starsSystem = new StarsSystem();
   int delayToPlayVoice = 10;
+  boolean voice = true;
 
-  Titlescreen () {
+  Titlescreen (SimpleTXTParser settings) {
     starsSystem.spawnSomeStars();
+    starsSystem.isStatic = !settings.getBoolean("starsMove", true);
     
   }
 

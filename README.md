@@ -2,7 +2,7 @@
 An updated and open-source version of [DinoBlaster (1979)](http://store.steampowered.com/app/653960/DinoBlaster/), the extinction-event arcade game with Brontoscan vector graphics.
 
 ## Accessibility
-DinoBlaster is flashy, spinny, and maybe unreasonably difficult. But you can adjust these things in `settings.txt` by remapping keys, setting `reduceFlashing`, and changing gameplay values.
+DinoBlaster is flashy, spinny, and maybe unreasonably difficult. But you can adjust these things in `settings.txt` by remapping keys, setting `reduceFlashing`, turning off `starsMove`, and changing gameplay values. This game can be played keyboard-only.
 
 ## Settings, preferences, and cheats
 Edit "settings.txt" to change your controls, set preferences, and even cheat. You can double-click it or launch it from in-game.
@@ -28,10 +28,11 @@ singleplayerMode | o | launch the game in single player mode
 multiplayerMode | p | launch the game in two-player mode
 sfxVolume | 100 | sound effects volume level, 0–100. At zero, sound effects are muted. 
 musicVolume | 100 | music volume level, 0–100. At zero, music is muted. 
-hideButtons | false | hides the single player, two-player, and settings buttons
+hideButtons | false | hides the single player, two-player, and settings buttons (good for a keyboard-only or arcade setup)
 hideSidePanels | false | hides all buttons and artwork on the sides of the game
-reduceFlashing | false | disables flashing animations and colors. May help with photosensitivity.
-glowiness | true | should the game glow, like other classic vector arcade games. requires a GPU that can run OpenGL.
+reduceFlashing | false | reduce flashing and disable palette swapping to help with stuff like photosensitive epilepsy
+starsMove | true | can be set to false to help with motion sensitivity
+glowiness | true | applies a glowy effect, like old vector arcade games had. requires a GPU that can run OpenGL.
 
 ### Gameplay
 Setting | Default value | Description
@@ -59,6 +60,8 @@ JurassicUnlockedCheat | false | Cheat and play in the Jurassic era without beati
 CretaceousUnlockedCheat | false | Cheat and play in the Cretaceous era without beating the Jurassic
 
 ### Misc
+Setting | Default value | Description
+:--- |:---|:---
 tips | "Real Winners Say No to Drugs","Remember to take breaks" | Text to briefly display at start of game. Should be short and preferably dumb. Put tip in quotes, separate multiple tips with comma
 player1Color | "#00ffff" | For two-player mode. Colors should be a hexvalue in quotes (like "#ff00ff") or one of [the html named colors](https://en.wikipedia.org/wiki/Web_colors#Extended_colors) in quotes (like "hotpink")
 player2Color | "#ff57ff" | For two-player mode. Colors should be a hexvalue in quotes (like "#ff00ff") or one of [the html named colors](https://en.wikipedia.org/wiki/Web_colors#Extended_colors) in quotes (like "hotpink")

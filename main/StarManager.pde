@@ -39,7 +39,13 @@ class StarsSystem {
   float defaultTimeScale = 1;
   float hyperTimeScale = 1.75;
 
+  boolean isStatic = false;
+
   StarsSystem () {
+  }
+
+  void makeStatic (boolean stat) {
+    isStatic = stat;
   }
 
   void spawnSomeStars() {
@@ -138,22 +144,20 @@ class StarsSystem {
       sb.popStyle();
       sb.popMatrix();
     } else {
-      float x = cos(a) * r;
-      float y = sin(a) * r;
-      float x2 = cos(a-(starSpeed * 5) ) * r;
-      float y2 = sin(a-(starSpeed * 5) ) * r;
-      //float x2 = cos(a-(starSpeed * 6) ) * r;
-      //float y2 = sin(a-(starSpeed * 6) ) * r;
+      float x = cos(isStatic ? 0 : a) * r;
+      float y = sin(isStatic ? 0 : a) * r;
+      float x2 = cos((isStatic ? 0 : a)-(starSpeed * 5) ) * r;
+      float y2 = sin((isStatic ? 0 : a)-(starSpeed * 5) ) * r;
 
       sb.pushStyle();
       for (int i = 0; i < stars.length; i++) {
         sb.pushMatrix();
         if (abs(stars[i].x - x) < width && abs(stars[i].y - y) < height) {
-          //if (state == HYPERSPACE) {
-          if (timescale > 1) {
+          if (state == HYPERSPACE) {
+          //if (timescale > 1) {
             sb.strokeWeight(4);
             sb.fill(currentColor);
-            if (i % 6 == 0) {
+            if (i % 6 == 0 && !isStatic) {
               sb.stroke(currentColor);
               sb.line(stars[i].x - x, stars[i].y - y, stars[i].x - x2, stars[i].y - y2);
             } else {
